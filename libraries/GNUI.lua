@@ -5,8 +5,8 @@
 \____/_/ |_/\__,_/_/ /_/ /_/_/_/ /_/ /_/\__,_/\__/\___/____]]
 
 --[[ NOTES
-Dimensions X,Y aka position is inverted in rendering
-
+Everything is in one file to make sure it is possible to load this script from a config file, 
+allowing me to put as much as I want without worrying about storage space.
 ]]
 
 local main = {}
@@ -317,15 +317,15 @@ function container.new(preset)
    -->==========[ Debug ]==========<--
 
    if config.debug_visible then
-      local debug_container = new.Part:newSprite("container"):texture(debug.texture):setColor(0.5,0.5,0.5,0.5)
-      local debug_margin    = new.Part:newSprite("margin"):texture(debug.texture):setColor(1,0,0,0.3)
-      local debug_padding   = new.Part:newSprite("padding"):texture(debug.texture):setColor(0,0.5,0,0.5)
+      local debug_container = new.Part:newSprite("container"):texture(debug.texture):setColor(0.5,0.5,0.5,0.3)
+      local debug_margin    = new.Part:newSprite("margin"):texture(debug.texture):setColor(0,0,0,0.3)
+      local debug_padding   = new.Part:newSprite("padding"):texture(debug.texture):setColor(1,1,1,0.3)
 
       new.DIMENSIONS_CHANGED:register(function ()
          debug_padding
          :scale(
             (new.Dimensions.z - new.Padding.x - new.Padding.z - new.Margin.x - new.Margin.z),
-            (new.Dimensions.w - new.Padding.y - new.Padding.w - new.Margin.y - new.Margin.w),1)
+            (new.Dimensions.w - new.Padding.y - new.Padding.w - new.Margin.y - new.Margin.w),1):pos(0,0,-3)
          
          debug_margin
          :pos(

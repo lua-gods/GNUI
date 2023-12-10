@@ -1,18 +1,17 @@
-local GNUI = require("libraries.secret")
+local GNUI = require("libraries.GNUI")
 
-local lwindow_size = vectors.vec2()
-
+--- creates the window
 local window = GNUI.newContainer()
 window.Part:setParentType("HUD")
 
-local m = 0
-local p  = 0
-
+-- testing features
+local m = 20
+local p  = 40
 window:setMargin(m,m,m,m)
 window:setPadding(p,p,p,p)
 
-host:setActionbar('{"text":"Start","color":"#'..vectors.rgbToHex(vectors.vec3(math.random(),math.random(),math.random()):normalize())..'"}')
-
+--- resizes it everytime the window resolution changes
+local lwindow_size = vectors.vec2()
 events.WORLD_TICK:register(function ()
    local window_size = client:getScaledWindowSize()
    if window_size ~= lwindow_size then
