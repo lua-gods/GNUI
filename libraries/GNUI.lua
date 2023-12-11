@@ -13,8 +13,8 @@ local main = {}
 
 local config = {
    debug_visible = true,
-   debug_event_name = "__debug",
-   internal_events_name = "__internal",
+   debug_event_name = "__c",
+   internal_events_name = "__a",
 }
 
 --#region EventLib
@@ -380,6 +380,7 @@ end
 
 ---@class GNUI.element.container : GNUI.element
 ---@field Dimensions Vector4
+---@field ContainmentRect Vector4
 ---@field DIMENSIONS_CHANGED EventLib
 ---@field Margin Vector4
 ---@field MARGIN_CHANGED EventLib
@@ -404,6 +405,7 @@ function container.new(preset)
    new.Dimensions = vectors.vec4(0,0,1,1)
    new.DIMENSIONS_CHANGED = eventLib.new()
    new.Margin = vectors.vec4()
+   new.ContainmentRect = vectors.vec4()
    new.MARGIN_CHANGED = eventLib.new()
    new.Padding = vectors.vec4()
    new.PADDING_CHANGED = eventLib.new()
@@ -414,6 +416,23 @@ function container.new(preset)
    -->==========[ Internals ]==========<--
 
    new.DIMENSIONS_CHANGED:register(function ()
+      new.ContainmentRect = vectors.vec4(0,0,
+         (new.Dimensions.z - new.Padding.x - new.Padding.z - new.Margin.x - new.Margin.z),
+         (new.Dimensions.w - new.Padding.y - new.Padding.w - new.Margin.y - new.Margin.w)
+      )
+      if new.Parent and new.Parent.ContainmentRect then
+         local p = new.Parent.ContainmentRect
+         local o = vectors.vec4(
+            math.lerp(p.x,p.z,new.Anchor.x),
+            math.lerp(p.y,p.w,new.Anchor.y),
+            math.lerp(p.x,p.z,new.Anchor.z),
+            math.lerp(p.y,p.w,new.Anchor.w)
+         )
+         new.ContainmentRect.x = new.ContainmentRect.y + o.x
+         new.ContainmentRect.y = new.ContainmentRect.y + o.y
+         new.ContainmentRect.w = new.ContainmentRect.w + o.w - o.x
+         new.ContainmentRect.z = new.ContainmentRect.z + o.z - o.y
+      end
       new.Part
       :setPos(
          -new.Dimensions.x-new.Margin.x-new.Padding.x,
@@ -445,27 +464,33 @@ function container.new(preset)
       local debug_padding   = new.Part:newSprite("padding"):texture(debug.texture):setColor(0,1,0,01)
 
       new.DIMENSIONS_CHANGED:register(function ()
+         local contain = new.ContainmentRect
+         local margin = new.Margin
+         local padding = new.Padding
          debug_padding
          :scale(
-            (new.Dimensions.z - new.Padding.x - new.Padding.z - new.Margin.x - new.Margin.z),
-            (new.Dimensions.w - new.Padding.y - new.Padding.w - new.Margin.y - new.Margin.w),1):pos(0,0,-3)
+            contain.z - contain.x,
+            contain.w - contain.y,1)
+         :pos(
+            - contain.x,
+            - contain.y,-0.6)
          
          debug_margin
          :pos(
-            new.Margin.x + new.Padding.x,
-            new.Margin.y + new.Padding.y,
+            margin.x + padding.x - contain.x,
+            margin.y + padding.y - contain.y,
             1)
          :scale(
-            (new.Dimensions.z),
-            (new.Dimensions.w),1)
+            (contain.z - contain.x + margin.z + margin.x + padding.x + padding.z),
+            (contain.w - contain.y + margin.w + margin.y + padding.y + padding.w),1)
          debug_container
          :pos(
-            new.Padding.x,
-            new.Padding.y,
-            -3)
+            padding.x - contain.x,
+            padding.y - contain.y,
+            -0.3)
          :scale(
-            (new.Dimensions.z - new.Margin.x - new.Margin.z),
-            (new.Dimensions.w - new.Margin.y - new.Margin.w),1)
+            (contain.z+padding.x+padding.z - contain.x),
+            (contain.w+padding.y+padding.w - contain.y),1)
       end,config.debug_event_name)
    end
    return new

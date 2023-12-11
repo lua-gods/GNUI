@@ -1,3 +1,13 @@
+local function superSine(value,seed,depth)
+   math.randomseed(seed)
+   local result = 0
+   for i = 1, depth, 1 do
+      result = result + math.sin(value * (math.random() * math.pi * depth) + math.random() * math.pi * depth)
+   end
+   return result / depth
+end
+
+
 local GNUI = require("libraries.GNUI")
 
 --- creates the window
@@ -18,11 +28,21 @@ events.WORLD_RENDER:register(function ()
       window:setSize(window_size)
       lwindow_size = window_size
    end
+   local i = 40
    local t = client:getSystemTime() / 300
-   window:setTopLeft(math.sin(t) * 60 + 60,0)
+   window:setTopLeft(
+      superSine(t*0.2,1,8) * i + i,
+      superSine(t*0.2,4,8) * i + i)
+   window:setBottomRight(
+      window_size.x - superSine(t*0.2,3,8) * i - i,
+      window_size.y - superSine(t*0.2,4,8) * i - i)
 end)
 
 local container = GNUI.newContainer()
 window:addChild(container)
-container:setSize(64,64):setPos(0,0):setMargin(5,5,5,5)
-container:setSize(64,64):setPos(0,0):setPadding(10,10,10,10)
+container
+--:setSize(0,50)
+:setPos(0,0)
+:setMargin(5,5,5,5)
+:setPadding(10,10,10,10)
+:setAnchor(0.2,0,1,1)
