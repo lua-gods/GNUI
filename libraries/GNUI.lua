@@ -189,17 +189,125 @@ debug.texture = textures:newTexture("1x1white",1,1):setPixel(0,0,vectors.vec3(1,
 
 --#endregion
 
+--#region-->========================================[ SpriteRenderer ]=========================================<--
+
+---@class Sprite
+---@field Texture Texture
+---@field TEXTURE_CHANGED EventLib
+---@field Modelpart ModelPart?
+---@field MODELPART_CHANGED EventLib
+---@field Position Vector2
+---@field Size Vector2
+---@field DIMENSIONS_CHANGED EventLib
+---@field RenderTasks table<any,SpriteTask>
+---@field BorderThickness Vector4
+---@field BORDER_THICKNESS_CHANGED EventLib
+---@field id integer
+local Sprite = {}
+Sprite.__index = Sprite
+
+local sprite_next_free = 0
+function Sprite.new()
+   local new = {}
+   new.Texture = debug.texture
+   new.TEXTURE_CHANGED = eventLib.new()
+   new.MODELPART_CHANGED = eventLib.new()
+   new.Position = vectors.vec2()
+   new.Size = vectors.vec2(16,16)
+   new.DIMENSIONS_CHANGED = eventLib.new()
+   new.RenderTasks = {}
+   new.BorderThickness = vectors.vec4(0,0,0,0)
+   new.BORDER_THICKNESS_CHANGED = eventLib.new()
+   new.id = sprite_next_free
+   sprite_next_free = sprite_next_free + 1
+   setmetatable(new,Sprite)
+   
+   new.TEXTURE_CHANGED:register(function ()
+      new:_updateRenderTasks()
+   end)
+
+   new.MODELPART_CHANGED:register(function ()
+      new:_deleteRenderTasks()
+      new:_buildRenderTasks()
+   end)
+
+   new.BORDER_THICKNESS_CHANGED:register(function ()
+      new:_deleteRenderTasks()
+      new:_buildRenderTasks()
+   end)
+   
+   new.DIMENSIONS_CHANGED:register(function ()
+      new:_updateRenderTasks()
+   end)
+
+   return new
+end
+
+function Sprite:setModelpart(part)
+   self.MODELPART_CHANGED:invoke(self,part,self.Modelpart)
+   self.Modelpart = part
+   return self
+end
+
+
+function Sprite:setTexture(texture)
+   self.TEXTURE_CHANGED:invoke(self,texture,self.Texture)
+   self.Texture = texture
+   return self
+end
+
+function Sprite:setPos(xpos,y)
+   self.Position = utils.figureOutVec2(xpos,y)
+   self.DIMENSIONS_CHANGED:invoke(self,self.Position,self.Size)
+   return self
+end
+
+function Sprite:setSize(xpos,y)
+   self.Size = utils.figureOutVec2(xpos,y)
+   self.DIMENSIONS_CHANGED:invoke(self,self.Position,self.Size)
+   return self
+end
+
+function Sprite:_deleteRenderTasks()
+   for _, task in pairs(self.RenderTasks) do
+      self.Modelpart:removeTask(task:getName())
+   end
+   return self
+end
+
+function Sprite:_buildRenderTasks()
+   local b = self.BorderThickness
+   self.is_ninepatch = not (b.x == 0 and b.y == 0 and b.z == 0 and b.w == 0)
+   if not self.is_ninepatch then -- not 9-Patch
+      self.RenderTasks[1] = self.Modelpart:newSprite("patch"..self.id)
+   end
+   self:_updateRenderTasks()
+end
+
+function Sprite:_updateRenderTasks()
+   if not self.is_ninepatch then
+      local dim = self.Texture:getDimensions()
+      self.RenderTasks[1]
+      :setPos(self.Position.x,self.Position.y)
+      :setScale(self.Size.x/dim.x,self.Size.y/dim.y)
+   end
+end
+
+--#endregion
+
 --#region Element
 
+local element_next_free = 0
 ---@class GNUI.element
 ---@field Visible boolean
 ---@field VISIBILITY_CHANGED EventLib
----@field Children table<any,GNUI.element>
+---@field Children table<any,GNUI.element|GNUI.element.container>
 ---@field ChildrenIndex integer
 ---@field CHILDREN_CHANGED table
----@field Parent GNUI.element 
+---@field Parent GNUI.element|GNUI.element.container
 ---@field PARENT_CHANGED table
 ---@field ON_FREE EventLib
+---@field id EventLib
 local element = {}
 element.__index = function (t,i)
    return rawget(t,i)
@@ -218,7 +326,9 @@ function element.new(preset)
    new.CHILDREN_CHANGED = eventLib.new()
    new.PARENT_CHANGED = eventLib.new()
    new.ON_FREE = eventLib.new()
+   new.id = element_next_free
    setmetatable(new,element)
+   element_next_free = element_next_free + 1
    return new
 end
 
@@ -237,6 +347,8 @@ function element:addChild(child,order)
    order = order or #self.Children+1
    table.insert(self.Children,order,child)
    self:updateChildrenOrder()
+   child.Parent = self
+   child.PARENT_CHANGED:invoke(self)
    return self
 end
 
@@ -248,6 +360,7 @@ function element:removeChild(child)
       self.Children[child.ChildrenIndex] = nil -- lmao
       child.Parent = nil
       child.ChildrenIndex = 0
+      child.PARENT_CHANGED:invoke(nil)
    end
    self:updateChildrenOrder()
    return self
@@ -265,7 +378,7 @@ end
 
 --#region-->========================================[ Container ]=========================================<--
 
----@class GNUI.element.container
+---@class GNUI.element.container : GNUI.element
 ---@field Dimensions Vector4
 ---@field DIMENSIONS_CHANGED EventLib
 ---@field Margin Vector4
@@ -277,16 +390,17 @@ end
 ---@field Part ModelPart
 local container = {}
 container.__index = function (t,i)
-   return container[i] or element.__index(t,i)
+   return container[i] or element[i]
 end
 
 container.__type = "GNUI.element.container"
 
 ---Creates a new container.
----@param preset table?
+---@param preset GNUI.element.container?
 ---@return GNUI.element.container
 function container.new(preset)
-   local new = preset or {}
+   local new = preset or element.new()
+   setmetatable(new,container)
    new.Dimensions = vectors.vec4(0,0,1,1)
    new.DIMENSIONS_CHANGED = eventLib.new()
    new.Margin = vectors.vec4()
@@ -295,7 +409,7 @@ function container.new(preset)
    new.PADDING_CHANGED = eventLib.new()
    new.Anchor = vectors.vec4(0,0,1,1)
    new.ANCHOR_CHANGED = eventLib.new()
-   new.Part = models:newPart("Container")
+   new.Part = models:newPart("container"..new.id)
 
    -->==========[ Internals ]==========<--
 
@@ -303,7 +417,12 @@ function container.new(preset)
       new.Part
       :setPos(
          -new.Dimensions.x-new.Margin.x-new.Padding.x,
-         -new.Dimensions.y-new.Margin.y-new.Padding.y,0)
+         -new.Dimensions.y-new.Margin.y-new.Padding.y,-15)
+      for key, value in pairs(new.Children) do
+         if value.DIMENSIONS_CHANGED then
+            value.DIMENSIONS_CHANGED:invoke(value.DIMENSIONS_CHANGED)
+         end
+      end
    end,config.internal_events_name)
 
    new.MARGIN_CHANGED:register(function ()
@@ -314,12 +433,16 @@ function container.new(preset)
       new.DIMENSIONS_CHANGED:invoke(new.Dimensions)
    end,config.internal_events_name)
 
+   new.PARENT_CHANGED:register(function ()
+      new.Part:moveTo(new.Parent.Part)
+   end)
+
    -->==========[ Debug ]==========<--
 
    if config.debug_visible then
-      local debug_container = new.Part:newSprite("container"):texture(debug.texture):setColor(0.5,0.5,0.5,0.3)
-      local debug_margin    = new.Part:newSprite("margin"):texture(debug.texture):setColor(0,0,0,0.3)
-      local debug_padding   = new.Part:newSprite("padding"):texture(debug.texture):setColor(1,1,1,0.3)
+      local debug_container = new.Part:newSprite("container"):texture(debug.texture):setColor(1,1,1,01)
+      local debug_margin    = new.Part:newSprite("margin"):texture(debug.texture):setColor(1,0,0,01)
+      local debug_padding   = new.Part:newSprite("padding"):texture(debug.texture):setColor(0,1,0,01)
 
       new.DIMENSIONS_CHANGED:register(function ()
          debug_padding
@@ -345,8 +468,6 @@ function container.new(preset)
             (new.Dimensions.w - new.Margin.y - new.Margin.w),1)
       end,config.debug_event_name)
    end
-
-   setmetatable(new,container)
    return new
 end
 
@@ -492,6 +613,66 @@ function container:setPadding(left,top,right,bottom)
    self.Padding.y = top    or 0
    self.Padding.z = right  or 0
    self.Padding.w = bottom or 0
+   self.MARGIN_CHANGED:invoke(self,self.Dimensions)
+   return self
+end
+
+-->====================[ Anchor ]====================<--
+
+---Sets the top anchor.  
+--- 0 = top part of the container is fully anchored to the top of its parent  
+--- 1 = top part of the container is fully anchored to the bottom of its parent
+---@param units number?
+function container:setAnchorTop(units)
+   self.Anchor.y = units or 0
+   self.MARGIN_CHANGED:invoke(self,self.Dimensions)
+   return self
+end
+
+---Sets the left anchor.  
+--- 0 = left part of the container is fully anchored to the left of its parent  
+--- 1 = left part of the container is fully anchored to the right of its parent
+---@param units number?
+function container:setAnchorLeft(units)
+   self.Anchor.x = units or 0
+   self.MARGIN_CHANGED:invoke(self,self.Dimensions)
+   return self
+end
+
+---Sets the down anchor.  
+--- 0 = bottom part of the container is fully anchored to the top of its parent  
+--- 1 = bottom part of the container is fully anchored to the bottom of its parent
+---@param units number?
+function container:setAnchorDown(units)
+   self.Anchor.z = units or 0
+   self.MARGIN_CHANGED:invoke(self,self.Dimensions)
+   return self
+end
+
+---Sets the right anchor.  
+--- 0 = right part of the container is fully anchored to the left of its parent  
+--- 1 = right part of the container is fully anchored to the right of its parent  
+---@param units number?
+---@return GNUI.element.container
+function container:setAnchorRight(units)
+   self.Anchor.w = units or 0
+   self.MARGIN_CHANGED:invoke(self,self.Dimensions)
+   return self
+end
+
+---Sets the anchor for all sides.  
+--- x 0 <-> 1 = left <-> right  
+--- y 0 <-> 1 = top <-> bottom
+---@param left number?
+---@param top number?
+---@param right number?
+---@param bottom number?
+---@return GNUI.element.container
+function container:setAnchor(left,top,right,bottom)
+   self.Anchor.x = left   or 0
+   self.Anchor.y = top    or 0
+   self.Anchor.z = right  or 0
+   self.Anchor.w = bottom or 0
    self.MARGIN_CHANGED:invoke(self,self.Dimensions)
    return self
 end
