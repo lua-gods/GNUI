@@ -29,13 +29,13 @@ events.WORLD_RENDER:register(function ()
       lwindow_size = window_size
    end
    local i = 40
-   local t = client:getSystemTime() / 300
+   local t = client:getSystemTime() / 10000
    window:setTopLeft(
-      superSine(t*0.2,1,8) * i + i,
-      superSine(t*0.2,4,8) * i + i)
+      superSine(t,1,8) * i + i,
+      superSine(t,4,8) * i + i)
    window:setBottomRight(
-      window_size.x - superSine(t*0.2,3,8) * i - i,
-      window_size.y - superSine(t*0.2,4,8) * i - i)
+      window_size.x - superSine(t,3,8) * i - i,
+      window_size.y - superSine(t,4,8) * i - i)
 end)
 
 local container = GNUI.newContainer()
@@ -45,4 +45,4 @@ container
 :setPos(0,0)
 :setMargin(5,5,5,5)
 :setPadding(10,10,10,10)
-:setAnchor(0.2,0,1,1)
+:setAnchor(0,0,0.5,1)
