@@ -717,7 +717,7 @@ container.__type = "GNUI.element.container"
 function container.new(preset)
    local new = preset or element.new()
    setmetatable(new,container)
-   new.Dimensions = vectors.vec4(0,0,1,1)
+   new.Dimensions = vectors.vec4(0,0,0,0)
    new.DIMENSIONS_CHANGED = eventLib.new()
    new.Margin = vectors.vec4()
    new.ContainmentRect = vectors.vec4()
