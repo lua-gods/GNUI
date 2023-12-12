@@ -203,16 +203,19 @@ debug.texture = textures:newTexture("1x1white",1,1):setPixel(0,0,vectors.vec3(1,
 ---@field Scale number
 ---@field DIMENSIONS_CHANGED EventLib
 ---@field RenderTasks table<any,SpriteTask>
+---@field RenderType ModelPart.renderType
 ---@field BorderThickness Vector4
 ---@field BORDER_THICKNESS_CHANGED EventLib
+---@field ExcludeMiddle boolean
 ---@field id integer
-local Sprite = {}
-Sprite.__index = Sprite
+local sprite = {}
+sprite.__index = sprite
 
 local sprite_next_free = 0
 ---@return Sprite
-function Sprite.new()
+function sprite.new()
    local new = {}
+   setmetatable(new,sprite)
    new.Texture = debug.texture
    new.TEXTURE_CHANGED = eventLib.new()
    new.MODELPART_CHANGED = eventLib.new()
@@ -223,11 +226,12 @@ function Sprite.new()
    new.Scale = 4
    new.DIMENSIONS_CHANGED = eventLib.new()
    new.RenderTasks = {}
+   new.RenderType = "CUTOUT_CULL"
    new.BorderThickness = vectors.vec4(0,0,0,0)
    new.BORDER_THICKNESS_CHANGED = eventLib.new()
+   new.ExcludeMiddle = false
    new.id = sprite_next_free
    sprite_next_free = sprite_next_free + 1
-   setmetatable(new,Sprite)
    
    new.TEXTURE_CHANGED:register(function ()
       new:_updateRenderTasks()
@@ -253,7 +257,7 @@ end
 ---Sets the modelpart to parent to.
 ---@param part ModelPart
 ---@return Sprite
-function Sprite:setModelpart(part)
+function sprite:setModelpart(part)
    self.Modelpart = part
    self.MODELPART_CHANGED:invoke(self.Modelpart)
    return self
@@ -263,7 +267,7 @@ end
 ---Sets the displayed image texture on the sprite.
 ---@param texture Texture
 ---@return Sprite
-function Sprite:setTexture(texture)
+function sprite:setTexture(texture)
    self.Texture = texture
    local dim = texture:getDimensions()
    self.UV = vectors.vec4(0,0,dim.x,dim.y)
@@ -276,7 +280,7 @@ end
 ---@param y number
 ---@param depth number?
 ---@return Sprite
-function Sprite:setPos(xpos,y,depth)
+function sprite:setPos(xpos,y,depth)
    self.Position = utils.figureOutVec3(xpos,y,depth or 0)
    self.DIMENSIONS_CHANGED:invoke(self,self.Position,self.Size)
    return self
@@ -287,7 +291,7 @@ end
 ---@param g number?
 ---@param b number?
 ---@return Sprite
-function Sprite:setColor(rgb,g,b)
+function sprite:setColor(rgb,g,b)
    self.Color = utils.figureOutVec3(rgb,g,b)
    self.DIMENSIONS_CHANGED:invoke(self,self.Position,self.Size)
    return self
@@ -297,7 +301,7 @@ end
 ---@param xpos number
 ---@param y number
 ---@return Sprite
-function Sprite:setSize(xpos,y)
+function sprite:setSize(xpos,y)
    self.Size = utils.figureOutVec2(xpos,y)
    self.DIMENSIONS_CHANGED:invoke(self,self.Position,self.Size)
    return self
@@ -305,7 +309,7 @@ end
 
 ---@param scale number
 ---@return Sprite
-function Sprite:setScale(scale)
+function sprite:setScale(scale)
    self.Scale = scale
    self.BORDER_THICKNESS_CHANGED:invoke(self,self.BorderThickness)
    return self
@@ -316,7 +320,7 @@ end
 ---Sets the top border thickness.
 ---@param units number?
 ---@return Sprite
-function Sprite:setBorderThicknessTop(units)
+function sprite:setBorderThicknessTop(units)
    self.BorderThickness.y = units or 0
    self.BORDER_THICKNESS_CHANGED:invoke(self,self.BorderThickness)
    return self
@@ -325,7 +329,7 @@ end
 ---Sets the left border thickness.
 ---@param units number?
 ---@return Sprite
-function Sprite:setBorderThicknessLeft(units)
+function sprite:setBorderThicknessLeft(units)
    self.BorderThickness.x = units or 0
    self.BORDER_THICKNESS_CHANGED:invoke(self,self.BorderThickness)
    return self
@@ -334,7 +338,7 @@ end
 ---Sets the down border thickness.
 ---@param units number?
 ---@return Sprite
-function Sprite:setBorderThicknessDown(units)
+function sprite:setBorderThicknessDown(units)
    self.BorderThickness.z = units or 0
    self.BORDER_THICKNESS_CHANGED:invoke(self,self.BorderThickness)
    return self
@@ -343,7 +347,7 @@ end
 ---Sets the right border thickness.
 ---@param units number?
 ---@return Sprite
-function Sprite:setBorderThicknessRight(units)
+function sprite:setBorderThicknessRight(units)
    self.BorderThickness.w = units or 0
    self.BORDER_THICKNESS_CHANGED:invoke(self,self.BorderThickness)
    return self
@@ -355,7 +359,7 @@ end
 ---@param right number?
 ---@param bottom number?
 ---@return Sprite
-function Sprite:setBorderThickness(left,top,right,bottom)
+function sprite:setBorderThickness(left,top,right,bottom)
    self.BorderThickness.x = left   or 0
    self.BorderThickness.y = top    or 0
    self.BorderThickness.z = right  or 0
@@ -370,20 +374,38 @@ end
 ---@param bx number
 ---@param by number
 ---@return Sprite
-function Sprite:setUV(ax,ay,bx,by)
+function sprite:setUV(ax,ay,bx,by)
    self.UV = vectors.vec4(ax,ay,bx,by)
    self.BORDER_THICKNESS_CHANGED:invoke(self.BorderThickness)
    return self
 end
 
-function Sprite:_deleteRenderTasks()
+---Sets the render type of your sprite
+---@param renderType ModelPart.renderType
+---@return Sprite
+function sprite:setRenderType(renderType)
+   self.RenderType = renderType
+   self:_deleteRenderTasks()
+   self:_buildRenderTasks()
+   return self
+end
+
+---Set to true if you want a hole in the middle of your ninepatch
+---@param toggle boolean
+---@return Sprite
+function sprite:excludeMiddle(toggle)
+   self.ExcludeMiddle = toggle
+   return self
+end
+
+function sprite:_deleteRenderTasks()
    for _, task in pairs(self.RenderTasks) do
       self.Modelpart:removeTask(task:getName())
    end
    return self
 end
 
-function Sprite:_buildRenderTasks()
+function sprite:_buildRenderTasks()
    local b = self.BorderThickness
    self.is_ninepatch = not (b.x == 0 and b.y == 0 and b.z == 0 and b.w == 0)
    if not self.is_ninepatch then -- not 9-Patch
@@ -404,15 +426,23 @@ function Sprite:_buildRenderTasks()
    self:_updateRenderTasks()
 end
 
-function Sprite:_updateRenderTasks()
+function sprite:_updateRenderTasks()
    local dim = self.Texture:getDimensions()
-   local uv = self.UV:copy():add(0,0,1,1)
+   local uv = self.UV:copy()
    if not self.is_ninepatch then
       self.RenderTasks[1]
       :setTexture(self.Texture)
       :setPos(self.Position)
       :setScale(self.Size.x/dim.x,self.Size.y/dim.y)
       :setColor(self.Color)
+      :setRenderType(self.RenderType)
+      :setUVPixels(
+         uv.x,
+         uv.y
+      ):region(
+         uv.z,
+         uv.w
+      )
    else
       local border = self.BorderThickness*self.Scale
       local uvborder = self.BorderThickness
@@ -423,14 +453,7 @@ function Sprite:_updateRenderTasks()
          task
          :setTexture(self.Texture)
          :setColor(self.Color)
-         :setUVPixels(
-            uv.x,
-            uv.y
-         )
-         :region(
-            uv.z,
-            uv.w
-         )
+         :setRenderType(self.RenderType)
       
       end
       self.RenderTasks[1]
@@ -464,13 +487,13 @@ function Sprite:_updateRenderTasks()
       )
       self.RenderTasks[3]
       :setPos(
-         -size.x+border.z,
-         -pos.y,
+         pos.x-size.x+border.z,
+         pos.y,
          pos.z
       ):setScale(
          border.z/dim.x,border.y/dim.y
       ):setUVPixels(
-         uv.z-uvborder.x-1,
+         uv.z-uvborder.z,
          uv.y
       ):region(
          uvborder.z,
@@ -493,23 +516,26 @@ function Sprite:_updateRenderTasks()
          uvborder.x,
          uvsize.y-uvborder.y-uvborder.w
       )
-      
-      self.RenderTasks[5]
-      :setPos(
-         pos.x-border.x,
-         pos.y-border.y,
-         pos.z
-      )
-      :setScale(
-         (size.x-border.x-border.z)/dim.x,
-         (size.y-border.y-border.w)/dim.y
-      ):setUVPixels(
-         uv.x+uvborder.x,
-         uv.y+uvborder.y
-      ):region(
-         uvsize.x-uvborder.x-uvborder.z,
-         uvsize.y-uvborder.y-uvborder.w
-      )
+      if self.ExcludeMiddle then
+         self.RenderTasks[5]
+         :setPos(
+            pos.x-border.x,
+            pos.y-border.y,
+            pos.z
+         )
+         :setScale(
+            (size.x-border.x-border.z)/dim.x,
+            (size.y-border.y-border.w)/dim.y
+         ):setUVPixels(
+            uv.x+uvborder.x,
+            uv.y+uvborder.y
+         ):region(
+            uvsize.x-uvborder.x-uvborder.z,
+            uvsize.y-uvborder.y-uvborder.w
+         ):setVisible(true)
+      else
+         self.RenderTasks[5]:setVisible(false)
+      end
 
       self.RenderTasks[6]
       :setPos(
@@ -531,8 +557,8 @@ function Sprite:_updateRenderTasks()
       
       self.RenderTasks[7]
       :setPos(
-         -pos.x,
-         -size.y+border.w,
+         pos.x,
+         pos.y-size.y+border.w,
          pos.z
       )
       :setScale(
@@ -548,8 +574,8 @@ function Sprite:_updateRenderTasks()
 
       self.RenderTasks[8]
       :setPos(
-         -pos.x-border.x,
-         -size.y+border.w,
+         pos.x-border.x,
+         pos.y-size.y+border.w,
          pos.z
       )
       :setScale(
@@ -565,8 +591,8 @@ function Sprite:_updateRenderTasks()
 
       self.RenderTasks[9]
       :setPos(
-         -size.x+border.z,
-         -size.y+border.w,
+         pos.x-size.x+border.z,
+         pos.y-size.y+border.w,
          pos.z
       )
       :setScale(
@@ -590,10 +616,10 @@ local element_next_free = 0
 ---@class GNUI.element
 ---@field Visible boolean
 ---@field VISIBILITY_CHANGED EventLib
----@field Children table<any,GNUI.element|GNUI.element.container>
+---@field Children table<any,GNUI.element|GNUI.container>
 ---@field ChildrenIndex integer
 ---@field CHILDREN_CHANGED table
----@field Parent GNUI.element|GNUI.element.container
+---@field Parent GNUI.element|GNUI.container
 ---@field PARENT_CHANGED table
 ---@field ON_FREE EventLib
 ---@field id EventLib
@@ -667,7 +693,7 @@ end
 
 --#region-->========================================[ Container ]=========================================<--
 
----@class GNUI.element.container : GNUI.element
+---@class GNUI.container : GNUI.element
 ---@field Dimensions Vector4
 ---@field ContainmentRect Vector4
 ---@field DIMENSIONS_CHANGED EventLib
@@ -686,8 +712,8 @@ end
 container.__type = "GNUI.element.container"
 
 ---Creates a new container.
----@param preset GNUI.element.container?
----@return GNUI.element.container
+---@param preset GNUI.container?
+---@return GNUI.container
 function container.new(preset)
    local new = preset or element.new()
    setmetatable(new,container)
@@ -748,9 +774,9 @@ function container.new(preset)
    -->==========[ Debug ]==========<--
 
    if config.debug_visible then
-      local debug_container = new.Part:newSprite("container"):texture(debug.texture):setColor(1,1,1)
-      local debug_margin    = new.Part:newSprite("margin"):texture(debug.texture):setColor(1,0,0)
-      local debug_padding   = Sprite.new():setModelpart(new.Part):setTexture(textures.ninepatch):setUV(3,2,12,12):setBorderThickness(2,2,3,4) -- :setColor(0,1,0)
+      local debug_container = sprite.new():setModelpart(new.Part):setTexture(textures.outline):setUV(0,0,3,3):setBorderThickness(1,1,1,1):setRenderType("EMISSIVE_SOLID"):setScale(1):setColor(0,1,0)
+      local debug_margin    = sprite.new():setModelpart(new.Part):setTexture(textures.outline):setUV(0,0,3,3):setBorderThickness(1,1,1,1):setRenderType("EMISSIVE_SOLID"):setScale(1):setColor(1,0,0)
+      local debug_padding   = sprite.new():setModelpart(new.Part):setTexture(textures.outline):setUV(0,0,3,3):setBorderThickness(1,1,1,1):setRenderType("EMISSIVE_SOLID"):setScale(1) -- :setColor(0,1,0)
 
       new.DIMENSIONS_CHANGED:register(function ()
          local contain = new.ContainmentRect
@@ -765,19 +791,19 @@ function container.new(preset)
             - contain.y,-0.6)
          
          debug_margin
-         :pos(
+         :setPos(
             margin.x + padding.x - contain.x,
             margin.y + padding.y - contain.y,
             1)
-         :scale(
+         :setSize(
             (contain.z - contain.x + margin.z + margin.x + padding.x + padding.z),
             (contain.w - contain.y + margin.w + margin.y + padding.y + padding.w),1)
          debug_container
-         :pos(
+         :setPos(
             padding.x - contain.x,
             padding.y - contain.y,
             -0.3)
-         :scale(
+         :setSize(
             (contain.z+padding.x+padding.z - contain.x),
             (contain.w+padding.y+padding.w - contain.y),1)
       end,config.debug_event_name)
@@ -790,7 +816,7 @@ end
 ---Sets the position of the container, the size stays the same.
 ---@param xpos number|Vector2
 ---@param y number?
----@return GNUI.element.container
+---@return GNUI.container
 function container:setPos(xpos,y)
    self.Dimensions.xy = utils.figureOutVec2(xpos,y)
    self.DIMENSIONS_CHANGED:invoke(self,self.Dimensions)
@@ -800,7 +826,7 @@ end
 ---Sets the size of the container
 ---@param xsize number|Vector2
 ---@param y number?
----@return GNUI.element.container
+---@return GNUI.container
 function container:setSize(xsize,y)
    self.Dimensions.zw = utils.figureOutVec2(xsize,y)
    self.DIMENSIONS_CHANGED:invoke(self,self.Dimensions)
@@ -810,7 +836,7 @@ end
 ---Sets the position of the top left part of the container, the bottom right stays in the same position
 ---@param xpos number|Vector2
 ---@param y number?
----@return GNUI.element.container
+---@return GNUI.container
 function container:setTopLeft(xpos,y)
    local old,new = self.Dimensions.xy,utils.figureOutVec2(xpos,y)
    local delta = new-old
@@ -822,7 +848,7 @@ end
 ---Sets the position of the top left part of the container, the top left stays in the same position
 ---@param zpos number|Vector2
 ---@param w number?
----@return GNUI.element.container
+---@return GNUI.container
 function container:setBottomRight(zpos,w)
    local old,new = self.Dimensions.xy+self.Dimensions.zw,utils.figureOutVec2(zpos,w)
    local delta = new-old
@@ -835,7 +861,7 @@ end
 
 ---Sets the top margin.
 ---@param units number?
----@return GNUI.element.container
+---@return GNUI.container
 function container:setMarginTop(units)
    self.Margin.y = units or 0
    self.MARGIN_CHANGED:invoke(self,self.Dimensions)
@@ -844,7 +870,7 @@ end
 
 ---Sets the left margin.
 ---@param units number?
----@return GNUI.element.container
+---@return GNUI.container
 function container:setMarginLeft(units)
    self.Margin.x = units or 0
    self.MARGIN_CHANGED:invoke(self,self.Dimensions)
@@ -853,7 +879,7 @@ end
 
 ---Sets the down margin.
 ---@param units number?
----@return GNUI.element.container
+---@return GNUI.container
 function container:setMarginDown(units)
    self.Margin.z = units or 0
    self.MARGIN_CHANGED:invoke(self,self.Dimensions)
@@ -862,7 +888,7 @@ end
 
 ---Sets the right margin.
 ---@param units number?
----@return GNUI.element.container
+---@return GNUI.container
 function container:setMarginRight(units)
    self.Margin.w = units or 0
    self.MARGIN_CHANGED:invoke(self,self.Dimensions)
@@ -874,7 +900,7 @@ end
 ---@param top number?
 ---@param right number?
 ---@param bottom number?
----@return GNUI.element.container
+---@return GNUI.container
 function container:setMargin(left,top,right,bottom)
    self.Margin.x = left   or 0
    self.Margin.y = top    or 0
@@ -888,7 +914,7 @@ end
 
 ---Sets the top padding.
 ---@param units number?
----@return GNUI.element.container
+---@return GNUI.container
 function container:setPaddingTop(units)
    self.Padding.y = units or 0
    self.MARGIN_CHANGED:invoke(self,self.Dimensions)
@@ -897,7 +923,7 @@ end
 
 ---Sets the left padding.
 ---@param units number?
----@return GNUI.element.container
+---@return GNUI.container
 function container:setPaddingLeft(units)
    self.Padding.x = units or 0
    self.MARGIN_CHANGED:invoke(self,self.Dimensions)
@@ -906,7 +932,7 @@ end
 
 ---Sets the down padding.
 ---@param units number?
----@return GNUI.element.container
+---@return GNUI.container
 function container:setPaddingDown(units)
    self.Padding.z = units or 0
    self.MARGIN_CHANGED:invoke(self,self.Dimensions)
@@ -915,7 +941,7 @@ end
 
 ---Sets the right padding.
 ---@param units number?
----@return GNUI.element.container
+---@return GNUI.container
 function container:setPaddingRight(units)
    self.Padding.w = units or 0
    self.MARGIN_CHANGED:invoke(self,self.Dimensions)
@@ -927,7 +953,7 @@ end
 ---@param top number?
 ---@param right number?
 ---@param bottom number?
----@return GNUI.element.container
+---@return GNUI.container
 function container:setPadding(left,top,right,bottom)
    self.Padding.x = left   or 0
    self.Padding.y = top    or 0
@@ -943,7 +969,7 @@ end
 --- 0 = top part of the container is fully anchored to the top of its parent  
 --- 1 = top part of the container is fully anchored to the bottom of its parent
 ---@param units number?
----@return GNUI.element.container
+---@return GNUI.container
 function container:setAnchorTop(units)
    self.Anchor.y = units or 0
    self.MARGIN_CHANGED:invoke(self,self.Dimensions)
@@ -954,7 +980,7 @@ end
 --- 0 = left part of the container is fully anchored to the left of its parent  
 --- 1 = left part of the container is fully anchored to the right of its parent
 ---@param units number?
----@return GNUI.element.container
+---@return GNUI.container
 function container:setAnchorLeft(units)
    self.Anchor.x = units or 0
    self.MARGIN_CHANGED:invoke(self,self.Dimensions)
@@ -965,7 +991,7 @@ end
 --- 0 = bottom part of the container is fully anchored to the top of its parent  
 --- 1 = bottom part of the container is fully anchored to the bottom of its parent
 ---@param units number?
----@return GNUI.element.container
+---@return GNUI.container
 function container:setAnchorDown(units)
    self.Anchor.z = units or 0
    self.MARGIN_CHANGED:invoke(self,self.Dimensions)
@@ -976,7 +1002,7 @@ end
 --- 0 = right part of the container is fully anchored to the left of its parent  
 --- 1 = right part of the container is fully anchored to the right of its parent  
 ---@param units number?
----@return GNUI.element.container
+---@return GNUI.container
 function container:setAnchorRight(units)
    self.Anchor.w = units or 0
    self.MARGIN_CHANGED:invoke(self,self.Dimensions)
@@ -990,7 +1016,7 @@ end
 ---@param top number?
 ---@param right number?
 ---@param bottom number?
----@return GNUI.element.container
+---@return GNUI.container
 function container:setAnchor(left,top,right,bottom)
    self.Anchor.x = left   or 0
    self.Anchor.y = top    or 0
@@ -1001,6 +1027,67 @@ function container:setAnchor(left,top,right,bottom)
 end
 
 --#endregion
+
+--#region-->========================================[ Rich Text Label ]=========================================<--
+
+---@alias AutoWarp string
+---| "NONE"
+---| "LETTER"
+---| "WORD"
+
+
+---@class GNUI.Label : GNUI.container
+---@field Text string
+---@field RenderTasks table<any,TextTask>
+---@field TEXT_CHANGED EventLib
+---@field Align Vector2
+---@field AutoWarp AutoWarp
+local label = {}
+label.__index = function (t,i)
+   return label[i] or container[i]
+end
+
+function label.new(preset)
+   ---@type GNUI.Label
+   local new = container.new() or preset
+   setmetatable(new,label)
+   new.Text = ""
+   new.TEXT_CHANGED = eventLib.new()
+   new.Align = vectors.vec2()
+
+   new.TEXT_CHANGED:register(function ()
+      new
+      :_deleteRenderTasks()
+      :_buildRenderTasks()
+   end,config.internal_events_name.."_txt")
+   return new
+end
+
+---@param text string
+---@return GNUI.Label
+function label:setText(text)
+   self.Text = text
+   self.TEXT_CHANGED:invoke(self.Text)
+   return self
+end
+
+function label:_buildRenderTasks()
+   self.RenderTasks = {self.Part:newText("text")}
+end
+
+function label:_updateRenderTasks()
+   self.RenderTasks[1]:setText(self.Text)
+end
+
+function label:_deleteRenderTasks()
+   for key, task in pairs(self.RenderTasks) do
+      self.Part:removeTask(task:getName())
+   end
+   return self
+end
+
+
 main.newContainer = container.new
+main.newLabel = label.new
 main.utils = utils
 return main
