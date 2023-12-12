@@ -713,7 +713,6 @@ container.__type = "GNUI.element.container"
 
 ---Creates a new container.
 ---@param preset GNUI.container?
----@return GNUI.container
 function container.new(preset)
    local new = preset or element.new()
    setmetatable(new,container)
@@ -774,9 +773,9 @@ function container.new(preset)
    -->==========[ Debug ]==========<--
 
    if config.debug_visible then
-      local debug_container = sprite.new():setModelpart(new.Part):setTexture(textures.outline):setUV(0,0,3,3):setBorderThickness(1,1,1,1):setRenderType("EMISSIVE_SOLID"):setScale(1):setColor(0,1,0)
-      local debug_margin    = sprite.new():setModelpart(new.Part):setTexture(textures.outline):setUV(0,0,3,3):setBorderThickness(1,1,1,1):setRenderType("EMISSIVE_SOLID"):setScale(1):setColor(1,0,0)
-      local debug_padding   = sprite.new():setModelpart(new.Part):setTexture(textures.outline):setUV(0,0,3,3):setBorderThickness(1,1,1,1):setRenderType("EMISSIVE_SOLID"):setScale(1) -- :setColor(0,1,0)
+      local debug_container = sprite.new():setModelpart(new.Part):setTexture(textures.outline):setBorderThickness(1,1,1,1):setRenderType("EMISSIVE_SOLID"):setScale(1):setColor(0,1,0)
+      local debug_margin    = sprite.new():setModelpart(new.Part):setTexture(textures.outline):setBorderThickness(1,1,1,1):setRenderType("EMISSIVE_SOLID"):setScale(1):setColor(1,0,0)
+      local debug_padding   = sprite.new():setModelpart(new.Part):setTexture(textures.outline):setBorderThickness(1,1,1,1):setRenderType("EMISSIVE_SOLID"):setScale(1) -- :setColor(0,1,0)
 
       new.DIMENSIONS_CHANGED:register(function ()
          local contain = new.ContainmentRect
@@ -816,7 +815,6 @@ end
 ---Sets the position of the container, the size stays the same.
 ---@param xpos number|Vector2
 ---@param y number?
----@return GNUI.container
 function container:setPos(xpos,y)
    self.Dimensions.xy = utils.figureOutVec2(xpos,y)
    self.DIMENSIONS_CHANGED:invoke(self,self.Dimensions)
@@ -826,7 +824,6 @@ end
 ---Sets the size of the container
 ---@param xsize number|Vector2
 ---@param y number?
----@return GNUI.container
 function container:setSize(xsize,y)
    self.Dimensions.zw = utils.figureOutVec2(xsize,y)
    self.DIMENSIONS_CHANGED:invoke(self,self.Dimensions)
@@ -836,7 +833,6 @@ end
 ---Sets the position of the top left part of the container, the bottom right stays in the same position
 ---@param xpos number|Vector2
 ---@param y number?
----@return GNUI.container
 function container:setTopLeft(xpos,y)
    local old,new = self.Dimensions.xy,utils.figureOutVec2(xpos,y)
    local delta = new-old
@@ -848,7 +844,6 @@ end
 ---Sets the position of the top left part of the container, the top left stays in the same position
 ---@param zpos number|Vector2
 ---@param w number?
----@return GNUI.container
 function container:setBottomRight(zpos,w)
    local old,new = self.Dimensions.xy+self.Dimensions.zw,utils.figureOutVec2(zpos,w)
    local delta = new-old
@@ -861,7 +856,6 @@ end
 
 ---Sets the top margin.
 ---@param units number?
----@return GNUI.container
 function container:setMarginTop(units)
    self.Margin.y = units or 0
    self.MARGIN_CHANGED:invoke(self,self.Dimensions)
@@ -870,7 +864,6 @@ end
 
 ---Sets the left margin.
 ---@param units number?
----@return GNUI.container
 function container:setMarginLeft(units)
    self.Margin.x = units or 0
    self.MARGIN_CHANGED:invoke(self,self.Dimensions)
@@ -879,7 +872,6 @@ end
 
 ---Sets the down margin.
 ---@param units number?
----@return GNUI.container
 function container:setMarginDown(units)
    self.Margin.z = units or 0
    self.MARGIN_CHANGED:invoke(self,self.Dimensions)
@@ -888,7 +880,6 @@ end
 
 ---Sets the right margin.
 ---@param units number?
----@return GNUI.container
 function container:setMarginRight(units)
    self.Margin.w = units or 0
    self.MARGIN_CHANGED:invoke(self,self.Dimensions)
@@ -900,7 +891,6 @@ end
 ---@param top number?
 ---@param right number?
 ---@param bottom number?
----@return GNUI.container
 function container:setMargin(left,top,right,bottom)
    self.Margin.x = left   or 0
    self.Margin.y = top    or 0
@@ -914,7 +904,6 @@ end
 
 ---Sets the top padding.
 ---@param units number?
----@return GNUI.container
 function container:setPaddingTop(units)
    self.Padding.y = units or 0
    self.MARGIN_CHANGED:invoke(self,self.Dimensions)
@@ -923,7 +912,6 @@ end
 
 ---Sets the left padding.
 ---@param units number?
----@return GNUI.container
 function container:setPaddingLeft(units)
    self.Padding.x = units or 0
    self.MARGIN_CHANGED:invoke(self,self.Dimensions)
@@ -932,7 +920,6 @@ end
 
 ---Sets the down padding.
 ---@param units number?
----@return GNUI.container
 function container:setPaddingDown(units)
    self.Padding.z = units or 0
    self.MARGIN_CHANGED:invoke(self,self.Dimensions)
@@ -941,7 +928,6 @@ end
 
 ---Sets the right padding.
 ---@param units number?
----@return GNUI.container
 function container:setPaddingRight(units)
    self.Padding.w = units or 0
    self.MARGIN_CHANGED:invoke(self,self.Dimensions)
@@ -953,7 +939,6 @@ end
 ---@param top number?
 ---@param right number?
 ---@param bottom number?
----@return GNUI.container
 function container:setPadding(left,top,right,bottom)
    self.Padding.x = left   or 0
    self.Padding.y = top    or 0
@@ -969,7 +954,6 @@ end
 --- 0 = top part of the container is fully anchored to the top of its parent  
 --- 1 = top part of the container is fully anchored to the bottom of its parent
 ---@param units number?
----@return GNUI.container
 function container:setAnchorTop(units)
    self.Anchor.y = units or 0
    self.MARGIN_CHANGED:invoke(self,self.Dimensions)
@@ -980,7 +964,6 @@ end
 --- 0 = left part of the container is fully anchored to the left of its parent  
 --- 1 = left part of the container is fully anchored to the right of its parent
 ---@param units number?
----@return GNUI.container
 function container:setAnchorLeft(units)
    self.Anchor.x = units or 0
    self.MARGIN_CHANGED:invoke(self,self.Dimensions)
@@ -991,7 +974,6 @@ end
 --- 0 = bottom part of the container is fully anchored to the top of its parent  
 --- 1 = bottom part of the container is fully anchored to the bottom of its parent
 ---@param units number?
----@return GNUI.container
 function container:setAnchorDown(units)
    self.Anchor.z = units or 0
    self.MARGIN_CHANGED:invoke(self,self.Dimensions)
@@ -1002,7 +984,6 @@ end
 --- 0 = right part of the container is fully anchored to the left of its parent  
 --- 1 = right part of the container is fully anchored to the right of its parent  
 ---@param units number?
----@return GNUI.container
 function container:setAnchorRight(units)
    self.Anchor.w = units or 0
    self.MARGIN_CHANGED:invoke(self,self.Dimensions)
@@ -1016,7 +997,6 @@ end
 ---@param top number?
 ---@param right number?
 ---@param bottom number?
----@return GNUI.container
 function container:setAnchor(left,top,right,bottom)
    self.Anchor.x = left   or 0
    self.Anchor.y = top    or 0
@@ -1047,19 +1027,27 @@ label.__index = function (t,i)
    return label[i] or container[i]
 end
 
+---@return GNUI.Label
 function label.new(preset)
    ---@type GNUI.Label
    local new = container.new() or preset
-   setmetatable(new,label)
    new.Text = ""
    new.TEXT_CHANGED = eventLib.new()
    new.Align = vectors.vec2()
+   new.RenderTasks = {}
 
    new.TEXT_CHANGED:register(function ()
       new
       :_deleteRenderTasks()
       :_buildRenderTasks()
+      :_updateRenderTasks()
    end,config.internal_events_name.."_txt")
+
+   new.DIMENSIONS_CHANGED:register(function ()
+      new
+      :_updateRenderTasks()
+   end,config.internal_events_name.."_txt")
+   setmetatable(new,label)
    return new
 end
 
@@ -1073,10 +1061,12 @@ end
 
 function label:_buildRenderTasks()
    self.RenderTasks = {self.Part:newText("text")}
+   return self
 end
 
 function label:_updateRenderTasks()
-   self.RenderTasks[1]:setText(self.Text)
+   self.RenderTasks[1]:setText(self.Text):setWrap(true):setWidth(self.ContainmentRect.z)
+   return self
 end
 
 function label:_deleteRenderTasks()
