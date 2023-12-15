@@ -38,7 +38,7 @@ events.WORLD_RENDER:register(function ()
       window:setSize(window_size)
       lwindow_size = window_size
    end
-   local i = 40
+   local i = 50
    local t = client:getSystemTime() / 10000
    window:setTopLeft(
       superSine(t,1,8) * i + i,

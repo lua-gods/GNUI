@@ -1010,18 +1010,14 @@ end
 
 --#region-->========================================[ Rich Text Label ]=========================================<--
 
----@alias AutoWarp string
----| "NONE"
----| "LETTER"
----| "WORD"
-
 
 ---@class GNUI.Label : GNUI.container
 ---@field Text string
+---@field Words table<any,{word:string,len:number}>
 ---@field RenderTasks table<any,TextTask>
 ---@field TEXT_CHANGED EventLib
 ---@field Align Vector2
----@field AutoWarp AutoWarp
+---@field AutoWarp boolean
 local label = {}
 label.__index = function (t,i)
    return label[i] or container[i]
@@ -1034,10 +1030,12 @@ function label.new(preset)
    new.Text = ""
    new.TEXT_CHANGED = eventLib.new()
    new.Align = vectors.vec2()
+   new.Words = {}
    new.RenderTasks = {}
 
    new.TEXT_CHANGED:register(function ()
       new
+      :_bakeWords()
       :_deleteRenderTasks()
       :_buildRenderTasks()
       :_updateRenderTasks()
@@ -1059,13 +1057,38 @@ function label:setText(text)
    return self
 end
 
+function label:_bakeWords()
+   self.Words = {}
+   local i = 0
+   for word in string.gmatch(self.Text,"%S+") do
+      i = i + 1
+      self.Words[i] = {word = word,len=client.getTextWidth(word)}
+   end
+   return self
+end
+
 function label:_buildRenderTasks()
-   self.RenderTasks = {self.Part:newText("text")}
+   for i, data in pairs(self.Words) do
+      self.RenderTasks[i] = self.Part:newText("word" .. i)
+   end
    return self
 end
 
 function label:_updateRenderTasks()
-   self.RenderTasks[1]:setText(self.Text):setWrap(true):setWidth(self.ContainmentRect.z)
+   local cursor = 0
+   local line = 0
+   for i, data in pairs(self.Words) do
+      if cursor + data.len > self.ContainmentRect.z then
+         cursor = 0
+         line = line - 8
+      end
+      if -line + 8 > self.ContainmentRect.w then
+         self.RenderTasks[i]:setText("")
+      else
+         self.RenderTasks[i]:setText(data.word):setPos(-cursor,line)
+      end
+      cursor = cursor + data.len + 4
+   end
    return self
 end
 
