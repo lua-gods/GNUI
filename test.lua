@@ -38,29 +38,32 @@ events.WORLD_RENDER:register(function ()
       window:setSize(window_size)
       lwindow_size = window_size
    end
-   local i = 50
+   local x = 80
+   local y = 40
    local t = client:getSystemTime() / 10000
    window:setTopLeft(
-      superSine(t,1,8) * i + i,
-      superSine(t,4,8) * i + i)
+      superSine(t,1,8) * x + x,
+      superSine(t,4,8) * y + y)
    window:setBottomRight(
-      window_size.x - superSine(t,3,8) * i - i,
-      window_size.y - superSine(t,4,8) * i - i)
+      window_size.x - superSine(t,3,8) * x - x,
+      window_size.y - superSine(t,4,8) * y - y)
 end)
-
-local container = GNUI.newContainer()
-window:addChild(container)
-container
-:setPos(0,0)
-:setMargin(5,5,5,5)
-:setPadding(10,10,10,10)
-:setAnchor(0,0,0.5,1)
-
 
 local label = GNUI.newLabel()
 window:addChild(label)
 label
 :setText(lorem)
+:setAlign(0.5,0.5)
+:setMargin(5,5,5,5)
+:setPadding(10,10,10,10)
+:setAnchor(0,0,.5,1)
+
+
+local label2 = GNUI.newLabel()
+window:addChild(label2)
+label2
+:setText(":3")
+:setAlign(0.5,0.5)
 :setMargin(5,5,5,5)
 :setPadding(10,10,10,10)
 :setAnchor(0.5,0,1,1)
