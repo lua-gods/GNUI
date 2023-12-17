@@ -12,7 +12,8 @@ allowing me to put as much as I want without worrying about storage space.
 local api = {}
 
 local config = {
-   debug_visible = false,
+   clipping_margin = 0.3,
+   debug_visible = true,
    debug_event_name = "_c",
    internal_events_name = "__a",
 }
@@ -231,6 +232,7 @@ debug.texture = textures:newTexture("1x1white",1,1):setPixel(0,0,vectors.vec3(1,
 ---@field BorderThickness Vector4
 ---@field BORDER_THICKNESS_CHANGED EventLib
 ---@field ExcludeMiddle boolean
+---@field Visible boolean
 ---@field id integer
 local sprite = {}
 sprite.__index = sprite
@@ -254,6 +256,9 @@ function sprite.new(obj)
    new.BorderThickness = new.BorderThickness or vectors.vec4(0,0,0,0)
    new.BORDER_THICKNESS_CHANGED = eventLib.new()
    new.ExcludeMiddle = new.ExcludeMiddle or false
+   new.Cursor = vectors.vec2()
+   new.CURSOR_CHANGED = eventLib.new()
+   new.Visible = true
    new.id = new.id or sprite_next_free
    sprite_next_free = sprite_next_free + 1
    
@@ -433,6 +438,12 @@ function sprite:duplicate()
    return sprite.new(copy)
 end
 
+function sprite:setVisible(visibility)
+   self:_updateRenderTasks()
+   self.Visible = visibility
+   return self
+end
+
 function sprite:_deleteRenderTasks()
    for _, task in pairs(self.RenderTasks) do
       self.Modelpart:removeTask(task:getName())
@@ -479,7 +490,7 @@ function sprite:_updateRenderTasks()
       ):region(
          uv.z-uv.x,
          uv.w-uv.y
-      )
+      ):setVisible(self.Visible)
    else
       local sborder = self.BorderThickness*self.Scale
       local pxborder = self.BorderThickness
@@ -505,7 +516,7 @@ function sprite:_updateRenderTasks()
       ):region(
          pxborder.x,
          pxborder.y
-      )
+      ):setVisible(self.Visible)
       
       self.RenderTasks[2]
       :setPos(
@@ -521,7 +532,8 @@ function sprite:_updateRenderTasks()
       ):region(
          uvsize.x-pxborder.x-pxborder.z,
          pxborder.y
-      )
+      ):setVisible(self.Visible)
+
       self.RenderTasks[3]
       :setPos(
          pos.x-size.x+sborder.z,
@@ -535,14 +547,14 @@ function sprite:_updateRenderTasks()
       ):region(
          pxborder.z,
          pxborder.y
-      )
+      ):setVisible(self.Visible)
+
       self.RenderTasks[4]
       :setPos(
          pos.x,
          pos.y-sborder.y,
          pos.z
-      )
-      :setScale(
+      ):setScale(
          sborder.x/dim.x,
          (size.y-sborder.y-sborder.w)/dim.y
       ):setUVPixels(
@@ -551,7 +563,7 @@ function sprite:_updateRenderTasks()
       ):region(
          pxborder.x,
          uvsize.y-pxborder.y-pxborder.w
-      )
+      ):setVisible(self.Visible)
       if not self.ExcludeMiddle then
          self.RenderTasks[5]
          :setPos(
@@ -568,7 +580,7 @@ function sprite:_updateRenderTasks()
          ):region(
             uvsize.x-pxborder.x-pxborder.z,
             uvsize.y-pxborder.y-pxborder.w
-         ):setVisible(true)
+         ):setVisible(self.Visible)
       else
          self.RenderTasks[5]:setVisible(false)
       end
@@ -588,7 +600,7 @@ function sprite:_updateRenderTasks()
       ):region(
          pxborder.z,
          uvsize.y-pxborder.y-pxborder.w
-      )
+      ):setVisible(self.Visible)
       
       
       self.RenderTasks[7]
@@ -606,15 +618,14 @@ function sprite:_updateRenderTasks()
       ):region(
          pxborder.x,
          pxborder.w
-      )
+      ):setVisible(self.Visible)
 
       self.RenderTasks[8]
       :setPos(
          pos.x-sborder.x,
          pos.y-size.y+sborder.w,
          pos.z
-      )
-      :setScale(
+      ):setScale(
          (size.x-sborder.z-sborder.x)/dim.x,
          sborder.w/dim.y
       ):setUVPixels(
@@ -623,15 +634,14 @@ function sprite:_updateRenderTasks()
       ):region(
          uvsize.x-pxborder.x-pxborder.z,
          pxborder.w
-      )
+      ):setVisible(self.Visible)
 
       self.RenderTasks[9]
       :setPos(
          pos.x-size.x+sborder.z,
          pos.y-size.y+sborder.w,
          pos.z
-      )
-      :setScale(
+      ):setScale(
          sborder.z/dim.x,
          sborder.w/dim.y
       ):setUVPixels(
@@ -640,7 +650,7 @@ function sprite:_updateRenderTasks()
       ):region(
          pxborder.z,
          pxborder.w
-      )
+      ):setVisible(self.Visible)
    end
 end
 
@@ -741,6 +751,8 @@ end
 ---@field ANCHOR_CHANGED EventLib
 ---@field Sprite Sprite
 ---@field SPRITE_CHANGED EventLib
+---@field Cursor Vector2?
+---@field CURSOR_CHANGED EventLib
 ---@field Part ModelPart
 local container = {}
 container.__index = function (t,i)
@@ -764,10 +776,23 @@ function container.new(preset)
    new.Anchor = vectors.vec4(0,0,1,1)
    new.ANCHOR_CHANGED = eventLib.new()
    new.Part = models:newPart("container"..new.id)
+   models:removeChild(new.Part)
+   new.Cursor = vectors.vec2(0.5,0.5)
+   new.CURSOR_CHANGED = eventLib.new()
    new.SPRITE_CHANGED = eventLib.new()
    new.Sprite = nil
 
    -->==========[ Internals ]==========<--
+   local debug_container 
+   local debug_margin    
+   local debug_padding   
+   local debug_cursor
+   if config.debug_visible then
+      debug_container = sprite.new():setModelpart(new.Part):setTexture(textures.outline):setBorderThickness(1,1,1,1):setRenderType("EMISSIVE_SOLID"):setScale(1):setColor(0,1,0):excludeMiddle(true)
+      debug_margin    = sprite.new():setModelpart(new.Part):setTexture(textures.outline):setBorderThickness(1,1,1,1):setRenderType("EMISSIVE_SOLID"):setScale(1):setColor(1,0,0):excludeMiddle(true)
+      debug_padding   = sprite.new():setModelpart(new.Part):setTexture(textures.outline):setBorderThickness(1,1,1,1):setRenderType("EMISSIVE_SOLID"):setScale(1):excludeMiddle(true)
+      debug_cursor   = sprite.new():setModelpart(new.Part):setTexture(textures.ui):setUV(4,23,4,23):setRenderType("EMISSIVE_SOLID"):setSize(1,1)
+   end
 
    new.DIMENSIONS_CHANGED:register(function ()
       new.ContainmentRect = vectors.vec4(0,0,
@@ -790,7 +815,9 @@ function container.new(preset)
       new.Part
       :setPos(
          -new.Dimensions.x-new.Margin.x-new.Padding.x,
-         -new.Dimensions.y-new.Margin.y-new.Padding.y,-15)
+         -new.Dimensions.y-new.Margin.y-new.Padding.y,
+         -config.clipping_margin
+      )
       for key, value in pairs(new.Children) do
          if value.DIMENSIONS_CHANGED then
             value.DIMENSIONS_CHANGED:invoke(value.DIMENSIONS_CHANGED)
@@ -803,11 +830,51 @@ function container.new(preset)
             :setPos(
                padding.x - contain.x,
                padding.y - contain.y,
-               -0.3)
+               0)
             :setSize(
                (contain.z+padding.x+padding.z - contain.x),
                (contain.w+padding.y+padding.w - contain.y)
             )
+      end
+      if config.debug_visible then
+         local contain = new.ContainmentRect
+         local margin = new.Margin
+         local padding = new.Padding
+         if new.Cursor then
+            debug_cursor:setPos(
+               -new.Cursor.x * 16 + new.Padding.x,
+               -new.Cursor.y * 16 + new.Padding.y,
+               -config.clipping_margin * 0.8
+            ):setVisible(true)
+         else
+            debug_cursor:setVisible(false)
+         end
+         debug_padding
+         :setSize(
+            contain.z - contain.x,
+            contain.w - contain.y)
+         :setPos(
+            - contain.x,
+            - contain.y,-config.clipping_margin * 0.8)
+         
+         debug_margin
+         :setPos(
+            margin.x + padding.x - contain.x,
+            margin.y + padding.y - contain.y,
+            -config.clipping_margin * 0.3)
+         :setSize(
+            (contain.z - contain.x + margin.z + margin.x + padding.x + padding.z),
+            (contain.w - contain.y + margin.w + margin.y + padding.y + padding.w)
+         )
+         debug_container
+         :setPos(
+            padding.x - contain.x,
+            padding.y - contain.y,
+            -config.clipping_margin * 0.6)
+         :setSize(
+            (contain.z+padding.x+padding.z - contain.x),
+            (contain.w+padding.y+padding.w - contain.y)
+         )
       end
    end,config.internal_events_name)
 
@@ -820,48 +887,11 @@ function container.new(preset)
    end,config.internal_events_name)
 
    new.PARENT_CHANGED:register(function ()
-      new.Part:moveTo(new.Parent.Part)
+      if new.Parent then
+         new.Part:moveTo(new.Parent.Part)
+      end
+      new.DIMENSIONS_CHANGED:invoke(new.Dimensions)
    end)
-
-   -->==========[ Debug ]==========<--
-
-   if config.debug_visible then
-      local debug_container = sprite.new():setModelpart(new.Part):setTexture(textures.outline):setBorderThickness(1,1,1,1):setRenderType("EMISSIVE_SOLID"):setScale(1):setColor(0,1,0):excludeMiddle(true)
-      local debug_margin    = sprite.new():setModelpart(new.Part):setTexture(textures.outline):setBorderThickness(1,1,1,1):setRenderType("EMISSIVE_SOLID"):setScale(1):setColor(1,0,0):excludeMiddle(true)
-      local debug_padding   = sprite.new():setModelpart(new.Part):setTexture(textures.outline):setBorderThickness(1,1,1,1):setRenderType("EMISSIVE_SOLID"):setScale(1):excludeMiddle(true)
-
-      new.DIMENSIONS_CHANGED:register(function ()
-         local contain = new.ContainmentRect
-         local margin = new.Margin
-         local padding = new.Padding
-         debug_padding
-         :setSize(
-            contain.z - contain.x,
-            contain.w - contain.y)
-         :setPos(
-            - contain.x,
-            - contain.y,-0.6)
-         
-         debug_margin
-         :setPos(
-            margin.x + padding.x - contain.x,
-            margin.y + padding.y - contain.y,
-            1)
-         :setSize(
-            (contain.z - contain.x + margin.z + margin.x + padding.x + padding.z),
-            (contain.w - contain.y + margin.w + margin.y + padding.y + padding.w)
-         )
-         debug_container
-         :setPos(
-            padding.x - contain.x,
-            padding.y - contain.y,
-            -0.3)
-         :setSize(
-            (contain.z+padding.x+padding.z - contain.x),
-            (contain.w+padding.y+padding.w - contain.y)
-         )
-      end,config.debug_event_name)
-   end
    return new
 end
 
@@ -916,6 +946,17 @@ function container:setBottomRight(zpos,w)
    local delta = new-old
    self.Dimensions.zw = self.Dimensions.zw + delta
    self.DIMENSIONS_CHANGED:invoke(self,self.Dimensions)
+   return self
+end
+
+---Sets the Cursor position relative to the top left of the container.
+---@param xpos number|Vector2
+---@param y number?
+---@return GNUI.container
+function container:setCursor(xpos,y)
+   self.Cursor = utils.figureOutVec2(xpos,y)
+   self.CURSOR_CHANGED:invoke()
+   self.DIMENSIONS_CHANGED:invoke()
    return self
 end
 
@@ -1033,7 +1074,7 @@ end
 ---@param units number?
 function container:setAnchorLeft(units)
    self.Anchor.x = units or 0
-   self.MARGIN_CHANGED:invoke(self,self.Dimensions)
+   self.DIMENSIONS_CHANGED:invoke(self,self.Dimensions)
    return self
 end
 
@@ -1043,7 +1084,7 @@ end
 ---@param units number?
 function container:setAnchorDown(units)
    self.Anchor.z = units or 0
-   self.MARGIN_CHANGED:invoke(self,self.Dimensions)
+   self.DIMENSIONS_CHANGED:invoke(self,self.Dimensions)
    return self
 end
 
@@ -1053,7 +1094,7 @@ end
 ---@param units number?
 function container:setAnchorRight(units)
    self.Anchor.w = units or 0
-   self.MARGIN_CHANGED:invoke(self,self.Dimensions)
+   self.DIMENSIONS_CHANGED:invoke(self,self.Dimensions)
    return self
 end
 
@@ -1069,7 +1110,7 @@ function container:setAnchor(left,top,right,bottom)
    self.Anchor.y = top    or 0
    self.Anchor.z = right  or 0
    self.Anchor.w = bottom or 0
-   self.MARGIN_CHANGED:invoke(self,self.Dimensions)
+   self.DIMENSIONS_CHANGED:invoke(self,self.Dimensions)
    return self
 end
 
@@ -1085,6 +1126,7 @@ end
 ---@field TEXT_CHANGED EventLib
 ---@field Align Vector2
 ---@field AutoWarp boolean
+---@field FontScale number
 local label = {}
 label.__index = function (t,i)
    return label[i] or container[i]
@@ -1099,6 +1141,7 @@ function label.new(preset)
    new.Align = vectors.vec2()
    new.Words = {}
    new.RenderTasks = {}
+   new.FontScale = 1
 
    new.TEXT_CHANGED:register(function ()
       new
@@ -1119,7 +1162,7 @@ end
 ---@param text string
 ---@return GNUI.Label
 function label:setText(text)
-   self.Text = text
+   self.Text = text or ""
    self.TEXT_CHANGED:invoke(self.Text)
    return self
 end
@@ -1149,6 +1192,14 @@ local function split(input)
    return result
 end
 
+---Sets the font scale for all text thats by this container.
+---@param scale number
+function label:setFontScale(scale)
+   self.FontScale = scale or 1
+   self:_updateRenderTasks()
+   return self
+end
+
 ---print(split("Apple   Bananas\nOranges Your mothEr"))
 
 function label:_bakeWords()
@@ -1171,35 +1222,35 @@ end
 
 function label:_updateRenderTasks()
    if #self.Words == 0 then return end
-   local cursor = vectors.vec2(math.huge,8)
+   local cursor = vectors.vec2(math.huge,8 * self.FontScale)
    local current_line = 1
    local line_len = 0
    local lines = {}
    -- generate lines
    for i, data in pairs(self.Words) do
-      if cursor.x + data.len > self.ContainmentRect.z then -- if over the width of the bounding box
+      if cursor.x + data.len * self.FontScale > self.ContainmentRect.z then -- if over the width of the bounding box
          cursor.x = self.ContainmentRect.x
-         cursor.y = cursor.y - 8
+         cursor.y = cursor.y - 8 * self.FontScale
          
          if current_line ~= 1 then
-            lines[current_line].overall =  line_len - 4
+            lines[current_line].overall =  line_len - 4 * self.FontScale
             line_len = 0
          end
          current_line = current_line + 1
          lines[current_line] = {overall=0,len={}}
       end
       lines[current_line].len[i] = vectors.vec2(-cursor.x,cursor.y)
-      cursor.x = cursor.x + data.len + 4
-      line_len = line_len + data.len + 4
+      cursor.x = cursor.x + (data.len + 4) * self.FontScale
+      line_len = line_len + (data.len + 4) * self.FontScale
    end
-   lines[current_line].overall =  line_len - 4
+   lines[current_line].overall =  line_len - 4 * self.FontScale
    -- place the text
    for key, line in pairs(lines) do
       for id, wlen in pairs(line.len) do
          self.RenderTasks[id]:setPos(
-            wlen.x + (line.overall - (self.ContainmentRect.z - self.ContainmentRect.x)) * self.Align.x,
-            wlen.y + (current_line * 8 - (self.ContainmentRect.w - self.ContainmentRect.y)) * self.Align.y -- - (self.ContainmentRect.w - self.ContainmentRect.y)) * self.Align.y
-         ):setVisible(true)
+            wlen.x + (line.overall - self.ContainmentRect.z + self.ContainmentRect.x) * self.Align.x,
+            wlen.y + ((current_line-1) * 8 * self.FontScale - (self.ContainmentRect.w - self.ContainmentRect.y)) * self.Align.y - self.ContainmentRect.y,
+         -0.1):setScale(self.FontScale,self.FontScale,1):setVisible(true)
       end
    end
    return self
