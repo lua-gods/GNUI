@@ -20,15 +20,26 @@ Et tortor at risus viverra adipiscing at in tellus integer. Elementum sagittis v
 
 local GNUI = require("libraries.GNUI")
 
+--- create theme
+local panel_texture = GNUI.newSprite()
+:setTexture(textures.ui)
+:setUV(0,6,4,10)
+:setBorderThickness(2,2,2,2)
+:setScale(2)
+
+
 --- creates the window
 local window = GNUI.newContainer()
 window.Part:setParentType("HUD")
+window:setSprite(panel_texture)
 
 -- testing features
 local m = 10
 local p  = 5
 window:setMargin(m,m,m,m)
 window:setPadding(p,p,p,p)
+
+
 
 --- resizes it everytime the window resolution changes
 local lwindow_size = vectors.vec2()
@@ -59,10 +70,12 @@ label
 :setAnchor(0,0,.5,1)
 
 
+
 local label2 = GNUI.newLabel()
 window:addChild(label2)
 label2
-:setText(":3")
+:setText("Lmao")
+:setSprite(panel_texture)
 :setAlign(0.5,0.5)
 :setMargin(5,5,5,5)
 :setPadding(10,10,10,10)

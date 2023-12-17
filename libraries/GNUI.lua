@@ -9,10 +9,10 @@ Everything is in one file to make sure it is possible to load this script from a
 allowing me to put as much as I want without worrying about storage space.
 ]]
 
-local main = {}
+local api = {}
 
 local config = {
-   debug_visible = true,
+   debug_visible = false,
    debug_event_name = "_c",
    internal_events_name = "__a",
 }
@@ -21,21 +21,22 @@ local config = {
 local eventLib = {}
 
 ---@class EventLib
-local eventMetatable = {__type = "Event", __index = {}}
-local eventsMetatable = {__index = {}}
+local eventMetatable = { __type = "Event" }
+local eventsMetatable = { __index = {}, __type = "Event" }
 eventMetatable.__index = eventMetatable
-
+eventMetatable.__type = "Event"
 ---@return EventLib
 function eventLib.new()
-   return setmetatable({subscribers = {}}, eventMetatable)
+   return setmetatable({ subscribers = {} }, eventMetatable)
 end
+
 ---@return EventLib
 function eventLib.newEvent()
-   return setmetatable({subscribers = {}}, eventMetatable)
+   return setmetatable({ subscribers = {} }, eventMetatable)
 end
 
 function eventLib.table(tbl)
-   return setmetatable({_table = tbl or {}}, eventsMetatable)
+   return setmetatable({ _table = tbl or {} }, eventsMetatable)
 end
 
 ---Registers an event
@@ -43,9 +44,9 @@ end
 ---@param name string?
 function eventMetatable:register(func, name)
    if name then
-      self.subscribers[name] = {func = func}
+      self.subscribers[name] = { func = func }
    else
-      table.insert(self.subscribers, {func = func})
+      table.insert(self.subscribers, { func = func })
    end
 end
 
@@ -69,7 +70,7 @@ end
 function eventMetatable:__call(...)
    local returnValue = {}
    for _, data in pairs(self.subscribers) do
-      table.insert(returnValue, {data.func(...)})
+      table.insert(returnValue, { data.func(...) })
    end
    return returnValue
 end
@@ -77,7 +78,7 @@ end
 function eventMetatable:invoke(...)
    local returnValue = {}
    for _, data in pairs(self.subscribers) do
-      table.insert(returnValue, {data.func(...)})
+      table.insert(returnValue, { data.func(...) })
    end
    return returnValue
 end
@@ -88,7 +89,9 @@ end
 
 -- events table
 function eventsMetatable.__index(t, i)
-   return t._table[i] or (type(i) == "string" and getmetatable(t._table[i:upper()]) == eventMetatable) and t._table[i:upper()] or nil
+   return t._table[i] or
+   (type(i) == "string" and getmetatable(t._table[i:upper()]) == eventMetatable) and
+   t._table[i:upper()] or nil
 end
 
 function eventsMetatable.__newindex(t, i, v)
@@ -102,6 +105,7 @@ end
 function eventsMetatable.__ipairs(t)
    return ipairs(t._table)
 end
+
 function eventsMetatable.__pairs(t)
    return pairs(t._table)
 end
@@ -180,6 +184,26 @@ function utils.figureOutVec3(posx,y,z)
    end
 end
 
+
+function utils.deepCopy(original)
+	local copy = {}
+   local meta = getmetatable(original)
+   if meta then
+      setmetatable(copy,meta)
+   end
+	for key, value in pairs(original) do
+		if type(value) == "table" then
+			value = utils.deepCopy(value)
+		end
+      
+      if type(value):find("Vector") then
+			value = value:copy()
+		end
+		copy[key] = value
+	end
+	return copy
+end
+
 --#endregion
 
 --#region-->========================================[ Debug ]=========================================<--
@@ -213,24 +237,24 @@ sprite.__index = sprite
 
 local sprite_next_free = 0
 ---@return Sprite
-function sprite.new()
-   local new = {}
+function sprite.new(obj)
+   local new = obj or {}
    setmetatable(new,sprite)
-   new.Texture = debug.texture
+   new.Texture = new.Texture or debug.texture
    new.TEXTURE_CHANGED = eventLib.new()
    new.MODELPART_CHANGED = eventLib.new()
-   new.Position = vectors.vec3()
-   new.UV = vectors.vec4(0,0,1,1)
-   new.Size = vectors.vec2(16,16)
-   new.Color = vectors.vec3(1,1,1)
-   new.Scale = 4
+   new.Position = new.Position or vectors.vec3()
+   new.UV = new.UV or vectors.vec4(0,0,1,1)
+   new.Size = new.Size or vectors.vec2(16,16)
+   new.Color = new.Color or vectors.vec3(1,1,1)
+   new.Scale = new.Scale or 4
    new.DIMENSIONS_CHANGED = eventLib.new()
-   new.RenderTasks = {}
-   new.RenderType = "CUTOUT_CULL"
-   new.BorderThickness = vectors.vec4(0,0,0,0)
+   new.RenderTasks = new.RenderTasks or {}
+   new.RenderType = new.RenderType or "EMISSIVE_SOLID"
+   new.BorderThickness = new.BorderThickness or vectors.vec4(0,0,0,0)
    new.BORDER_THICKNESS_CHANGED = eventLib.new()
-   new.ExcludeMiddle = false
-   new.id = sprite_next_free
+   new.ExcludeMiddle = new.ExcludeMiddle or false
+   new.id = new.id or sprite_next_free
    sprite_next_free = sprite_next_free + 1
    
    new.TEXTURE_CHANGED:register(function ()
@@ -368,14 +392,14 @@ function sprite:setBorderThickness(left,top,right,bottom)
    return self
 end
 
----Sets the UV region of the sprite, a and b are relative to the top left to the bottom right
----@param ax number
----@param ay number
----@param bx number
----@param by number
+---Sets the UV region of the sprite.
+---@param x number
+---@param y number
+---@param width number
+---@param height number
 ---@return Sprite
-function sprite:setUV(ax,ay,bx,by)
-   self.UV = vectors.vec4(ax,ay,bx,by)
+function sprite:setUV(x,y,width,height)
+   self.UV = vectors.vec4(x,y,width,height)
    self.BORDER_THICKNESS_CHANGED:invoke(self.BorderThickness)
    return self
 end
@@ -398,6 +422,17 @@ function sprite:excludeMiddle(toggle)
    return self
 end
 
+function sprite:duplicate()
+   local copy = {}
+   for key, value in pairs(self) do
+      if type(value):find("Vector") then
+         value = value:copy()
+      end
+      copy[key] = value
+   end
+   return sprite.new(copy)
+end
+
 function sprite:_deleteRenderTasks()
    for _, task in pairs(self.RenderTasks) do
       self.Modelpart:removeTask(task:getName())
@@ -406,6 +441,7 @@ function sprite:_deleteRenderTasks()
 end
 
 function sprite:_buildRenderTasks()
+   if not self.Modelpart then return self end
    local b = self.BorderThickness
    self.is_ninepatch = not (b.x == 0 and b.y == 0 and b.z == 0 and b.w == 0)
    if not self.is_ninepatch then -- not 9-Patch
@@ -427,8 +463,9 @@ function sprite:_buildRenderTasks()
 end
 
 function sprite:_updateRenderTasks()
+   if not self.Modelpart then return self end
    local dim = self.Texture:getDimensions()
-   local uv = self.UV:copy()
+   local uv = self.UV:copy():add(0,0,1,1)
    if not self.is_ninepatch then
       self.RenderTasks[1]
       :setTexture(self.Texture)
@@ -440,12 +477,12 @@ function sprite:_updateRenderTasks()
          uv.x,
          uv.y
       ):region(
-         uv.z,
-         uv.w
+         uv.z-uv.x,
+         uv.w-uv.y
       )
    else
-      local border = self.BorderThickness*self.Scale
-      local uvborder = self.BorderThickness
+      local sborder = self.BorderThickness*self.Scale
+      local pxborder = self.BorderThickness
       local pos = self.Position
       local size = self.Size
       local uvsize = vectors.vec2(uv.z-uv.x,uv.w-uv.y)
@@ -460,78 +497,77 @@ function sprite:_updateRenderTasks()
       :setPos(
          pos
       ):setScale(
-         border.x/dim.x,
-         border.y/dim.y
+         sborder.x/dim.x,
+         sborder.y/dim.y
       ):setUVPixels(
          uv.x,
          uv.y
       ):region(
-         uvborder.x,
-         uvborder.y
+         pxborder.x,
+         pxborder.y
       )
       
       self.RenderTasks[2]
       :setPos(
-         pos.x-border.x,
+         pos.x-sborder.x,
          pos.y,
          pos.z
       ):setScale(
-         (size.x-border.z-border.x)/dim.x,
-         border.y/dim.y
+         (size.x-sborder.z-sborder.x)/dim.x,
+         sborder.y/dim.y
       ):setUVPixels(
-         uv.x+uvborder.x,
+         uv.x+pxborder.x,
          uv.y
       ):region(
-         uvsize.x-uvborder.x-uvborder.z,
-         uvborder.y
+         uvsize.x-pxborder.x-pxborder.z,
+         pxborder.y
       )
       self.RenderTasks[3]
       :setPos(
-         pos.x-size.x+border.z,
+         pos.x-size.x+sborder.z,
          pos.y,
          pos.z
       ):setScale(
-         border.z/dim.x,border.y/dim.y
+         sborder.z/dim.x,sborder.y/dim.y
       ):setUVPixels(
-         uv.z-uvborder.z,
+         uv.z-pxborder.z,
          uv.y
       ):region(
-         uvborder.z,
-         uvborder.y
+         pxborder.z,
+         pxborder.y
       )
-
       self.RenderTasks[4]
       :setPos(
          pos.x,
-         pos.y-border.y,
+         pos.y-sborder.y,
          pos.z
       )
       :setScale(
-         border.x/dim.x,
-         (size.y-border.y-border.w)/dim.y
+         sborder.x/dim.x,
+         (size.y-sborder.y-sborder.w)/dim.y
       ):setUVPixels(
          uv.x,
-         uv.y+uvborder.y
+         uv.y+pxborder.y
       ):region(
-         uvborder.x,
-         uvsize.y-uvborder.y-uvborder.w
+         pxborder.x,
+         uvsize.y-pxborder.y-pxborder.w
       )
-      if self.ExcludeMiddle then
+      if not self.ExcludeMiddle then
          self.RenderTasks[5]
          :setPos(
-            pos.x-border.x,
-            pos.y-border.y,
+            pos.x-sborder.x,
+            pos.y-sborder.y,
             pos.z
          )
          :setScale(
-            (size.x-border.x-border.z)/dim.x,
-            (size.y-border.y-border.w)/dim.y
+            (size.x-sborder.x-sborder.z)/dim.x,
+            (size.y-sborder.y-sborder.w)/dim.y
          ):setUVPixels(
-            uv.x+uvborder.x,
-            uv.y+uvborder.y
+            uv.x+pxborder.x,
+            uv.y+pxborder.y
          ):region(
-            uvsize.x-uvborder.x-uvborder.z,
-            uvsize.y-uvborder.y-uvborder.w
+            uvsize.x-pxborder.x-pxborder.z,
+            uvsize.y-pxborder.y-pxborder.w
          ):setVisible(true)
       else
          self.RenderTasks[5]:setVisible(false)
@@ -539,71 +575,71 @@ function sprite:_updateRenderTasks()
 
       self.RenderTasks[6]
       :setPos(
-         pos.x-size.x+border.z,
-         pos.y-border.y,
+         pos.x-size.x+sborder.z,
+         pos.y-sborder.y,
          pos.z
       )
       :setScale(
-         border.z/dim.x,
-         (size.y-border.y-border.w)/dim.y
+         sborder.z/dim.x,
+         (size.y-sborder.y-sborder.w)/dim.y
       ):setUVPixels(
-         uv.z-uvborder.z,
-         uv.y+uvborder.y
+         uv.z-pxborder.z,
+         uv.y+pxborder.y
       ):region(
-         uvborder.z,
-         uvsize.y-uvborder.y-uvborder.w
+         pxborder.z,
+         uvsize.y-pxborder.y-pxborder.w
       )
       
       
       self.RenderTasks[7]
       :setPos(
          pos.x,
-         pos.y-size.y+border.w,
+         pos.y-size.y+sborder.w,
          pos.z
       )
       :setScale(
-         border.x/dim.x,
-         border.w/dim.y
+         sborder.x/dim.x,
+         sborder.w/dim.y
       ):setUVPixels(
          uv.x,
-         uv.w-uvborder.w
+         uv.w-pxborder.w
       ):region(
-         uvborder.x,
-         uvborder.w
+         pxborder.x,
+         pxborder.w
       )
 
       self.RenderTasks[8]
       :setPos(
-         pos.x-border.x,
-         pos.y-size.y+border.w,
+         pos.x-sborder.x,
+         pos.y-size.y+sborder.w,
          pos.z
       )
       :setScale(
-         (size.x-border.z-border.x)/dim.x,
-         border.w/dim.y
+         (size.x-sborder.z-sborder.x)/dim.x,
+         sborder.w/dim.y
       ):setUVPixels(
-         uv.x+uvborder.x,
-         uv.w-uvborder.w
+         uv.x+pxborder.x,
+         uv.w-pxborder.w
       ):region(
-         uvsize.x-uvborder.x-uvborder.z,
-         uvborder.w
+         uvsize.x-pxborder.x-pxborder.z,
+         pxborder.w
       )
 
       self.RenderTasks[9]
       :setPos(
-         pos.x-size.x+border.z,
-         pos.y-size.y+border.w,
+         pos.x-size.x+sborder.z,
+         pos.y-size.y+sborder.w,
          pos.z
       )
       :setScale(
-         border.z/dim.x,
-         border.w/dim.y
+         sborder.z/dim.x,
+         sborder.w/dim.y
       ):setUVPixels(
-         uv.z-uvborder.z,
-         uv.w-uvborder.w
+         uv.z-pxborder.z,
+         uv.w-pxborder.w
       ):region(
-         uvborder.z,
-         uvborder.w
+         pxborder.z,
+         pxborder.w
       )
    end
 end
@@ -703,6 +739,8 @@ end
 ---@field PADDING_CHANGED EventLib
 ---@field Anchor Vector4
 ---@field ANCHOR_CHANGED EventLib
+---@field Sprite Sprite
+---@field SPRITE_CHANGED EventLib
 ---@field Part ModelPart
 local container = {}
 container.__index = function (t,i)
@@ -726,6 +764,8 @@ function container.new(preset)
    new.Anchor = vectors.vec4(0,0,1,1)
    new.ANCHOR_CHANGED = eventLib.new()
    new.Part = models:newPart("container"..new.id)
+   new.SPRITE_CHANGED = eventLib.new()
+   new.Sprite = nil
 
    -->==========[ Internals ]==========<--
 
@@ -756,6 +796,19 @@ function container.new(preset)
             value.DIMENSIONS_CHANGED:invoke(value.DIMENSIONS_CHANGED)
          end
       end
+      if new.Sprite then
+         local contain = new.ContainmentRect
+         local padding = new.Padding
+         new.Sprite
+            :setPos(
+               padding.x - contain.x,
+               padding.y - contain.y,
+               -0.3)
+            :setSize(
+               (contain.z+padding.x+padding.z - contain.x),
+               (contain.w+padding.y+padding.w - contain.y)
+            )
+      end
    end,config.internal_events_name)
 
    new.MARGIN_CHANGED:register(function ()
@@ -773,9 +826,9 @@ function container.new(preset)
    -->==========[ Debug ]==========<--
 
    if config.debug_visible then
-      local debug_container = sprite.new():setModelpart(new.Part):setTexture(textures.outline):setBorderThickness(1,1,1,1):setRenderType("EMISSIVE_SOLID"):setScale(1):setColor(0,1,0)
-      local debug_margin    = sprite.new():setModelpart(new.Part):setTexture(textures.outline):setBorderThickness(1,1,1,1):setRenderType("EMISSIVE_SOLID"):setScale(1):setColor(1,0,0)
-      local debug_padding   = sprite.new():setModelpart(new.Part):setTexture(textures.outline):setBorderThickness(1,1,1,1):setRenderType("EMISSIVE_SOLID"):setScale(1) -- :setColor(0,1,0)
+      local debug_container = sprite.new():setModelpart(new.Part):setTexture(textures.outline):setBorderThickness(1,1,1,1):setRenderType("EMISSIVE_SOLID"):setScale(1):setColor(0,1,0):excludeMiddle(true)
+      local debug_margin    = sprite.new():setModelpart(new.Part):setTexture(textures.outline):setBorderThickness(1,1,1,1):setRenderType("EMISSIVE_SOLID"):setScale(1):setColor(1,0,0):excludeMiddle(true)
+      local debug_padding   = sprite.new():setModelpart(new.Part):setTexture(textures.outline):setBorderThickness(1,1,1,1):setRenderType("EMISSIVE_SOLID"):setScale(1):excludeMiddle(true)
 
       new.DIMENSIONS_CHANGED:register(function ()
          local contain = new.ContainmentRect
@@ -796,7 +849,8 @@ function container.new(preset)
             1)
          :setSize(
             (contain.z - contain.x + margin.z + margin.x + padding.x + padding.z),
-            (contain.w - contain.y + margin.w + margin.y + padding.y + padding.w),1)
+            (contain.w - contain.y + margin.w + margin.y + padding.y + padding.w)
+         )
          debug_container
          :setPos(
             padding.x - contain.x,
@@ -804,10 +858,23 @@ function container.new(preset)
             -0.3)
          :setSize(
             (contain.z+padding.x+padding.z - contain.x),
-            (contain.w+padding.y+padding.w - contain.y),1)
+            (contain.w+padding.y+padding.w - contain.y)
+         )
       end,config.debug_event_name)
    end
    return new
+end
+
+
+---Sets the backdrop of the container.  
+---note: the object dosent get applied directly, its duplicated and the clone is used instead of the original.
+---@param sprite_obj Sprite
+---@return GNUI.container
+function container:setSprite(sprite_obj)
+   self.Sprite = sprite_obj:duplicate()
+   self.Sprite:setModelpart(self.Part)
+   self.SPRITE_CHANGED:invoke()
+   return self
 end
 
 -->====================[ Dimensions ]====================<--
@@ -1070,24 +1137,19 @@ function label:setAlign(horizontal,vertical)
    return self
 end
 
-local function split(inputString)
+local function split(input)
    local result = {}
-   local pattern = "([^ \t\v\f\r\n]+)([ \t\v\f\r]+)([\n]*)"
-   for nonWhitespace, whitespace, newline in inputString:gmatch(pattern) do
-      if nonWhitespace ~= "" then
-         table.insert(result, nonWhitespace)
+   for line in input:gmatch('[^\n]+') do
+      for text, space in line:gmatch('([^%s]+)(%s*)') do
+         table.insert(result, text)
+         table.insert(result, #space)
       end
-      if whitespace ~= "" then
-         table.insert(result, #whitespace)
-      end
-      if newline ~= "" then
-         table.insert(result, true)
-      end
+      table.insert(result, true)
    end
    return result
 end
 
---print(split("Apple  Bananas\nOranges Your mothEr"))
+---print(split("Apple   Bananas\nOranges Your mothEr"))
 
 function label:_bakeWords()
    self.Words = {}
@@ -1151,7 +1213,8 @@ function label:_deleteRenderTasks()
 end
 
 
-main.newContainer = container.new
-main.newLabel = label.new
-main.utils = utils
-return main
+api.newContainer = container.new
+api.newLabel = label.new
+api.utils = utils
+api.newSprite = sprite.new
+return api
