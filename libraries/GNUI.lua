@@ -1271,33 +1271,35 @@ function label:_updateRenderTasks()
    lines[current_line] = {width=0,len={}}
    -- generate lines
    for i, data in pairs(self.Words) do
+      --- calculate where the next word should be placed
+      local data_type = type(data)
+      local current_word_width
+      if data_type == "table" then -- word
+         current_word_width = data.len * self.FontScale
+         cursor.x = cursor.x + current_word_width
+         line_len = line_len + current_word_width
+      elseif data_type == "number" then
+         current_word_width = data * self.FontScale
+         cursor.x = cursor.x + current_word_width
+         line_len = line_len + current_word_width
+      elseif data_type == "boolean" then
+         cursor.x = math.huge
+      end
+
       -- inside bounds verification
       if cursor.x > self.ContainmentRect.z then
          -- reset cursor
-         cursor.x = self.ContainmentRect.x
+         cursor.x = self.ContainmentRect.x + current_word_width
          cursor.y = cursor.y - 8 * self.FontScale
          
          -- finalize data on next line
-         lines[current_line].width = line_len - 4 * self.FontScale
+         lines[current_line].width = line_len * self.FontScale
          line_len = 0
          current_line = current_line + 1
          lines[current_line] = {width=0,len={}}
-
       end
-
-      --- append instructions to the lines table
-      local data_type = type(data)
-      if data_type == "table" then -- word
-         lines[current_line].len[i] = vectors.vec2(-cursor.x,cursor.y)
-         local width = data.len * self.FontScale
-         cursor.x = cursor.x + width
-         line_len = line_len + width
-      elseif data_type == "number" then
-         local width = data * self.FontScale
-         cursor.x = cursor.x + width
-         line_len = line_len + width
-      elseif data_type == "boolean" then
-         cursor.x = math.huge
+      if data_type == "table" then
+         lines[current_line].len[i] = vectors.vec2(-cursor.x + current_word_width,cursor.y) -- tells where the text should be positioned
       end
    end
 

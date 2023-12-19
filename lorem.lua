@@ -7,4 +7,4 @@ Cursus vitae congue mauris rhoncus. Bibendum neque egestas congue quisque egesta
 Sit amet risus nullam eget felis. Aliquam vestibulum morbi blandit cursus risus at ultrices mi. 
 Vulputate enim nulla aliquet porttitor lacus luctus accumsan. Purus sit amet luctus venenatis. 
 Morbi quis commodo odio aenean sed. Nunc id cursus metus aliquam eleifend mi in nulla. 
-Et tortor at risus viverra adipiscing at in tellus integer. Elementum sagittis vitae et leo duis ut diam.]])
+Et tortor at risus viverra adipiscing at in tellus integer. Elementum sagittis vitae et leo duis ut diam.]]):gsub("\n","")

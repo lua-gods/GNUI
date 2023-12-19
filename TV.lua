@@ -65,7 +65,7 @@ events.WORLD_RENDER:register(function (dt)
    --   math.cos(time*0.25)*0.1 + 0.1,math.sin(time*0.23)*0.1 + 0.1,
    --   math.cos(time*0.23)*0.1 + 0.9,math.sin(time*0.21)*0.1 + 0.9
    --)
-   --label:setFontScale(math.sin(time * 0.1) * 0.1 + 0.25)
+   label:setFontScale(math.abs((time * 0.1) % 2 - 1)*0.1 + 0.2)
    --:setAlign(math.abs((time * 0.05) % 2 - 1),math.abs((time * 0.0513513) % 2 - 1))
    if world_cursor then
       local local_cursor = vectors.vec2(
