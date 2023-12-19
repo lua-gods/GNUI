@@ -72,7 +72,7 @@ events.WORLD_RENDER:register(function (dt)
          origin.y-world_cursor.y+size.y
       ) * 16 - window.Padding.xy
       
-      window:setCursor(local_cursor.x,local_cursor.y)
+      --window:setCursor(local_cursor.x,local_cursor.y)
    end
 end)
 

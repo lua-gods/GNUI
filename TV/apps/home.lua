@@ -43,33 +43,29 @@ local week = {
    "Saturday",
 }
 
-local shifts = {}
-
-for y = 0, 9, 1 do
-   for x = 0, 5, 1 do
-      shifts[#shifts+1] = vectors.vec2(x * 320,y * 180)
-   end
-end
-
-local frame = 1
-function app.FRAME(window,delta)
+local last_minute = 0
+function app.FRAME(window,delta,dt)
    local date = client:getDate()
-   local time = world.getTimeOfDay() % 24000
-   local hour = math.floor(time / 1000 + 6) % 24
-   local minute = math.floor((time / 1000) % 1 * 60)
-   
-   clock_label:setText((date.hour%12)..":"..date.minute .. (date.hour > 12 and "pm" or "am"))
-   date_label:setText(week[date.week_day]..", "..date.month_name.." "..date.day .. " ".. date.year)
-   info_label:setText(date.timezone_name)
-   frame = (frame) % #shifts + 0.5
-   local uv = shifts[math.max(math.floor(frame),1)]
-   wallpaper:setUV(uv.x,uv.y,uv.x + 319,uv.y + 179)
+   if last_minute ~= date.minute then
+      last_minute = date.minute
+      local time = world.getTimeOfDay() % 24000
+      local hour = math.floor(time / 1000 + 6) % 24
+      local minute = math.floor((time / 1000) % 1 * 60)
+      
+      clock_label:setText((date.hour%12)..":"..(#tostring(date.minute) == 1 and "0" .. date.minute or date.minute) .. (date.hour > 12 and "pm" or "am"))
+      date_label:setText(week[date.week_day]..", "..date.month_name.." "..date.day .. " ".. date.year)
+      info_label:setText(date.timezone_name)
+   end
+   --time = time * 0.01
+   --local dim = textures.wallpaper:getDimensions()
+   --wallpaper:setUV(math.sin(time) * 5,0,math.sin(time) * 5 + dim.x - 6,dim.y-1)
 end
 
 function app.CLOSE(window)
    window:removeChild(clock_label)
    window:removeChild(date_label)
    window:removeChild(info_label)
+   
 end
 
 return app, "home", "Home"
