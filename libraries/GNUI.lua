@@ -756,6 +756,9 @@ end
 ---@field SPRITE_CHANGED EventLib
 ---@field Cursor Vector2?
 ---@field CURSOR_CHANGED EventLib
+---@field Hovering boolean
+---@field MOUSE_ENTERED EventLib
+---@field MOUSE_EXITED EventLib
 ---@field Part ModelPart
 local container = {}
 container.__index = function (t,i)
@@ -767,23 +770,26 @@ container.__type = "GNUI.element.container"
 ---Creates a new container.
 ---@param preset GNUI.container?
 function container.new(preset)
-   local new = preset or element.new()
-   setmetatable(new,container)
-   new.Dimensions = vectors.vec4(0,0,0,0) 
-   new.DIMENSIONS_CHANGED = eventLib.new()
-   new.Margin = vectors.vec4()
-   new.ContainmentRect = vectors.vec4() -- Dimensions but with margins and anchored applied
-   new.MARGIN_CHANGED = eventLib.new()
-   new.Padding = vectors.vec4()
-   new.PADDING_CHANGED = eventLib.new()
-   new.Anchor = vectors.vec4(0,0,1,1)
-   new.ANCHOR_CHANGED = eventLib.new()
-   new.Part = models:newPart("container"..new.id)
-   models:removeChild(new.Part)
-   new.Cursor = vectors.vec2() -- in local space
-   new.CURSOR_CHANGED = eventLib.new()
-   new.SPRITE_CHANGED = eventLib.new()
-   new.Sprite = nil
+   local self = preset or element.new()
+   setmetatable(self,container)
+   self.Dimensions = vectors.vec4(0,0,0,0) 
+   self.DIMENSIONS_CHANGED = eventLib.new()
+   self.Margin = vectors.vec4()
+   self.ContainmentRect = vectors.vec4() -- Dimensions but with margins and anchored applied
+   self.MARGIN_CHANGED = eventLib.new()
+   self.Padding = vectors.vec4()
+   self.PADDING_CHANGED = eventLib.new()
+   self.Anchor = vectors.vec4(0,0,1,1)
+   self.ANCHOR_CHANGED = eventLib.new()
+   self.Part = models:newPart("container"..self.id)
+   models:removeChild(self.Part)
+   self.Cursor = vectors.vec2() -- in local space
+   self.CURSOR_CHANGED = eventLib.new()
+   self.SPRITE_CHANGED = eventLib.new()
+   self.Hovering = false
+   self.MOUSE_ENTERED = eventLib.new()
+   self.MOUSE_EXITED = eventLib.new()
+   self.Sprite = nil
 
    -->==========[ Internals ]==========<--
    local debug_container 
@@ -791,45 +797,47 @@ function container.new(preset)
    local debug_padding   
    local debug_cursor
    if config.debug_visible then
-      debug_container = sprite.new():setModelpart(new.Part):setTexture(textures.outline):setBorderThickness(1,1,1,1):setRenderType("EMISSIVE_SOLID"):setScale(config.debug_scale):setColor(0,1,0):excludeMiddle(true)
-      debug_margin    = sprite.new():setModelpart(new.Part):setTexture(textures.outline):setBorderThickness(1,1,1,1):setRenderType("EMISSIVE_SOLID"):setScale(config.debug_scale):setColor(1,0,0):excludeMiddle(true)
-      debug_padding   = sprite.new():setModelpart(new.Part):setTexture(textures.outline):setBorderThickness(1,1,1,1):setRenderType("EMISSIVE_SOLID"):setScale(config.debug_scale):excludeMiddle(true)
-      debug_cursor   = sprite.new():setModelpart(new.Part):setTexture(textures.ui):setUV(6,23,6,23):setRenderType("EMISSIVE_SOLID"):setSize(1,1)
+      debug_container = sprite.new():setModelpart(self.Part):setTexture(textures.outline):setBorderThickness(1,1,1,1):setRenderType("EMISSIVE_SOLID"):setScale(config.debug_scale):setColor(0,1,0):excludeMiddle(true)
+      debug_margin    = sprite.new():setModelpart(self.Part):setTexture(textures.outline):setBorderThickness(1,1,1,1):setRenderType("EMISSIVE_SOLID"):setScale(config.debug_scale):setColor(1,0,0):excludeMiddle(true)
+      debug_padding   = sprite.new():setModelpart(self.Part):setTexture(textures.outline):setBorderThickness(1,1,1,1):setRenderType("EMISSIVE_SOLID"):setScale(config.debug_scale):excludeMiddle(true)
+      debug_cursor   = sprite.new():setModelpart(self.Part):setTexture(textures.ui):setUV(6,23,6,23):setRenderType("EMISSIVE_SOLID"):setSize(1,1)
    end
 
-   new.DIMENSIONS_CHANGED:register(function ()
-      new.ContainmentRect = vectors.vec4(0,0,
-         (new.Dimensions.z - new.Padding.x - new.Padding.z - new.Margin.x - new.Margin.z),
-         (new.Dimensions.w - new.Padding.y - new.Padding.w - new.Margin.y - new.Margin.w)
+   self.DIMENSIONS_CHANGED:register(function ()
+      -- generate the containment rect
+      self.ContainmentRect = vectors.vec4(0,0,
+         (self.Dimensions.z - self.Padding.x - self.Padding.z - self.Margin.x - self.Margin.z),
+         (self.Dimensions.w - self.Padding.y - self.Padding.w - self.Margin.y - self.Margin.w)
       )
-      if new.Parent and new.Parent.ContainmentRect then
-         local p = new.Parent.ContainmentRect
+      -- adjust based on parent if this has one
+      if self.Parent and self.Parent.ContainmentRect then 
+         local p = self.Parent.ContainmentRect
          local o = vectors.vec4(
-            math.lerp(p.x,p.z,new.Anchor.x),
-            math.lerp(p.y,p.w,new.Anchor.y),
-            math.lerp(p.x,p.z,new.Anchor.z),
-            math.lerp(p.y,p.w,new.Anchor.w)
+            math.lerp(p.x,p.z,self.Anchor.x),
+            math.lerp(p.y,p.w,self.Anchor.y),
+            math.lerp(p.x,p.z,self.Anchor.z),
+            math.lerp(p.y,p.w,self.Anchor.w)
          )
-         new.ContainmentRect.x = new.ContainmentRect.y + o.x
-         new.ContainmentRect.y = new.ContainmentRect.y + o.y
-         new.ContainmentRect.z = new.ContainmentRect.z + o.z
-         new.ContainmentRect.w = new.ContainmentRect.w + o.w
+         self.ContainmentRect.x = self.ContainmentRect.y + o.x
+         self.ContainmentRect.y = self.ContainmentRect.y + o.y
+         self.ContainmentRect.z = self.ContainmentRect.z + o.z
+         self.ContainmentRect.w = self.ContainmentRect.w + o.w
       end
-      new.Part
+      self.Part
       :setPos(
-         -new.Dimensions.x-new.Margin.x-new.Padding.x,
-         -new.Dimensions.y-new.Margin.y-new.Padding.y,
+         -self.Dimensions.x-self.Margin.x-self.Padding.x,
+         -self.Dimensions.y-self.Margin.y-self.Padding.y,
          -config.clipping_margin
       )
-      for key, value in pairs(new.Children) do
+      for key, value in pairs(self.Children) do
          if value.DIMENSIONS_CHANGED then
             value.DIMENSIONS_CHANGED:invoke(value.DIMENSIONS_CHANGED)
          end
       end
-      if new.Sprite then
-         local contain = new.ContainmentRect
-         local padding = new.Padding
-         new.Sprite
+      if self.Sprite then
+         local contain = self.ContainmentRect
+         local padding = self.Padding
+         self.Sprite
             :setPos(
                padding.x - contain.x,
                padding.y - contain.y,
@@ -840,15 +848,15 @@ function container.new(preset)
             )
       end
       if config.debug_visible then
-         local contain = new.ContainmentRect
-         local margin = new.Margin
-         local padding = new.Padding
+         local contain = self.ContainmentRect
+         local margin = self.Margin
+         local padding = self.Padding
 
          -- Display the cursor in local space
-         if new.Cursor then
+         if self.Hovering then
             debug_cursor:setPos(
-               -new.Cursor.x + new.Padding.x - new.ContainmentRect.x,
-               -new.Cursor.y + new.Padding.y - new.ContainmentRect.y,
+               -self.Cursor.x - self.ContainmentRect.x,
+               -self.Cursor.y - self.ContainmentRect.y,
                -config.clipping_margin * 0.8
             ):setVisible(true)
          else
@@ -883,30 +891,21 @@ function container.new(preset)
       end
    end,config.internal_events_name)
 
-   new.CURSOR_CHANGED:register(function ()
-      for i, child in pairs(new.Children) do
-         child:setCursor(
-            new.Cursor.x-new.ContainmentRect.x*16,
-            new.Cursor.y
-         )
-      end
-   end)
-
-   new.MARGIN_CHANGED:register(function ()
-      new.DIMENSIONS_CHANGED:invoke(new.Dimensions)
+   self.MARGIN_CHANGED:register(function ()
+      self.DIMENSIONS_CHANGED:invoke(self.Dimensions)
    end,config.internal_events_name)
 
-   new.PADDING_CHANGED:register(function ()
-      new.DIMENSIONS_CHANGED:invoke(new.Dimensions)
+   self.PADDING_CHANGED:register(function ()
+      self.DIMENSIONS_CHANGED:invoke(self.Dimensions)
    end,config.internal_events_name)
 
-   new.PARENT_CHANGED:register(function ()
-      if new.Parent then
-         new.Part:moveTo(new.Parent.Part)
+   self.PARENT_CHANGED:register(function ()
+      if self.Parent then
+         self.Part:moveTo(self.Parent.Part)
       end
-      new.DIMENSIONS_CHANGED:invoke(new.Dimensions)
+      self.DIMENSIONS_CHANGED:invoke(self.Dimensions)
    end)
-   return new
+   return self
 end
 
 
@@ -968,9 +967,25 @@ end
 ---@param y number?
 ---@return GNUI.container
 function container:setCursor(xpos,y)
-   self.Cursor = utils.figureOutVec2(xpos,y)
-   self.CURSOR_CHANGED:invoke()
-   self.DIMENSIONS_CHANGED:invoke()
+   local new = utils.figureOutVec2(xpos,y)
+   local lhovering = self.Hovering
+   self.Hovering = (new.x > 0 and new.y > 0 and new.x < self.ContainmentRect.z and new.y < self.ContainmentRect.w)
+   self.Cursor = new
+   if self.Hovering ~= lhovering then
+      if self.Hovering then
+         self.MOUSE_ENTERED:invoke()
+      else
+         self.MOUSE_EXITED:invoke()
+      end
+   end
+   for i, child in pairs(self.Children) do
+      child:setCursor(
+         self.Cursor.x-child.ContainmentRect.x-child.Margin.x-child.Padding.x,
+         self.Cursor.y-child.ContainmentRect.y-child.Margin.y-child.Padding.y
+      )
+   end
+   self.DIMENSIONS_CHANGED:invoke(self.Dimensions)
+   self.CURSOR_CHANGED:invoke(new)
    return self
 end
 
