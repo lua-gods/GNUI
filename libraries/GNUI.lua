@@ -208,6 +208,36 @@ function utils.deepCopy(original)
 	return copy
 end
 
+---Splits a string into instructions on how to split this.  
+---{word:string,len:number} = word  
+---number = whitespace  
+---boolean = line break  
+---@param text string
+function utils.string2instructions(text)
+   local instructions = {}
+   for line in text:gmatch('[^\n]+') do
+      for word,white in line:gmatch("([^%s]+)(%s*)") do
+         if #word > 0 then
+            table.insert(instructions,{word=word,len=client.getTextWidth(word)})
+         end
+         table.insert(instructions,client.getTextWidth(white))
+      end
+      if type(instructions[#instructions]) == "number" then -- remove excess whitespace
+         instructions[#instructions] = nil
+      end
+      table.insert(instructions,true)
+   end
+
+   -- remove excess data
+   for _ = 1, 2, 1 do
+      local last_type = type(instructions[#instructions])
+      if last_type == "boolean" or last_type == "number" then
+         instructions[#instructions] = nil -- remove last whitespace
+      end
+   end
+   return instructions
+end
+
 --#endregion
 
 --#region-->========================================[ Debug ]=========================================<--
@@ -1209,18 +1239,6 @@ function label:setAlign(horizontal,vertical)
    return self
 end
 
-local function split(input)
-   local result = {}
-   for line in input:gmatch('[^\n]+') do
-      for text, space in line:gmatch('([^%s]+)(%s*)') do
-         table.insert(result, text)
-         table.insert(result, #space)
-      end
-      table.insert(result, true)
-   end
-   return result
-end
-
 ---Sets the font scale for all text thats by this container.
 ---@param scale number
 function label:setFontScale(scale)
@@ -1229,57 +1247,73 @@ function label:setFontScale(scale)
    return self
 end
 
----print(split("Apple   Bananas\nOranges Your mothEr"))
-
 function label:_bakeWords()
-   self.Words = {}
-   local i = 0
-   
-   for word in string.gmatch(self.Text,"%S+") do
-      i = i + 1
-      self.Words[i] = {word = word,len=client.getTextWidth(word)}
-   end
+   self.Words = utils.string2instructions(self.Text)
    return self
 end
 
 function label:_buildRenderTasks()
    for i, data in pairs(self.Words) do
-      self.RenderTasks[i] = self.Part:newText("word" .. i):setText(data.word)
+      if type(data) == "table" then
+         self.RenderTasks[i] = self.Part:newText("word" .. i):setText(data.word)   
+      end
    end
    return self
 end
 
 function label:_updateRenderTasks()
    if #self.Words == 0 then return end
-   local cursor = vectors.vec2(math.huge,8 * self.FontScale)
+   local cursor = vectors.vec2(self.ContainmentRect.x,0)
    local current_line = 1
    local line_len = 0
    local lines = {}
+   
+   lines[current_line] = {width=0,len={}}
    -- generate lines
    for i, data in pairs(self.Words) do
-      if cursor.x + data.len * self.FontScale > self.ContainmentRect.z then -- if over the width of the bounding box
+      -- inside bounds verification
+      if cursor.x > self.ContainmentRect.z then
+         -- reset cursor
          cursor.x = self.ContainmentRect.x
          cursor.y = cursor.y - 8 * self.FontScale
          
-         if current_line ~= 1 then
-            lines[current_line].overall =  line_len - 4 * self.FontScale
-            line_len = 0
-         end
+         -- finalize data on next line
+         lines[current_line].width = line_len - 4 * self.FontScale
+         line_len = 0
          current_line = current_line + 1
-         lines[current_line] = {overall=0,len={}}
+         lines[current_line] = {width=0,len={}}
+
       end
-      lines[current_line].len[i] = vectors.vec2(-cursor.x,cursor.y)
-      cursor.x = cursor.x + (data.len + 4) * self.FontScale
-      line_len = line_len + (data.len + 4) * self.FontScale
+
+      --- append instructions to the lines table
+      local data_type = type(data)
+      if data_type == "table" then -- word
+         lines[current_line].len[i] = vectors.vec2(-cursor.x,cursor.y)
+         local width = data.len * self.FontScale
+         cursor.x = cursor.x + width
+         line_len = line_len + width
+      elseif data_type == "number" then
+         local width = data * self.FontScale
+         cursor.x = cursor.x + width
+         line_len = line_len + width
+      elseif data_type == "boolean" then
+         cursor.x = math.huge
+      end
    end
-   lines[current_line].overall =  line_len - 4 * self.FontScale
-   -- place the text
+
+   --- finalize last line
+   lines[current_line].width =  line_len - 4 * self.FontScale
+
+   -- place render tasks
    for key, line in pairs(lines) do
-      for id, wlen in pairs(line.len) do
-         self.RenderTasks[id]:setPos(
-            wlen.x + (line.overall - self.ContainmentRect.z + self.ContainmentRect.x) * self.Align.x,
-            wlen.y + ((current_line-1) * 8 * self.FontScale - (self.ContainmentRect.w - self.ContainmentRect.y)) * self.Align.y - self.ContainmentRect.y,
-         -0.1):setScale(self.FontScale,self.FontScale,1):setVisible(true)
+      for id, word_length in pairs(line.len) do
+         self.RenderTasks[id]
+         :setPos(
+            word_length.x + (line.width - self.ContainmentRect.z + self.ContainmentRect.x) * self.Align.x,
+            word_length.y + ((current_line-1) * 8 * self.FontScale - (self.ContainmentRect.w - self.ContainmentRect.y)) * self.Align.y - self.ContainmentRect.y,
+         -0.1)
+         :setScale(self.FontScale,self.FontScale,1)
+         :setVisible(true)
       end
    end
    return self
