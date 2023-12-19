@@ -18,7 +18,7 @@ Vulputate enim nulla aliquet porttitor lacus luctus accumsan. Purus sit amet luc
 Morbi quis commodo odio aenean sed. Nunc id cursus metus aliquam eleifend mi in nulla. 
 Et tortor at risus viverra adipiscing at in tellus integer. Elementum sagittis vitae et leo duis ut diam.]]):gsub("\n",""))
 
-local GNUI = require("libraries.GNUI")
+local GNUI = require("libraries.FiGUI")
 
 --- create theme
 local panel_texture = GNUI.newSprite()

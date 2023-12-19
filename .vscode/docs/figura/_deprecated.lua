@@ -456,26 +456,6 @@ ClientAPI.setTitle = nil
 ---@deprecated [[Replace with "host:setTitleTimes()"]]
 ClientAPI.setTitleTimes = nil
 
-
----==============================================================================================---
----  DATA                                                                                        ---
----==============================================================================================---
-
----@type «deprecated»
----`data` is deprecated. Replace the following:
----* `data.getName()` with `config:getName()`
----* `data.setName()` with `config:setName()`
----* `data.load()` and `data.loadAll()` with `config:load()`
----* `data.save()` and `data.remove()` with `config:save()`
----
----The following do not have a replacement:
----* `data.allowTracking()`
----* `data.deleteFile()`
----* `data.hasTracking()`
----@deprecated [[Complex, hover for more info]]
-data = nil
-
-
 ---==============================================================================================---
 ---  ENTITY                                                                                      ---
 ---==============================================================================================---

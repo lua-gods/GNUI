@@ -1,0 +1,146 @@
+---@meta _
+
+---@class InputStream
+---@field available fun(self: InputStream): integer
+---@field close fun(self: InputStream)
+---@field mark fun(self: InputStream, readlimit: integer)
+---@field markSupported fun(self: InputStream): boolean
+---@field read fun(self: InputStream): integer
+---@field readBase64 fun(self: InputStream, length?: integer): string
+---@field readByteArray fun(self: InputStream, length?: integer): string
+---@field readDouble fun(self: InputStream): number
+---@field readDoubleLE fun(self: InputStream): number
+---@field readFloat fun(self: InputStream): number
+---@field readFloatLE fun(self: InputStream): number
+---@field readInt fun(self: InputStream): integer
+---@field readIntLE fun(self: InputStream): integer
+---@field readLong fun(self: InputStream): integer
+---@field readLongLE fun(self: InputStream): integer
+---@field readShort fun(self: InputStream): integer
+---@field readShortLE fun(self: InputStream): integer
+---@field readString fun(self: InputStream, length?: integer): string
+---@field readUShort fun(self: InputStream): integer
+---@field readUShortLE fun(self: InputStream): integer
+---@field reset fun(self: InputStream)
+---@field skip fun(self: InputStream, n: integer): integer
+---@field transferTo fun(self: InputStream, out: OutputStream): integer
+
+---@class OutputStream
+---@field close fun(self: OutputStream)
+---@field flush fun(self: OutputStream)
+---@field write fun(self: OutputStream, b: integer)
+---@field writeBase64 fun(self: OutputStream, s: string)
+---@field writeByteArray fun(self: OutputStream, s: string)
+---@field writeDouble fun(self: OutputStream, v: number)
+---@field writeDoubleLE fun(self: OutputStream, v: number)
+---@field writeFloat fun(self: OutputStream, v: number)
+---@field writeFloatLE fun(self: OutputStream, v: number)
+---@field writeInt fun(self: OutputStream, v: integer)
+---@field writeIntLE fun(self: OutputStream, v: integer)
+---@field writeLong fun(self: OutputStream, v: integer)
+---@field writeLongLE fun(self: OutputStream, v: integer)
+---@field writeShort fun(self: OutputStream, v: integer)
+---@field writeShortLE fun(self: OutputStream, v: integer)
+---@field writeString fun(self: OutputStream, s: string)
+---@field writeUShort fun(self: OutputStream, v: integer)
+---@field writeUShortLE fun(self: OutputStream, v: integer)
+
+---@class Buffer
+---@field available fun(self: Buffer): integer
+---@field clear fun(self: Buffer)
+---@field close fun(self: Buffer)
+---@field getLength fun(self: Buffer): integer
+---@field getMaxCapacity fun(self: Buffer): integer
+---@field getPosition fun(self: Buffer): integer
+---@field isClosed fun(self: Buffer): boolean
+---@field read fun(self: Buffer): integer
+---@field readBase64 fun(self: Buffer, length?: integer): string
+---@field readByteArray fun(self: Buffer, length?: integer): string
+---@field readDouble fun(self: Buffer): number
+---@field readDoubleLE fun(self: Buffer): number
+---@field readFloat fun(self: Buffer): number
+---@field readFloatLE fun(self: Buffer): number
+---@field readFromStream fun(self: Buffer, stream: InputStream, amount: integer): integer
+---@field readInt fun(self: Buffer): integer
+---@field readIntLE fun(self: Buffer): integer
+---@field readLong fun(self: Buffer): integer
+---@field readLongLE fun(self: Buffer): integer
+---@field readShort fun(self: Buffer): integer
+---@field readShortLE fun(self: Buffer): integer
+---@field readString fun(self: Buffer, length?: integer): string
+---@field readUShort fun(self: Buffer): integer
+---@field readUShortLE fun(self: Buffer): integer
+---@field setPosition fun(self: Buffer, position: integer)
+---@field write fun(self: Buffer, b: integer)
+---@field writeBase64 fun(self: Buffer, s: string)
+---@field writeByteArray fun(self: Buffer, s: string)
+---@field writeDouble fun(self: Buffer, v: number)
+---@field writeDoubleLE fun(self: Buffer, v: number)
+---@field writeFloat fun(self: Buffer, v: number)
+---@field writeFloatLE fun(self: Buffer, v: number)
+---@field writeInt fun(self: Buffer, v: integer)
+---@field writeIntLE fun(self: Buffer, v: integer)
+---@field writeLong fun(self: Buffer, v: integer)
+---@field writeLongLE fun(self: Buffer, v: integer)
+---@field writeShort fun(self: Buffer, v: integer)
+---@field writeShortLE fun(self: Buffer, v: integer)
+---@field writeString fun(self: Buffer, s: string)
+---@field writeToStream fun(self: Buffer, stream: OutputStream, amount: integer): integer
+---@field writeUShort fun(self: Buffer, v: integer)
+---@field writeUShortLE fun(self: Buffer, v: integer)
+
+---@class DataAPI
+---@field createBuffer fun(self: DataAPI, capacity?: integer): Buffer
+data = {}
+
+---@class Future
+---@field getValue fun(self: Future): HttpResponse
+---@field isDone fun(self: Future): boolean
+
+---@class HttpAPI
+---@field request fun(self: HttpAPI, uri: string): HttpRequestBuilder
+
+---@alias HttpMethod string
+---| "GET"
+---| "POST"
+---| "PUT"
+---| "DELETE"
+---| "HEAD"
+---| "OPTIONS"
+---| "PATCH"
+---| "TRACE"
+---| "CONNECT"
+
+---@class HttpRequestBuilder
+---@field body fun(self: HttpRequestBuilder, data: InputStream|Buffer): HttpRequestBuilder
+---@field getBody fun(self: HttpRequestBuilder): InputStream|Buffer
+---@field getHeaders fun(self: HttpRequestBuilder): HttpHeaders
+---@field getMethod fun(self: HttpRequestBuilder): string
+---@field getUri fun(self: HttpRequestBuilder): string
+---@field header fun(self: HttpRequestBuilder, header: string, value: string): HttpRequestBuilder
+---@field method fun(self: HttpRequestBuilder, method: HttpMethod): HttpRequestBuilder
+---@field send fun(self: HttpRequestBuilder): Future
+---@field uri fun(self: HttpRequestBuilder, uri: string): HttpRequestBuilder
+
+---@class HttpHeaders -- not everything
+---@field connection string[]
+---@field access-control-allow string[]
+---@field headers string[]
+---@field set-cookie string[]
+---@field access-control-allow-methods string[]
+---@field content-length string[]
+---@field date string[]
+---@field content-type string[]
+---@field access-control-allow-origin string[]
+---@field server string[]
+
+---@class HttpResponse
+---@field getHeaders fun(self: HttpResponse): HttpHeaders
+---@field getData fun(self: HttpResponse): InputStream
+---@field getResponseCode fun(self: HttpResponse): integer
+
+---@class NetworkingAPI
+---@field http HttpAPI
+---@field isLinkAllowed fun(self: NetworkingAPI, link: string): boolean
+---@field isNetworkingAllowed fun(self: NetworkingAPI): boolean
+net = {}
