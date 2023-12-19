@@ -12,8 +12,11 @@ allowing me to put as much as I want without worrying about storage space.
 local api = {}
 
 local config = {
-   clipping_margin = 0.3,
    debug_visible = true,
+   debug_scale = 0.4,
+   
+   clipping_margin = 0.3,
+   
    debug_event_name = "_c",
    internal_events_name = "__a",
 }
@@ -766,10 +769,10 @@ container.__type = "GNUI.element.container"
 function container.new(preset)
    local new = preset or element.new()
    setmetatable(new,container)
-   new.Dimensions = vectors.vec4(0,0,0,0)
+   new.Dimensions = vectors.vec4(0,0,0,0) 
    new.DIMENSIONS_CHANGED = eventLib.new()
    new.Margin = vectors.vec4()
-   new.ContainmentRect = vectors.vec4()
+   new.ContainmentRect = vectors.vec4() -- Dimensions but with margins and anchored applied
    new.MARGIN_CHANGED = eventLib.new()
    new.Padding = vectors.vec4()
    new.PADDING_CHANGED = eventLib.new()
@@ -777,7 +780,7 @@ function container.new(preset)
    new.ANCHOR_CHANGED = eventLib.new()
    new.Part = models:newPart("container"..new.id)
    models:removeChild(new.Part)
-   new.Cursor = vectors.vec2(0.5,0.5)
+   new.Cursor = vectors.vec2() -- in local space
    new.CURSOR_CHANGED = eventLib.new()
    new.SPRITE_CHANGED = eventLib.new()
    new.Sprite = nil
@@ -788,10 +791,10 @@ function container.new(preset)
    local debug_padding   
    local debug_cursor
    if config.debug_visible then
-      debug_container = sprite.new():setModelpart(new.Part):setTexture(textures.outline):setBorderThickness(1,1,1,1):setRenderType("EMISSIVE_SOLID"):setScale(1):setColor(0,1,0):excludeMiddle(true)
-      debug_margin    = sprite.new():setModelpart(new.Part):setTexture(textures.outline):setBorderThickness(1,1,1,1):setRenderType("EMISSIVE_SOLID"):setScale(1):setColor(1,0,0):excludeMiddle(true)
-      debug_padding   = sprite.new():setModelpart(new.Part):setTexture(textures.outline):setBorderThickness(1,1,1,1):setRenderType("EMISSIVE_SOLID"):setScale(1):excludeMiddle(true)
-      debug_cursor   = sprite.new():setModelpart(new.Part):setTexture(textures.ui):setUV(4,23,4,23):setRenderType("EMISSIVE_SOLID"):setSize(1,1)
+      debug_container = sprite.new():setModelpart(new.Part):setTexture(textures.outline):setBorderThickness(1,1,1,1):setRenderType("EMISSIVE_SOLID"):setScale(config.debug_scale):setColor(0,1,0):excludeMiddle(true)
+      debug_margin    = sprite.new():setModelpart(new.Part):setTexture(textures.outline):setBorderThickness(1,1,1,1):setRenderType("EMISSIVE_SOLID"):setScale(config.debug_scale):setColor(1,0,0):excludeMiddle(true)
+      debug_padding   = sprite.new():setModelpart(new.Part):setTexture(textures.outline):setBorderThickness(1,1,1,1):setRenderType("EMISSIVE_SOLID"):setScale(config.debug_scale):excludeMiddle(true)
+      debug_cursor   = sprite.new():setModelpart(new.Part):setTexture(textures.ui):setUV(6,23,6,23):setRenderType("EMISSIVE_SOLID"):setSize(1,1)
    end
 
    new.DIMENSIONS_CHANGED:register(function ()
@@ -840,10 +843,12 @@ function container.new(preset)
          local contain = new.ContainmentRect
          local margin = new.Margin
          local padding = new.Padding
+
+         -- Display the cursor in local space
          if new.Cursor then
             debug_cursor:setPos(
-               -new.Cursor.x * 16 + new.Padding.x,
-               -new.Cursor.y * 16 + new.Padding.y,
+               -new.Cursor.x + new.Padding.x - new.ContainmentRect.x,
+               -new.Cursor.y + new.Padding.y - new.ContainmentRect.y,
                -config.clipping_margin * 0.8
             ):setVisible(true)
          else
@@ -877,6 +882,15 @@ function container.new(preset)
          )
       end
    end,config.internal_events_name)
+
+   new.CURSOR_CHANGED:register(function ()
+      for i, child in pairs(new.Children) do
+         child:setCursor(
+            new.Cursor.x-new.ContainmentRect.x*16,
+            new.Cursor.y
+         )
+      end
+   end)
 
    new.MARGIN_CHANGED:register(function ()
       new.DIMENSIONS_CHANGED:invoke(new.Dimensions)

@@ -61,14 +61,18 @@ window:setPadding(2,2,2,2)
 events.WORLD_RENDER:register(function (dt)
    local world_cursor = ray2plane(client:getCameraPos(),client:getCameraDir(),vectors.vec3(0,0,1),origin:copy():add(0,0,1.8))
    local time = client:getSystemTime() / 100
-   --label:setAnchor(0,0,math.cos(time*0.2)*0.25 + 0.75,math.sin(time*0.2)*0.25 + 0.75)
+   label:setAnchor(
+      math.cos(time*0.25)*0.1 + 0.1,math.sin(time*0.23)*0.1 + 0.1,
+      math.cos(time*0.23)*0.1 + 0.9,math.sin(time*0.21)*0.1 + 0.9
+   )
    --label:setFontScale(math.sin(time * 0.1) * 0.1 + 0.25)
    label:setFontScale(0.1)
-   :setAlign(math.abs((time * 0.05) % 2 - 1),math.abs((time * 0.0513513) % 2 - 1))
+   --:setAlign(math.abs((time * 0.05) % 2 - 1),math.abs((time * 0.0513513) % 2 - 1))
    if world_cursor then
       local local_cursor = vectors.vec2(
          world_cursor.x-origin.x+size.x * 0.5 - 0.5,
-         origin.y-world_cursor.y+size.y)
+         origin.y-world_cursor.y+size.y
+      ) * 16
       
       window:setCursor(local_cursor.x,local_cursor.y)
    end
