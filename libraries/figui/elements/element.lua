@@ -76,5 +76,6 @@ function element:free()
       self.Parent:removeChild(self)
    end
    self.ON_FREE:invoke()
+   self = nil
 end
 return element

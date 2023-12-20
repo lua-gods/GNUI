@@ -2,10 +2,12 @@ local eventLib = require("libraries.figui.eventHandler")
 local utils = require("libraries.figui.utils")
 
 local element = require("libraries.figui.elements.element")
+local sprite = require("libraries.figui.spriteLib")
 local core = require("libraries.figui.core")
 
 ---@class GNUI.container : GNUI.element
 ---@field Dimensions Vector4
+---@field Z number
 ---@field ContainmentRect Vector4
 ---@field DIMENSIONS_CHANGED EventLib
 ---@field Margin Vector4
@@ -19,6 +21,8 @@ local core = require("libraries.figui.core")
 ---@field Cursor Vector2?
 ---@field CURSOR_CHANGED EventLib
 ---@field Hovering boolean
+---@field CaptureCursor boolean
+---@field PRESSED EventLib
 ---@field MOUSE_ENTERED EventLib
 ---@field MOUSE_EXITED EventLib
 ---@field Part ModelPart
@@ -31,10 +35,12 @@ container.__type = "GNUI.element.container"
 
 ---Creates a new container.
 ---@param preset GNUI.container?
+---@return GNUI.container
 function container.new(preset)
    local new = preset or element.new()
    setmetatable(new,container)
    new.Dimensions = vectors.vec4(0,0,0,0) 
+   new.Z = 0
    new.DIMENSIONS_CHANGED = eventLib.new()
    new.Margin = vectors.vec4()
    new.ContainmentRect = vectors.vec4() -- Dimensions but with margins and anchored applied
@@ -50,6 +56,8 @@ function container.new(preset)
    new.CURSOR_CHANGED = eventLib.new()
    new.SPRITE_CHANGED = eventLib.new()
    new.Hovering = false
+   new.PRESSED = eventLib.new()
+   new.CaptureCursor = true
    new.MOUSE_ENTERED = eventLib.new()
    new.MOUSE_EXITED = eventLib.new()
    new.Sprite = nil
@@ -90,7 +98,7 @@ function container.new(preset)
       :setPos(
          -new.Dimensions.x-new.Margin.x-new.Padding.x,
          -new.Dimensions.y-new.Margin.y-new.Padding.y,
-         -core.clipping_margin
+         (-(new.Z + 1) * core.clipping_margin)
       )
       for key, value in pairs(new.Children) do
          if value.DIMENSIONS_CHANGED then
@@ -122,13 +130,13 @@ function container.new(preset)
             contain.w - contain.y)
          :setPos(
             - contain.x,
-            - contain.y,-core.clipping_margin * 0.8)
+            - contain.y,(-(new.Z + 1) * core.clipping_margin) * 0.8)
          
          debug_margin
          :setPos(
             margin.x + padding.x - contain.x,
             margin.y + padding.y - contain.y,
-            -core.clipping_margin * 0.3)
+            -(-(new.Z + 1) * core.clipping_margin) * 0.3)
          :setSize(
             (contain.z - contain.x + margin.z + margin.x + padding.x + padding.z),
             (contain.w - contain.y + margin.w + margin.y + padding.y + padding.w)
@@ -137,7 +145,7 @@ function container.new(preset)
          :setPos(
             padding.x - contain.x,
             padding.y - contain.y,
-            -core.clipping_margin * 0.6)
+            -(-(new.Z + 1) * core.clipping_margin) * 0.6)
          :setSize(
             (contain.z+padding.x+padding.z - contain.x),
             (contain.w+padding.y+padding.w - contain.y)
@@ -150,9 +158,9 @@ function container.new(preset)
          -- Display the cursor in local space
          if new.Hovering then
             debug_cursor:setPos(
-               -new.Cursor.x - new.ContainmentRect.x,
-               -new.Cursor.y - new.ContainmentRect.y,
-               -core.clipping_margin * 0.8
+               -new.Cursor.x - new.ContainmentRect.x + new.Padding.x,
+               -new.Cursor.y - new.ContainmentRect.y + new.Padding.y,
+               (-(new.Z + 1) * core.clipping_margin) * 0.1
             ):setVisible(true)
          else
             debug_cursor:setVisible(false)
@@ -171,6 +179,8 @@ function container.new(preset)
    new.PARENT_CHANGED:register(function ()
       if new.Parent then
          new.Part:moveTo(new.Parent.Part)
+      else
+         new.Part:getParent():removeChild(new.Part)
       end
       new.DIMENSIONS_CHANGED:invoke(new.Dimensions)
    end)
@@ -201,7 +211,7 @@ end
 ---@param y number?
 function container:setPos(xpos,y)
    self.Dimensions.xy = utils.figureOutVec2(xpos,y)
-   self.DIMENSIONS_CHANGED:invoke(self,self.Dimensions)
+   self.DIMENSIONS_CHANGED:invoke(self.Dimensions)
    return self
 end
 
@@ -210,7 +220,7 @@ end
 ---@param y number?
 function container:setSize(xsize,y)
    self.Dimensions.zw = utils.figureOutVec2(xsize,y)
-   self.DIMENSIONS_CHANGED:invoke(self,self.Dimensions)
+   self.DIMENSIONS_CHANGED:invoke(self.Dimensions)
    return self
 end
 
@@ -221,7 +231,7 @@ function container:setTopLeft(xpos,y)
    local old,new = self.Dimensions.xy,utils.figureOutVec2(xpos,y)
    local delta = new-old
    self.Dimensions.xy,self.Dimensions.zw = new,self.Dimensions.zw - delta
-   self.DIMENSIONS_CHANGED:invoke(self,self.Dimensions)
+   self.DIMENSIONS_CHANGED:invoke(self.Dimensions)
    return self
 end
 
@@ -232,19 +242,58 @@ function container:setBottomRight(zpos,w)
    local old,new = self.Dimensions.xy+self.Dimensions.zw,utils.figureOutVec2(zpos,w)
    local delta = new-old
    self.Dimensions.zw = self.Dimensions.zw + delta
-   self.DIMENSIONS_CHANGED:invoke(self,self.Dimensions)
+   self.DIMENSIONS_CHANGED:invoke(self.Dimensions)
    return self
 end
 
----Sets the Cursor position relative to the top left of the container.
+---Checks if the cursor in local coordinates is inside the bounding box of this container.
+---@param x number|Vector2
+---@param y number?
+---@return boolean
+function container:isHovering(x,y)
+   local pos = utils.figureOutVec2(x,y)
+   return (
+      pos.x > 0 and pos.y > 0
+      and pos.x < self.ContainmentRect.z-self.ContainmentRect.x 
+      and pos.y < self.ContainmentRect.w-self.ContainmentRect.y)
+end
+
+---Sets the Cursor position relative to the top left of the container.  
+---Returns true if the cursor is hovering over the container.  
+---if press is true, the container on the top most pressed position will have its PRESSED event invoked.
+---if forced is true, the container will have its PRESSED event invoked.
 ---@param xpos number|Vector2
 ---@param y number?
----@return GNUI.container
-function container:setCursor(xpos,y)
-   local new = utils.figureOutVec2(xpos,y)
+---@param press boolean?
+---@param forced boolean?
+---@return boolean
+function container:setCursor(xpos,y,press,forced)
+   press = press or false
+   forced = forced or false
+   local pos = utils.figureOutVec2(xpos,y)
    local lhovering = self.Hovering
-   self.Hovering = (new.x > 0 and new.y > 0 and new.x < self.ContainmentRect.z and new.y < self.ContainmentRect.w)
-   self.Cursor = new
+   self.Hovering = self:isHovering(pos)
+   self.Cursor = pos
+   if self.Hovering and not forced then
+      local hovering
+      for i, child in pairs(self.Children) do
+         if not hovering then
+            if child.CaptureCursor then
+               hovering = child:setCursor(
+                  self.Cursor.x-child.ContainmentRect.x-child.Dimensions.x-child.Margin.x-self.Padding.x,
+                  self.Cursor.y-child.ContainmentRect.y-child.Dimensions.y-child.Margin.y-self.Padding.y,
+                  press)
+               if hovering then -- obstructed by child
+                  self.Hovering = false
+               end
+            end
+         else
+            if child.Hovering then
+               child.Hovering = false
+            end
+         end
+      end
+   end
    if self.Hovering ~= lhovering then
       if self.Hovering then
          self.MOUSE_ENTERED:invoke()
@@ -252,14 +301,34 @@ function container:setCursor(xpos,y)
          self.MOUSE_EXITED:invoke()
       end
    end
-   for i, child in pairs(self.Children) do
-      child:setCursor(
-         self.Cursor.x-child.Dimensions.x-child.Margin.x-child.Padding.x,
-         self.Cursor.y-child.Dimensions.y-child.Margin.y-child.Padding.y
-      )
+   if forced then
+      self.PRESSED:invoke()
+   else
+      if self.Hovering and self.CaptureCursor then
+         if press then
+            self.PRESSED:invoke()
+         end
+         self.CURSOR_CHANGED:invoke(pos)
+      end
    end
    --self.DIMENSIONS_CHANGED:invoke(self.Dimensions)
-   self.CURSOR_CHANGED:invoke(new)
+   return self.Hovering
+end
+
+---Sets the offset of the depth for this container, a work around to fixing Z fighting issues when two elements overlap.
+---@param depth number
+---@return GNUI.container
+function container:setZ(depth)
+   self.Z = depth
+   self.DIMENSIONS_CHANGED:invoke(self.Dimensions)
+   return self
+end
+
+---If this container should be able to capture the cursor from its parent if obstructed.
+---@param capture boolean
+---@return GNUI.container
+function container:canCaptureCursor(capture)
+   self.CaptureCursor = capture
    return self
 end
 
@@ -269,7 +338,7 @@ end
 ---@param units number?
 function container:setMarginTop(units)
    self.Margin.y = units or 0
-   self.MARGIN_CHANGED:invoke(self,self.Dimensions)
+   self.MARGIN_CHANGED:invoke(self.Dimensions)
    return self
 end
 
@@ -277,7 +346,7 @@ end
 ---@param units number?
 function container:setMarginLeft(units)
    self.Margin.x = units or 0
-   self.MARGIN_CHANGED:invoke(self,self.Dimensions)
+   self.MARGIN_CHANGED:invoke(self.Dimensions)
    return self
 end
 
@@ -285,7 +354,7 @@ end
 ---@param units number?
 function container:setMarginDown(units)
    self.Margin.z = units or 0
-   self.MARGIN_CHANGED:invoke(self,self.Dimensions)
+   self.MARGIN_CHANGED:invoke(self.Dimensions)
    return self
 end
 
@@ -293,7 +362,7 @@ end
 ---@param units number?
 function container:setMarginRight(units)
    self.Margin.w = units or 0
-   self.MARGIN_CHANGED:invoke(self,self.Dimensions)
+   self.MARGIN_CHANGED:invoke(self.Dimensions)
    return self
 end
 
@@ -307,7 +376,7 @@ function container:setMargin(left,top,right,bottom)
    self.Margin.y = top    or 0
    self.Margin.z = right  or 0
    self.Margin.w = bottom or 0
-   self.MARGIN_CHANGED:invoke(self,self.Dimensions)
+   self.MARGIN_CHANGED:invoke(self.Dimensions)
    return self
 end
 
@@ -317,7 +386,7 @@ end
 ---@param units number?
 function container:setPaddingTop(units)
    self.Padding.y = units or 0
-   self.MARGIN_CHANGED:invoke(self,self.Dimensions)
+   self.MARGIN_CHANGED:invoke(self.Dimensions)
    return self
 end
 
@@ -325,7 +394,7 @@ end
 ---@param units number?
 function container:setPaddingLeft(units)
    self.Padding.x = units or 0
-   self.MARGIN_CHANGED:invoke(self,self.Dimensions)
+   self.MARGIN_CHANGED:invoke(self.Dimensions)
    return self
 end
 
@@ -333,7 +402,7 @@ end
 ---@param units number?
 function container:setPaddingDown(units)
    self.Padding.z = units or 0
-   self.MARGIN_CHANGED:invoke(self,self.Dimensions)
+   self.MARGIN_CHANGED:invoke(self.Dimensions)
    return self
 end
 
@@ -341,7 +410,7 @@ end
 ---@param units number?
 function container:setPaddingRight(units)
    self.Padding.w = units or 0
-   self.MARGIN_CHANGED:invoke(self,self.Dimensions)
+   self.MARGIN_CHANGED:invoke(self.Dimensions)
    return self
 end
 
@@ -355,7 +424,7 @@ function container:setPadding(left,top,right,bottom)
    self.Padding.y = top    or 0
    self.Padding.z = right  or 0
    self.Padding.w = bottom or 0
-   self.MARGIN_CHANGED:invoke(self,self.Dimensions)
+   self.MARGIN_CHANGED:invoke(self.Dimensions)
    return self
 end
 
@@ -367,7 +436,7 @@ end
 ---@param units number?
 function container:setAnchorTop(units)
    self.Anchor.y = units or 0
-   self.MARGIN_CHANGED:invoke(self,self.Dimensions)
+   self.MARGIN_CHANGED:invoke(self.Dimensions)
    return self
 end
 
@@ -377,7 +446,7 @@ end
 ---@param units number?
 function container:setAnchorLeft(units)
    self.Anchor.x = units or 0
-   self.DIMENSIONS_CHANGED:invoke(self,self.Dimensions)
+   self.DIMENSIONS_CHANGED:invoke(self.Dimensions)
    return self
 end
 
@@ -387,7 +456,7 @@ end
 ---@param units number?
 function container:setAnchorDown(units)
    self.Anchor.z = units or 0
-   self.DIMENSIONS_CHANGED:invoke(self,self.Dimensions)
+   self.DIMENSIONS_CHANGED:invoke(self.Dimensions)
    return self
 end
 
@@ -397,23 +466,20 @@ end
 ---@param units number?
 function container:setAnchorRight(units)
    self.Anchor.w = units or 0
-   self.DIMENSIONS_CHANGED:invoke(self,self.Dimensions)
+   self.DIMENSIONS_CHANGED:invoke(self.Dimensions)
    return self
 end
 
 ---Sets the anchor for all sides.  
 --- x 0 <-> 1 = left <-> right  
 --- y 0 <-> 1 = top <-> bottom
----@param left number?
+---@param left number|Vector4
 ---@param top number?
 ---@param right number?
 ---@param bottom number?
 function container:setAnchor(left,top,right,bottom)
-   self.Anchor.x = left   or 0
-   self.Anchor.y = top    or 0
-   self.Anchor.z = right  or 0
-   self.Anchor.w = bottom or 0
-   self.DIMENSIONS_CHANGED:invoke(self,self.Dimensions)
+   self.Anchor = utils.figureOutVec4(left,top,right,bottom)
+   self.DIMENSIONS_CHANGED:invoke(self.Dimensions)
    return self
 end
 

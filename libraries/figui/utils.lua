@@ -44,6 +44,9 @@ function utils.vec4GetSize(vec4)
    return (vec4.zw - vec4.xy) ---@type Vector2
 end
 
+---@param posx number|Vector2
+---@param y number?
+---@return Vector2
 function utils.figureOutVec2(posx,y)
    local typa, typb = type(posx), type(y)
    
@@ -56,15 +59,36 @@ function utils.figureOutVec2(posx,y)
    end
 end
 
+---@param posx number|Vector3
+---@param y number?
+---@param z number?
+---@return Vector3
 function utils.figureOutVec3(posx,y,z)
    local typa, typb, typc = type(posx), type(y), type(z)
    
-   if typa == "Vector2" and typb == "nil" and typc == "nil" then
+   if typa == "Vector3" and typb == "nil" and typc == "nil" then
       return posx:copy()
    elseif typa == "number" and typb == "number" and typc == "number" then
       return vectors.vec3(posx,y,z)
    else
       error("Invalid Vector3 parameter, expected Vector3 or (number, number, number), instead got ("..typa..", "..typb..", "..typc..")")
+   end
+end
+
+---@param posx number|Vector4
+---@param y number?
+---@param z number?
+---@param w number?
+---@return Vector4
+function utils.figureOutVec4(posx,y,z,w)
+   local typa, typb, typc, typd = type(posx), type(y), type(z), type(w)
+   
+   if typa == "Vector4" and typb == "nil" and typc == "nil" and typd == "nil" then
+      return posx:copy()
+   elseif typa == "number" and typb == "number" and typc == "number"  and typd == "number" then
+      return vectors.vec4(posx,y,z,w)
+   else
+      error("Invalid Vector4 parameter, expected Vector3 or (number, number, number), instead got ("..typa..", "..typb..", "..typc.. ", "..typd..")")
    end
 end
 

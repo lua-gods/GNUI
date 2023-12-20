@@ -1,6 +1,7 @@
 local FiGUI = require("libraries.FiGUI")
 local lorem = require("lorem")
 
+---@class TV
 local api = {}
 
 --[[ NOTE
@@ -29,7 +30,7 @@ end
 --- create theme
 local wallpaper = FiGUI.newSprite()
 :setTexture(textures.ui)
-:setUV(0,14,0,14)
+:setUV(0,16,0,16)
 :setRenderType("EMISSIVE_SOLID")
 
 local size = vectors.vec2(7,3)
@@ -58,134 +59,94 @@ end)
 --window:addChild(label)
 
 events.WORLD_RENDER:register(function (dt)
-   local world_cursor = ray2plane(client:getCameraPos(),client:getCameraDir(),vectors.vec3(0,0,1),origin:copy():add(0,0,1.8))
    local time = client:getSystemTime() / 100
    --label:setAnchor(
-   --   math.cos(time*0.25)*0.1 + 0.1,math.sin(time*0.23)*0.1 + 0.1,
+      --   math.cos(time*0.25)*0.1 + 0.1,math.sin(time*0.23)*0.1 + 0.1,
    --   math.cos(time*0.23)*0.1 + 0.9,math.sin(time*0.21)*0.1 + 0.9
    --)
    --label:setFontScale(math.abs((time * 0.1) % 2 - 1)*0.1 + 0.2)
    --:setAlign(math.abs((time * 0.05) % 2 - 1),math.abs((time * 0.0513513) % 2 - 1))
-   if world_cursor then
-      local local_cursor = vectors.vec2(
-         world_cursor.x-origin.x+size.x * 0.5 - 0.5,
-         origin.y-world_cursor.y+size.y
-      ) * 16 - window.Padding.xy
-      
-      --window:setCursor(local_cursor.x,local_cursor.y)
-   end
 end)
 
-
-window:setPadding(2,2,2,2)
-
---local packed = textures:newTexture("atlas1",128,128)
---local packed_dim = packed:getDimensions()
---packed:fill(0,0,packed_dim.x,packed_dim.y,vectors.vec4(0,0,0,0))
---
---local packed_sprite = FiGUI.newSprite()
---:setTexture(packed)
---
---local packed_display = FiGUI.newContainer()
---:setSprite(packed_sprite)
---window:addChild(packed_display)
---packed_display:setAnchor(0,0,0,0)
---packed_display:setBottomRight(44,44)
---
---local debug_label = FiGUI.newLabel()
---debug_label:setAnchor(0,0,1,1)
---debug_label:setTopLeft(44,0)
---debug_label:setMargin(2,0,0,0)
---window:addChild(debug_label)
---
---debug_label:setText("Cool Text"):setFontScale(0.4)
---
---local rects = {}
---for i = 1, 200, 1 do
---   rects[#rects+1] = vectors.vec2(math.random(1,16),math.random(1,16))
---end
---
---events.WORLD_TICK:register(function ()
---   if #rects > 0 then
---      local box = rects[1]
---      local found_spot = false
---      for x = 0, packed_dim.x-box.x-1, 1 do
---         for y = 0, packed_dim.y-box.y-1, 1 do
---
---            local nvm = false
---            for bx = 0, box.x, 1 do
---               for by = 0, box.y, 1 do
---                  local pxl = packed:getPixel(x+bx,y+by)
---                  if pxl.x + pxl.y + pxl.z > 0 then
---                     nvm = true
---                     break
---                  end
---               end
---               if nvm then
---                  break
---               end
---            end
---            
---            if not nvm then
---               packed:fill(x,y,box.x,box.y,vectors.vec3(math.random(),math.random(),math.random()):normalize())
---               packed:update()
---               found_spot = true
---            end
---            if found_spot then break end
---         end
---         if found_spot then break end
---      end
---      table.remove(rects,1)
---      found_spot = false
---      local compose = "Cool Shoes\n"
---      for i, value in pairs(rects) do
---         compose = compose .. tostring(value) .. "\n"
---         if i > 10 then
---            compose = compose .. "..."
---            break
---         end
---      end
---      debug_label:setText(compose)
---   else
---      events.WORLD_TICK:remove("packer")
---   end
---end,"packer")
-
+-->====================[ App Management ]====================<--
+local tween = require("libraries.GNTweenLib")
 local apps = {}---@type table<any,{app:Application,id:string,name:string}>
 local current_app = nil ---@type Application?
 
 ---@class Application
----@field START fun(window : GNUI.container)?
----@field TICK fun(window : GNUI.container)?
----@field FRAME fun(window : GNUI.container,delta_frame : number,delta_tick : number)?
----@field CLOSE fun(window : GNUI.container)?
+---@field INIT fun(window : GNUI.container,tv:TV)?
+---@field OPEN fun(window : GNUI.container,tv:TV)?
+---@field TICK fun(window : GNUI.container,tv:TV)?
+---@field FRAME fun(window : GNUI.container,tv:TV,delta_frame : number,delta_tick : number)?
+---@field CLOSE fun(window : GNUI.container,tv:TV)?
+---@field KEY_PRESS fun(window : GNUI.container,tv:TV,player : Player,char : string?,key_id : Minecraft.keyid ,key_status : Event.Press.state,key_modifier : Event.Press.modifiers)?
+---@field close function?
 
 ---@param application Application
-function api.registerApp(application,id,name)
-   apps[id] = {app = application,id = id,name = name}
+function api.registerApp(application,name,icon)
+   apps[name] = {app = application,name = name,icon = icon}
 end
 
+-- load apps
 for _, path in pairs(listFiles("TV.apps")) do
-   api.registerApp(require(path))
+   local app,id,name = require(path)
+   app.close = function ()
+      api.setApp("home")
+   end
+   api.registerApp(app,id,name)
 end
+
+local transitioning = false
 
 function api.setApp(id)
-   if current_app then
-      current_app.CLOSE(window)
-   end
-   window
-   :setSprite(wallpaper)
-   :setSize(size * 16)
-   :setPos(size.x * -16,0)
-   if apps[id] then
-      apps[id].app.START(window)
+   if not transitioning then
+      if current_app then
+         transitioning = true
+         if current_app.CLOSE then
+            current_app.CLOSE(current_app.window,api)
+         end
+         local last_window = current_app.window
+         last_window:setZ(10)
+         tween.tweenFunction(0.5,"outQuint",function (t)
+            local anchor = math.lerp(vectors.vec4(0,0,1,1),vectors.vec4(0.1,0.1,0.9,0.9),t)
+            last_window:setAnchor(anchor)
+         end,function ()
+            tween.tweenFunction(0.5,"inSine",function (t)
+               local anchor = math.lerp(vectors.vec4(0.1,0.1,0.9,0.9),vectors.vec4(0.1,1.1,0.9,1.9),t)
+               last_window:setAnchor(anchor)
+            end,function ()
+               transitioning = false
+               last_window:setZ(0)
+               window:removeChild(last_window)
+            end)
+         end)
+      end
+   
       current_app = apps[id].app
+      if current_app then
+         local win = current_app.window or FiGUI.newContainer()
+         win:setAnchor(0,0,1,1)
+         window:addChild(win)
+         if not current_app.window then
+            win:setSprite(wallpaper)
+         end
+         current_app.window = win
+         if not current_app.ready then
+            if current_app.INIT then
+               current_app.INIT(win,api)
+               current_app.ready = true
+            end
+         end
+         if current_app.OPEN then
+            current_app.OPEN(win,api)
+         end
+      end
    end
 end
 
 events.WORLD_TICK:register(function ()
-   if current_app then
-      current_app.TICK(window)
+   if current_app and current_app.TICK then
+      current_app.TICK(current_app.window,api)
    end
 end)
 
@@ -193,11 +154,68 @@ local last_system_time = client:getSystemTime()
 events.WORLD_RENDER:register(function (dt)
    local system_time = client:getSystemTime()
    local delta = (system_time - last_system_time) / 1000
-   if current_app then
-      current_app.FRAME(window,delta,dt)
+   if current_app and current_app.FRAME then
+      current_app.FRAME(current_app.window,api,delta,dt)
    end
 end)
 
 api.setApp("home")
 
+-->========================================[ Remote ]=========================================<--
+
+local auth = {} 
+local users = {}
+local keyPress = {}
+
+function auth(player)
+   if type(player) == "PlayerAPI" then
+      local name = player:getName()
+      users[name] = {player = player,name = name}
+      log(name .." connected")
+      return name
+   end
+end
+
+local timer = 0
+events.WORLD_TICK:register(function ()
+   timer = timer + 1
+   if timer > 20  then
+      for key, user in pairs(users) do
+         if not user.player:isLoaded() then
+            users[key] = nil
+            log(user.name.." disconnected")
+         end
+      end
+   end
+end)
+
+
+local key2string = require("libraries.key2string")
+function keyPress(user,key,status,modifier)
+   if current_app and current_app.KEY_PRESS then
+      current_app.KEY_PRESS(current_app.window,api,users[user].player,key2string(key,modifier),key,status,modifier)
+   end
+   --log(users[user].name .. " " .. (key2string(key,modifier) or " "))
+end
+
+local function raycastPress(user,pos,dir)
+   local world_cursor = ray2plane(pos,dir,vectors.vec3(0,0,1),origin:copy():add(0,0,1.8))
+   if world_cursor then
+      local local_cursor = vectors.vec2(
+         world_cursor.x-origin.x+size.x * 0.5 - 0.5,
+         origin.y - world_cursor.y+size.y
+      ) * 16 - window.Padding.xy
+
+      if current_app.window then
+         current_app.window:setCursor(local_cursor.x,local_cursor.y,true)
+         window:setCursor(local_cursor.x,local_cursor.y,true,true)
+      else
+         window:setCursor(local_cursor.x,local_cursor.y,true)
+      end
+   end
+end
+
+avatar:store("auth",auth)
+avatar:store("keyPress",keyPress)
+avatar:store("raycastPress",raycastPress)
 return api

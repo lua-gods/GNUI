@@ -40,6 +40,12 @@ function label.new(preset)
       new
       :_updateRenderTasks()
    end,core.internal_events_name.."_txt")
+
+   new.PARENT_CHANGED:register(function ()
+      if not new.Parent then
+         new:_deleteRenderTasks()
+      end
+   end,core.internal_events_name.."_txt")
    setmetatable(new,label)
    return new
 end

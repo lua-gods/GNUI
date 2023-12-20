@@ -40,7 +40,7 @@ function sprite.new(obj)
    new.Color = new.Color or vectors.vec3(1,1,1)
    new.Scale = new.Scale or 4
    new.DIMENSIONS_CHANGED = eventLib.new()
-   new.RenderTasks = new.RenderTasks or {}
+   new.RenderTasks = {}
    new.RenderType = new.RenderType or "EMISSIVE_SOLID"
    new.BorderThickness = new.BorderThickness or vectors.vec4(0,0,0,0)
    new.BORDER_THICKNESS_CHANGED = eventLib.new()
@@ -291,7 +291,6 @@ function sprite:_updateRenderTasks()
          :setTexture(self.Texture)
          :setColor(self.Color)
          :setRenderType(self.RenderType)
-      
       end
       self.RenderTasks[1]
       :setPos(

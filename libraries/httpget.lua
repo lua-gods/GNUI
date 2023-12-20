@@ -90,7 +90,7 @@ function lib.requestString(url,body)
    end)
 end
 
----@param func fun(buffer : Buffer)
+---@param func fun(result : any)
 ---@return HTTPRequestQueue
 function wait:onFinish(func)
    self.finish = func
