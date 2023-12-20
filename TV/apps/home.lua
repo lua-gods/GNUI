@@ -6,10 +6,12 @@ local texture = textures["1x1white"]
 local http = require("libraries.httpget")
 
 local clock_label = FiGUI:newLabel()
+clock_label:canCaptureCursor(false)
 clock_label:setAnchor(0,0.4,1,0.6)
 clock_label:setAlign(1,0.5)
 
 local date_label = FiGUI:newLabel()
+date_label:canCaptureCursor(false)
 date_label:setAnchor(0,0.4,1,0.6)
 date_label:setAlign(1,0.5)
 date_label:setPos(0,7)
@@ -18,6 +20,7 @@ date_label:setFontScale(0.3)
 local info_label = FiGUI:newLabel()
 info_label:setAnchor(0,0.4,1,0.6)
 info_label:setAlign(1,0.5)
+info_label:canCaptureCursor(false)
 info_label:setPos(0,4)
 info_label:setFontScale(0.2)
 ---@type Application
@@ -47,11 +50,14 @@ function app.INIT(window,tv)
    window:setSprite(wallpaper)
    window:setPadding(2,2,2,2)
 
-   for key, value in pairs(listFiles("TV.apps")) do
+   local i = 0
+   for _, value in pairs(listFiles("TV.apps")) do
       if value ~= "TV.apps.home" then
+         local offset = vectors.vec2(i%5*12,math.floor(i/5)*12)
          local _, name, icon = require(value)
          local app_icon = FiGUI.newContainer()
          app_icon:setSize(12,12)
+         app_icon:setPos(offset)
          app_icon:setSprite(icon)
          window:addChild(app_icon)
          app_icon:setMargin(2,2,2,2)
@@ -59,11 +65,12 @@ function app.INIT(window,tv)
             tv.setApp(name)
          end)
          local app_label = FiGUI.newLabel()
-         app_label:setPos(app_label.Dimensions.xy:copy():add(0,10))
+         app_label:setPos(app_label.Dimensions.xy:copy():add(0,10):add(offset))
          app_label:setSize(12,3)
          app_label:setFontScale(0.2):setText(name):setAlign(0.5,0.5)
          app_label:canCaptureCursor(false)
          window:addChild(app_label)
+         i = i + 1
       end
    end
 end
