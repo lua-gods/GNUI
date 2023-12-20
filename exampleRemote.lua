@@ -16,7 +16,7 @@ local auth
 --- find the API
 events.ENTITY_INIT:register(function ()
    ---@type {auth:fun(player : Player): auth, remote:{keyPress:fun(auth:string,key:integer), keyRelease:fun(auth:string,key:integer)}}?
-   TV = world.avatarVars()["dc912a38-2f0f-40f8-9d6d-57c400185362"]
+   TV = world.avatarVars()[host:isHost() and avatar:getUUID() or "dc912a38-2f0f-40f8-9d6d-57c400185362"]
    if not TV then return end
    auth = TV.auth(player)
 end)
