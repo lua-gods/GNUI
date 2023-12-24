@@ -3,7 +3,7 @@ local tween = require("libraries.GNTweenLib")
 
 local texture = textures["1x1white"]
 
-local http = require("libraries.httpget")
+local http = require("libraries.http")
 
 local clock_label = FiGUI:newLabel()
 clock_label:canCaptureCursor(false)
@@ -33,16 +33,20 @@ function app.INIT(window,tv)
    wallpaper = FiGUI.newSprite()
    :setTexture(texture)
    :setRenderType("EMISSIVE_SOLID")
-   wallpaper:setColor(0.1,0.1,0.1)
+   wallpaper:setColor(0, 0, 0)
 
-   http.requestTexture("https://cdn.discordapp.com/attachments/1135020117915344948/1187077856061292624/compression.png?ex=65959367&is=65831e67&hm=ced1c5847b49e9716135cfd8924da6feb6887ed4e001a528cc5e2eb5b1b678a5&",nil,"wallpaper"):onFinish(function (new)
-      texture = new
-      wallpaper:setTexture(new)
-      tween.tweenFunction(1,"inOutQuad",function (y)
-         y = math.lerp(0.1,1,y)
-         wallpaper:setColor(y,y,y)
-      end)
-   end)
+   http.get(
+      'https://cdn.discordapp.com/attachments/1135020117915344948/1187077856061292624/compression.png?ex=65959367&is=65831e67&hm=ced1c5847b49e9716135cfd8924da6feb6887ed4e001a528cc5e2eb5b1b678a5&',
+      function(output, err)
+         if err then return end
+         texture = textures:read('wallpaper', output)
+         wallpaper:setTexture(texture)
+         tween.tweenFunction(1,"inOutQuad",function (y)
+            wallpaper:setColor(y,y,y)
+         end)
+      end,
+      'base64'
+   )
 
    window:addChild(clock_label)
    window:addChild(date_label)
