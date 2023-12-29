@@ -1,7 +1,7 @@
 local FiGUI = require("libraries.FiGUI")
 local lorem = require("lorem")
 
----@class TV
+---@class TVold
 local api = {}
 
 --[[ NOTE
@@ -59,7 +59,7 @@ end)
 --window:addChild(label)
 
 events.WORLD_RENDER:register(function (dt)
-   local time = client:getSystemTime() / 100
+   local time = client:getSystemTime() / 1000
    --label:setAnchor(
       --   math.cos(time*0.25)*0.1 + 0.1,math.sin(time*0.23)*0.1 + 0.1,
    --   math.cos(time*0.23)*0.1 + 0.9,math.sin(time*0.21)*0.1 + 0.9
@@ -73,14 +73,7 @@ local tween = require("libraries.GNTweenLib")
 local apps = {}---@type table<any,{app:Application,id:string,name:string}>
 local current_app = nil ---@type Application?
 
----@class Application
----@field INIT fun(window : GNUI.container,tv:TV)?
----@field OPEN fun(window : GNUI.container,tv:TV)?
----@field TICK fun(window : GNUI.container,tv:TV)?
----@field FRAME fun(window : GNUI.container,tv:TV,delta_frame : number,delta_tick : number)?
----@field CLOSE fun(window : GNUI.container,tv:TV)?
----@field KEY_PRESS fun(window : GNUI.container,tv:TV,player : Player,char : string?,key_id : Minecraft.keyid ,key_status : Event.Press.state,key_modifier : Event.Press.modifiers)?
----@field close function?
+
 
 ---@param application Application
 function api.registerApp(application,name,icon)
