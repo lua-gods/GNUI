@@ -37,9 +37,11 @@ local function check(pos)
    return world.getBlockState(pos).id
 end
 
+local MAX_SIZE = 500
+
 ---@param skull WorldSkull
 skullHandler.INIT:register(function(skull)
-   local rect = vectors.vec4(0,0,0,0)
+   local rect = vectors.vec4(-MAX_SIZE,MAX_SIZE,-MAX_SIZE,MAX_SIZE)
    local mat = matrices.mat4()
    mat:translate(0,0,1)
    mat:rotateY(skull.rot)
@@ -47,28 +49,28 @@ skullHandler.INIT:register(function(skull)
 
    local s = vectors.vec2(0,0)
    local screen_block = world.getBlockState(skull.pos-skull.dir).id
-   for i = 1, 10, 1 do
+   for i = 1, MAX_SIZE, 1 do
       local ws = mat:apply(s.x+i,s.y,0)
       if check(ws) ~= screen_block then
          rect.x = i-1
          break
       end
    end
-   for i = 1, 10, 1 do
+   for i = 1, MAX_SIZE, 1 do
       local ws = mat:apply(s.x-i,s.y,0)
       if check(ws) ~= screen_block then
          rect.z = -i+1
          break
       end
    end
-   for i = 1, 10, 1 do
+   for i = 1, MAX_SIZE, 1 do
       local ws = mat:apply(s.x,s.y+i,0)
       if check(ws) ~= screen_block then
          rect.y = i-1
          break
       end
    end
-   for i = 1, 10, 1 do
+   for i = 1, MAX_SIZE, 1 do
       local ws = mat:apply(s.x,s.y-i,0)
       if check(ws) ~= screen_block then
          rect.w = -i+1
