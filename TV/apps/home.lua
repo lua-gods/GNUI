@@ -12,27 +12,58 @@ local factory = function ()
    clock_label:canCaptureCursor(false)
    clock_label:setAnchor(0,0.4,1,0.6)
    clock_label:setAlign(1,0.5)
+   clock_label:setTextEffect("SHADOW")
    
    local date_label = FiGUI:newLabel()
    date_label:canCaptureCursor(false)
    date_label:setAnchor(0,0.4,1,0.6)
    date_label:setAlign(1,0.5)
-   date_label:setPos(0,7)
+   date_label:setPos(0,8)
    date_label:setFontScale(0.3)
+   date_label:setTextEffect("SHADOW")
    
    local info_label = FiGUI:newLabel()
    info_label:setAnchor(0,0.4,1,0.6)
    info_label:setAlign(1,0.5)
    info_label:canCaptureCursor(false)
-   info_label:setPos(0,4)
+   info_label:setPos(0,6)
    info_label:setFontScale(0.2)
+   info_label:setTextEffect("SHADOW")
    ---@type Application
    local app = {}
    
    local wallpaper
 
+
+   ---@param window any
+   ---@param tv TV
+   local function rebuildAppCatalog(window,tv)
+      local i = 0
+      for _, appp in pairs(appManager.apps) do
+         if appp.icon then
+         local offset = vectors.vec2(i%5*12,math.floor(i/5)*12)
+            local app_icon = FiGUI.newContainer()
+            app_icon:setSize(12,12)
+            app_icon:setPos(offset)
+            app_icon:setSprite(appp.icon)
+            window:addChild(app_icon)
+            app_icon:setMargin(2,2,2,2)
+            app_icon.PRESSED:register(function ()
+               tv:setApp(appp.name)
+            end)
+            local app_label = FiGUI.newLabel()
+            app_label:setPos(app_label.Dimensions.xy:copy():add(0,10):add(offset))
+            app_label:setSize(12,3)
+            app_label:setFontScale(0.2):setText(appp.name):setAlign(0.5,0.5)
+            app_label:canCaptureCursor(false)
+            app_label:setTextEffect("SHADOW")
+            window:addChild(app_label)
+            i = i + 1
+         end
+      end
+   end
+
    function app.INIT(window,tv)
-   
       wallpaper = FiGUI.newSprite()
       :setTexture(texture)
       :setRenderType("EMISSIVE_SOLID")
@@ -53,46 +84,21 @@ local factory = function ()
       else
          texture = textures.wallpaper
          wallpaper:setTexture(texture)
-         tween.tweenFunction(1,"inOutQuad",function (y)
-            wallpaper:setColor(y,y,y)
-         end)
+         wallpaper:setColor(1,1,1)
 
          local dim = texture:getDimensions()
          local aspect_ratio = dim.x/dim.y
-         local window_aspect_ratio = window.Dimensions.z/window.Dimensions.w
+         local window_aspect_ratio = window.ContainmentRect.z/window.ContainmentRect.w
          wallpaper:setUV(0,0,(dim.x-1) / aspect_ratio * window_aspect_ratio,dim.y-1)
       end
       
-   
       window:addChild(clock_label)
       window:addChild(date_label)
       window:addChild(info_label)
       window:setSprite(wallpaper)
       window:setPadding(2,2,2,2)
-   
-      local i = 0
-      for _, value in pairs(listFiles("TV.apps")) do
-         if value ~= "TV.apps.home" then
-            local offset = vectors.vec2(i%5*12,math.floor(i/5)*12)
-            local _, name, icon = require(value)
-            local app_icon = FiGUI.newContainer()
-            app_icon:setSize(12,12)
-            app_icon:setPos(offset)
-            app_icon:setSprite(icon)
-            window:addChild(app_icon)
-            app_icon:setMargin(2,2,2,2)
-            app_icon.PRESSED:register(function ()
-               tv.setApp(name)
-            end)
-            local app_label = FiGUI.newLabel()
-            app_label:setPos(app_label.Dimensions.xy:copy():add(0,10):add(offset))
-            app_label:setSize(12,3)
-            app_label:setFontScale(0.2):setText(name):setAlign(0.5,0.5)
-            app_label:canCaptureCursor(false)
-            window:addChild(app_label)
-            i = i + 1
-         end
-      end
+
+      rebuildAppCatalog(window,tv)
    end
    
    local week = {
@@ -124,4 +130,4 @@ local factory = function ()
    return app
 end
 
-appManager:registerApp(factory,"home"--[[,icon]])
+appManager:registerApp(factory,"Home"--[[,icon]])

@@ -1,6 +1,7 @@
 local appManager = require("TV.appManager")
+local FiGUI = require("libraries.FiGUI")
+
 local factory = function ()
-    local FiGUI = require("libraries.FiGUI")
     ---@type Application
     local app = {}
     
@@ -24,4 +25,4 @@ local factory = function ()
     return app
 end
 
-appManager:registerApp(factory,"Example app")
+appManager:registerApp(factory,"Example")

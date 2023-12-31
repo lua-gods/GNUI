@@ -1,6 +1,8 @@
+-- app template version 2.0.1
 local appManager = require("TV.appManager")
+local FiGUI = require("libraries.FiGUI")
+
 local factory = function () -- creates an instance of the app
-    local FiGUI = require("libraries.FiGUI")
     ---@type Application
     local app = {}
     
@@ -22,7 +24,7 @@ local factory = function () -- creates an instance of the app
     function app.FRAME(window,tv,delta_tick,delta_frame)
     end
     
-    -- gets called when a key is pressed, autocomplete will explain the rest.
+    -- gets called when a key is pressed, hover over the parameters for definitions.
     function app.KEY_PRESS(window,tv, player, char, key_id, key_status, key_modifier)
     end
     

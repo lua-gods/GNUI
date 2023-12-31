@@ -4,8 +4,14 @@ local utils = require("libraries.figui.utils")
 local container = require("libraries.figui.elements.container")
 local core = require("libraries.figui.core")
 
+---@alias TextEffect string
+---| "NONE"
+---| "OUTLINE"
+---| "SHADOW"
+
 ---@class GNUI.Label : GNUI.container
 ---@field Text string
+---@field TextEffect TextEffect
 ---@field Words table<any,{word:string,len:number}>
 ---@field RenderTasks table<any,TextTask>
 ---@field TEXT_CHANGED EventLib
@@ -23,6 +29,7 @@ function label.new(preset)
    local new = container.new() or preset
    new.Text = ""
    new.TEXT_CHANGED = eventLib.new()
+   new.TextEffect = "NONE"
    new.Align = vectors.vec2()
    new.Words = {}
    new.RenderTasks = {}
@@ -75,6 +82,13 @@ end
 ---@param scale number
 function label:setFontScale(scale)
    self.FontScale = scale or 1
+   self:_updateRenderTasks()
+   return self
+end
+
+---@param effect TextEffect
+function label:setTextEffect(effect)
+   self.TextEffect = effect
    self:_updateRenderTasks()
    return self
 end
@@ -147,6 +161,8 @@ function label:_updateRenderTasks()
             word_length.y + ((current_line) * 8 * self.FontScale - (self.ContainmentRect.w - self.ContainmentRect.y)) * self.Align.y - self.ContainmentRect.y,
          -0.1)
          :setScale(self.FontScale,self.FontScale,1)
+         :setShadow(self.TextEffect == "SHADOW")
+         :setOutline(self.TextEffect == "OUTLINE")
          :setVisible(true)
       end
    end

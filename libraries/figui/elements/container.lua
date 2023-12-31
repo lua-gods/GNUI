@@ -254,8 +254,8 @@ function container:isHovering(x,y)
    local pos = utils.figureOutVec2(x,y)
    return (
       pos.x > 0 and pos.y > 0
-      and pos.x < self.ContainmentRect.z-self.ContainmentRect.x 
-      and pos.y < self.ContainmentRect.w-self.ContainmentRect.y)
+      and pos.x < self.ContainmentRect.z-self.ContainmentRect.x+self.Padding.x+self.Padding.z 
+      and pos.y < self.ContainmentRect.w-self.ContainmentRect.y+self.Padding.y+self.Padding.w)
 end
 
 ---Sets the Cursor position relative to the top left of the container.  
