@@ -1,6 +1,8 @@
 local appManager = require("TV.appManager")
 local FiGUI = require("libraries.FiGUI")
-local factory = function () -- creates an instance of the app
+
+
+local factory = function (window,tv) -- creates an instance of the app
    ---@type Application
    local app = {}
    app.capture_keyboard = true
@@ -51,28 +53,26 @@ local factory = function () -- creates an instance of the app
    -->====================[ Generic ]====================<--
 
    local text = FiGUI.newLabel()
-   function app.INIT(window,tv)
-      ENV.exit = function ()
-         tv:setApp(tv.default_app)
-      end
-      text:setText("Hello World"):setFontScale(0.3)
-      text:setAnchor(0,0,1,1)
-      text:canCaptureCursor(false)
-      window:setMargin(1,1,1,1)
-      window:addChild(text)
-      
-      local close = FiGUI.newLabel()
-      close:setText("X"):setFontScale(0.3)
-      close:setSize(3,3)
-      close:setAlign(0.5,0.5)
-      close:setAnchor(1,0,1,0)
-      close:setPos(-3,0)
-      close.PRESSED:register(function ()
-         tv:setApp(tv.default_app)
-      end)
-      window:addChild(close)
-      reset()
+   ENV.exit = function ()
+      tv:setApp(tv.default_app)
    end
+   text:setText("Hello World"):setFontScale(0.3)
+   text:setAnchor(0,0,1,1)
+   text:canCaptureCursor(false)
+   window:setMargin(1,1,1,1)
+   window:addChild(text)
+   
+   local close = FiGUI.newLabel()
+   close:setText("X"):setFontScale(0.3)
+   close:setSize(3,3)
+   close:setAlign(0.5,0.5)
+   close:setAnchor(1,0,1,0)
+   close:setPos(-3,0)
+   close.PRESSED:register(function ()
+      tv:setApp(tv.default_app)
+   end)
+   window:addChild(close)
+   reset()
 
    local function getLastLines(inputString)
       local lines = {}
@@ -88,7 +88,7 @@ local factory = function () -- creates an instance of the app
       return table.concat(last_lines, "\n")
    end
 
-   function app.TICK(window,tv)
+   function app.TICK()
       if update then
          update = false
          logs = getLastLines(logs)
@@ -97,7 +97,7 @@ local factory = function () -- creates an instance of the app
       end
    end
 
-   function app.KEY_PRESS(window,tv, char, key_id, key_status, key_modifier)
+   function app.KEY_PRESS(char, key_id, key_status, key_modifier)
       if key_status == 1 or key_status == 2 then
          if key_id == 259 then -- backspace
             input = input:sub(0,math.max(carrot-1,0)) .. input:sub(carrot+1,-1)

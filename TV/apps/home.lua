@@ -1,6 +1,9 @@
 local appManager = require("TV.appManager")
 
-local factory = function ()
+---@param window GNUI.container
+---@param tv TV
+---@return Application
+local factory = function (window,tv)
    local FiGUI = require("libraries.FiGUI")
    local tween = require("libraries.GNTweenLib")
    
@@ -34,10 +37,7 @@ local factory = function ()
    
    local wallpaper
 
-
-   ---@param window any
-   ---@param tv TV
-   local function rebuildAppCatalog(window,tv)
+   local function rebuildAppCatalog()
       local i = 0
       for _, appp in pairs(appManager.apps) do
          if appp.icon then
@@ -63,43 +63,41 @@ local factory = function ()
       end
    end
 
-   function app.INIT(window,tv)
-      wallpaper = FiGUI.newSprite()
-      :setTexture(texture)
-      :setRenderType("EMISSIVE_SOLID")
-      wallpaper:setColor(0, 0, 0)
-      if false then -- offline / online
-         http.get(
-            'https://cdn.discordapp.com/attachments/1135020117915344948/1187077856061292624/compression.png?ex=65959367&is=65831e67&hm=ced1c5847b49e9716135cfd8924da6feb6887ed4e001a528cc5e2eb5b1b678a5&',
-            function(output, err)
-               if err then return end
-               texture = textures:read('wallpaper', output)
-               wallpaper:setTexture(texture)
-               tween.tweenFunction(1,"inOutQuad",function (y)
-                  wallpaper:setColor(y,y,y)
-               end)
-            end,
-            'base64'
-         )
-      else
-         texture = textures["TV.wallpaper"]
-         wallpaper:setTexture(texture)
-         wallpaper:setColor(1,1,1)
+   wallpaper = FiGUI.newSprite()
+   :setTexture(texture)
+   :setRenderType("EMISSIVE_SOLID")
+   wallpaper:setColor(0, 0, 0)
+   if false then -- offline / online
+      http.get(
+         'https://cdn.discordapp.com/attachments/1135020117915344948/1187077856061292624/compression.png?ex=65959367&is=65831e67&hm=ced1c5847b49e9716135cfd8924da6feb6887ed4e001a528cc5e2eb5b1b678a5&',
+         function(output, err)
+            if err then return end
+            texture = textures:read('wallpaper', output)
+            wallpaper:setTexture(texture)
+            tween.tweenFunction(1,"inOutQuad",function (y)
+               wallpaper:setColor(y,y,y)
+            end)
+         end,
+         'base64'
+      )
+   else
+      texture = textures["TV.wallpaper"]
+      wallpaper:setTexture(texture)
+      wallpaper:setColor(1,1,1)
 
-         local dim = texture:getDimensions()
-         local aspect_ratio = dim.x/dim.y
-         local window_aspect_ratio = window.ContainmentRect.z/window.ContainmentRect.w
-         wallpaper:setUV(0,0,(dim.x-1) / aspect_ratio * window_aspect_ratio,dim.y-1)
-      end
-      
-      window:addChild(clock_label)
-      window:addChild(date_label)
-      window:addChild(info_label)
-      window:setSprite(wallpaper)
-      window:setPadding(2,2,2,2)
-
-      rebuildAppCatalog(window,tv)
+      local dim = texture:getDimensions()
+      local aspect_ratio = dim.x/dim.y
+      local window_aspect_ratio = window.ContainmentRect.z/window.ContainmentRect.w
+      wallpaper:setUV(0,0,(dim.x-1) / aspect_ratio * window_aspect_ratio,dim.y-1)
    end
+   
+   window:addChild(clock_label)
+   window:addChild(date_label)
+   window:addChild(info_label)
+   window:setSprite(wallpaper)
+   window:setPadding(2,2,2,2)
+
+   rebuildAppCatalog()
    
    local week = {
       "Sunday",
@@ -113,7 +111,7 @@ local factory = function ()
    
    local last_minute = 0
    local frame = 0
-   function app.FRAME(window,tv,dt,df)
+   function app.FRAME(dt,df)
       local date = client:getDate()
       if last_minute ~= date.minute then
          last_minute = date.minute

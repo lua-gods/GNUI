@@ -1,15 +1,13 @@
 ---@class Application
----@field INIT fun(window : GNUI.container,tv:TV)?
----@field OPEN fun(window : GNUI.container,tv:TV)?
----@field TICK fun(window : GNUI.container,tv:TV)?
----@field FRAME fun(window : GNUI.container,tv:TV,delta_frame : number,delta_tick : number)?
----@field CLOSE fun(window : GNUI.container,tv:TV)?
----@field KEY_PRESS fun(window : GNUI.container,tv:TV,char : string?,key_id : Minecraft.keyid ,key_status : Event.Press.state,key_modifier : Event.Press.modifiers)?
+---@field TICK fun()?
+---@field FRAME fun(delta_frame : number,delta_tick : number)?
+---@field CLOSE fun()?
+---@field KEY_PRESS fun(char : string?,key_id : Minecraft.keyid ,key_status : Event.Press.state,key_modifier : Event.Press.modifiers)?
 ---@field window GNUI.container?
----@field capture_keyboard boolean
+---@field capture_keyboard boolean?
 
 ---@class ApplicationPackage
----@field factory fun(): Application
+---@field factory fun(window: GNUI.container, TV: TV): Application
 ---@field name string
 ---@field icon Sprite?
 ---@field instance Application?

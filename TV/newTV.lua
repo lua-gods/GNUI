@@ -149,37 +149,32 @@ function TV:setApp(id)
    end
    local win
    if not self.apps[id] then
-      local new = appManager.apps[id].factory()
-      self.current_app = new
-      self.apps[id]    = new
       win = FigUI.newContainer()
       win:setAnchor(0,0,1,1)
       win:setSprite(wallpaper)
       self.Window:addChild(win)
-      if self.current_app.INIT then
-         self.current_app.INIT(win,self)
-      end
+      
+      local new = appManager.apps[id].factory(win,self)
+      self.current_app = new
+      self.apps[id]    = new
    else
       self.current_app = self.apps[id]
       win = self.current_app.window
-      self.Window:addChild(self.apps[id].window)
       win:setAnchor(0,0,1,1)
-   end
-   if self.current_app.OPEN then
-      self.current_app.OPEN(win,self)
+      self.Window:addChild(self.apps[id].window)
    end
    self.current_app.window = win
 end
 
 skullHandler.TICK:register(function (skull)
    if skull.tv and skull.tv.current_app and skull.tv.current_app.TICK then
-      skull.tv.current_app.TICK(skull.tv.current_app.window,skull.tv)
+      skull.tv.current_app.TICK()
    end
 end)
 
 skullHandler.FRAME:register(function (skull,dt,df)
    if skull.tv and skull.tv.current_app and skull.tv.current_app.FRAME then
-      skull.tv.current_app.FRAME(skull.tv.current_app.window,skull.tv,dt,df)
+      skull.tv.current_app.FRAME(dt,df)
    end
 end)
 
@@ -256,11 +251,7 @@ local key2string = require("libraries.key2string")
 function remoteAPI.keyPress(id,key,status,modifier)
    if users[id].selected_tv.current_app then
       if users[id].selected_tv.current_app.KEY_PRESS then
-         users[id].selected_tv.current_app.KEY_PRESS(
-            users[id].selected_tv.Window,
-            users[id].selected_tv,
-            key2string(key,modifier),
-            key,status,modifier)
+         users[id].selected_tv.current_app.KEY_PRESS(key2string(key,modifier),key,status,modifier)
       end
    end
    return users[id].selected_tv.current_app.capture_keyboard
