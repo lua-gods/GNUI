@@ -12,6 +12,7 @@ models:removeChild(models.core)
 ---@field Dimensions Vector4
 ---@field current_app Application
 ---@field apps table<any,Application>
+---@field default_app string?
 local TV = {}
 TV.__index = TV
 
@@ -27,6 +28,7 @@ function TV:new(modelPart)
    local window = FigUI.newContainer()
    new.Window = window
    new.apps = {}
+   new.default_app = "Home"
    modelPart:addChild(window.Part)
    setmetatable(new,TV)
    return new
@@ -143,7 +145,7 @@ function TV:setApp(id)
       self.Window:removeChild(self.current_app.window)
    end
    if not appManager.apps[id] then
-      error("Application \""..id.."\" does not exist",2)
+      error("Application \""..tostring(id).."\" does not exist",2)
    end
    local win
    if not self.apps[id] then
@@ -162,9 +164,9 @@ function TV:setApp(id)
       win = self.current_app.window
       self.Window:addChild(self.apps[id].window)
       win:setAnchor(0,0,1,1)
-      if self.current_app.OPEN then
-         self.current_app.OPEN(win,self)
-      end
+   end
+   if self.current_app.OPEN then
+      self.current_app.OPEN(win,self)
    end
    self.current_app.window = win
 end
@@ -190,14 +192,14 @@ end)
 
 skullHandler.INIT:register(function (skull)
    if skull.tv then
-      skull.tv:setApp("Home")
+      skull.tv:setApp(skull.tv.default_app)
    end
 end)
 
 -- CONTROL SERVER
 
 local remoteAuthAPI = {}
-local users = {}
+local users = {} ---@type table<string,{selected_tv:TV}>
 local remoteAPI = {}
 
 ---@param client ClientAPI
@@ -214,6 +216,9 @@ function remoteAuthAPI.handshake(client)
          end,
          click = function (right)
             remoteAPI.click(id,right)
+         end,
+         keyPress = function (key,status,modifier)
+            return remoteAPI.keyPress(id,key,status,modifier)
          end
       }
       users[id] = {api=api}
@@ -245,6 +250,20 @@ function remoteAPI.click(id,right)
       local window = users[id].selected_tv.Window
       window:setCursor(window.Cursor,nil,true)
    end
+end
+
+local key2string = require("libraries.key2string")
+function remoteAPI.keyPress(id,key,status,modifier)
+   if users[id].selected_tv.current_app then
+      if users[id].selected_tv.current_app.KEY_PRESS then
+         users[id].selected_tv.current_app.KEY_PRESS(
+            users[id].selected_tv.Window,
+            users[id].selected_tv,
+            key2string(key,modifier),
+            key,status,modifier)
+      end
+   end
+   return users[id].selected_tv.current_app.capture_keyboard
 end
 
 avatar:store("auth",remoteAuthAPI)

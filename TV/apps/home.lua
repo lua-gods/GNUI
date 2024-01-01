@@ -82,7 +82,7 @@ local factory = function ()
             'base64'
          )
       else
-         texture = textures.wallpaper
+         texture = textures["TV.wallpaper"]
          wallpaper:setTexture(texture)
          wallpaper:setColor(1,1,1)
 

@@ -86,6 +86,7 @@ end
 ---@param texture Texture
 ---@return Sprite
 function sprite:setTexture(texture)
+   if type(texture) ~= "Texture" then error("Invalid texture, recived "..type(texture)..".",2) end
    self.Texture = texture
    local dim = texture:getDimensions()
    self.UV = vectors.vec4(0,0,dim.x-1,dim.y-1)

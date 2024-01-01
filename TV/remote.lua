@@ -4,8 +4,9 @@
 local connected = false
 local remote
 
-local luvpos = vectors.vec2(0,0)
-local lstv
+local last_uv_pos = vectors.vec2(0,0)
+local hovering_tv -- the TV hovering on
+local selected_tv -- the TV clicked on
 
 ---@param ray_dir Vector3
 ---@param plane_dir Vector3
@@ -32,7 +33,8 @@ local input = {
 
 input.primary.press = function ()
    host:swingArm()
-   if lstv then
+   selected_tv = hovering_tv
+   if hovering_tv then
       remote.click(false)
       return true
    end
@@ -40,14 +42,22 @@ end
 
 input.secondary.press = function ()
    host:swingArm(true)
-   if lstv then
+   selected_tv = hovering_tv
+   if hovering_tv then
       remote.click(true)
       return true
    end
 end
 
+events.KEY_PRESS:register(function (key,status,modifier)
+   if hovering_tv and selected_tv == hovering_tv then
+      local captured = remote.keyPress(key,status,modifier)
+      return status == 1 and captured
+   end
+end)
+
 local TV = world.avatarVars()["e4b91448-3b58-4c1f-8339-d40f75ecacc4"]
-events.TICK:register(function (dt)
+events.TICK:register(function ()
    if not connected then -- disconnected
       TV = world.avatarVars()["e4b91448-3b58-4c1f-8339-d40f75ecacc4"]
       if TV.getEveryTV then
@@ -77,9 +87,9 @@ events.TICK:register(function (dt)
             if  lpos.x > 0 and lpos.y > 0 
             and lpos.x < tv.rect.z and lpos.y < tv.rect.w
             and (gpos-eyePos):length() < 5 then
-               if tv.id ~= lstv then
+               if tv.id ~= hovering_tv then
                   remote.setSelectedTV(tv.id)
-                  lstv = tv.id
+                  hovering_tv = tv.id
                end
                found_tv = true
                
@@ -87,9 +97,9 @@ events.TICK:register(function (dt)
                   math.map(lpos.x,tv.rect.z,0,1,0),
                   math.map(lpos.y,tv.rect.w,0,0,1)
                )
-               if luvpos ~= uvpos then
+               if last_uv_pos ~= uvpos then
                   remote.setCursorPos(uvpos)
-                  luvpos = uvpos
+                  last_uv_pos = uvpos
                end
                break
                --particles["end_rod"]:pos(gpos):spawn():scale(1):lifetime(0)
@@ -98,7 +108,8 @@ events.TICK:register(function (dt)
       end
       if not found_tv then
          remote.setSelectedTV(nil)
-         lstv = nil
+         selected_tv = nil
+         hovering_tv = nil
       end
    end
 end)

@@ -25,7 +25,7 @@ local factory = function () -- creates an instance of the app
     end
     
     -- gets called when a key is pressed, hover over the parameters for definitions.
-    function app.KEY_PRESS(window,tv, player, char, key_id, key_status, key_modifier)
+    function app.KEY_PRESS(window,tv, char, key_id, key_status, key_modifier)
     end
     
     -- gets called when the user exits the app.
