@@ -16,9 +16,9 @@ models:removeChild(models.core)
 local TV = {}
 TV.__index = TV
 
-local wallpaper = FigUI.newSprite()
+local default_wallpaper = FigUI.newSprite()
 :setTexture(textures.ui)
-:setUV(0,16,0,16)
+:setUV(0,14,0,14)
 :setRenderType("EMISSIVE_SOLID")
 
 ---@param modelPart ModelPart
@@ -122,7 +122,7 @@ skullHandler.INIT:register(function(skull)
       skull.tv = tv
       skull.tvid = id
       tv.Window:setSize(16 * rect.z,16 * rect.w)
-      tv.Window:setSprite(wallpaper:duplicate())
+      tv.Window:setSprite(default_wallpaper:duplicate())
       TVanchor:setPos(8-(rect.x-rect.z+1)*16,(rect.y+1)*16,-16-4-0.02)
       tvs[id] = {
          tv=tv,
@@ -151,7 +151,7 @@ function TV:setApp(id)
    if not self.apps[id] then
       win = FigUI.newContainer()
       win:setAnchor(0,0,1,1)
-      win:setSprite(wallpaper)
+      win:setSprite(default_wallpaper)
       self.Window:addChild(win)
       
       local new = appManager.apps[id].factory(win,self)
