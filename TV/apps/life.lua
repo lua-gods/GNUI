@@ -96,15 +96,19 @@ local factory = function (window,tv)
 
     return app
 end
-local icon = FiGUI.newSprite()
 math.randomseed(8)
-local texture = textures:newTexture("life" .. uuid(), 16, 16)
-texture:applyFunc(0, 0, 16, 16, function(_, x, y)
+local icon = textures:newTexture("life" .. uuid(), 16, 16)
+icon:applyFunc(0, 0, 16, 16, function(_, x, y)
     return math.random() > 0.5 and ALIVE or DEAD
 end)
 for _ = 1, 5 do
-    rules(texture, texture, 16, 16)
+    rules(icon, icon, 16, 16)
 end
-texture:update()
-icon:setTexture(texture)
-appManager:registerApp(factory,"Life", icon)
+icon:update()
+
+avatar:store("app1",{
+    factory = factory,
+    name    = "Life",
+    icon    = icon,
+    uuid    = client:getSystemTime()})
+--appManager:registerApp(factory,"Life", icon)

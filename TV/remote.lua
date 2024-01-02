@@ -1,5 +1,5 @@
 
-
+if not host:isHost() then return end
 
 local connected = false
 local remote

@@ -137,7 +137,4 @@ local factory = function (window,tv) -- creates an instance of the app
    return app
 end
 
-local icon = FiGUI.newSprite()
-icon:setTexture(textures["TV.apps.terminal.terminal_icon"])
-
-appManager:registerApp(factory,"Terminal",icon)
+appManager:registerApp(factory,"Terminal",textures["TV.apps.terminal.terminal_icon"])

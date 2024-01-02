@@ -113,7 +113,4 @@ local factory = function (window,tv)
     return app
 end
 
-local icon = FiGUI.newSprite()
-icon:setTexture(textures:fromVanilla("sand", "minecraft:textures/block/sand.png"))
-
-appManager:registerApp(factory,"Sand",icon)
+appManager:registerApp(factory,"Sand",textures:fromVanilla("sand", "minecraft:textures/block/sand.png"))

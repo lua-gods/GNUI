@@ -1,21 +1,37 @@
 local appManager = require("TV.appManager")
+local FiGUI = require("libraries.FiGUI")
+local tween = require("libraries.GNTweenLib")
+local http = require("libraries.http")
 
 local links = {
    "https://media.discordapp.net/attachments/1124181688566681701/1191341307340259379/2024-01-01_19.18.55.png",
    "https://cdn.discordapp.com/attachments/1135020117915344948/1187077856061292624/compression.png",
 }
 
+local wallpaper_downloaded = false
+local texture = textures:newTexture("wallpaper",1,1):setPixel(0,0,vectors.vec3())
+http.get(
+   links[2],
+   function(output, err)
+      if err then return end
+      texture = textures:read('wallpaper', output)
+      wallpaper_downloaded = true
+   end,
+   'base64'
+)  
+
 ---@param window GNUI.container
 ---@param tv TV
 ---@return Application
 local factory = function (window,tv)
-   local FiGUI = require("libraries.FiGUI")
-   local tween = require("libraries.GNTweenLib")
+   local _wallpaper_downloaded = false
+   local wallpaper = FiGUI.newSprite()
+   wallpaper:setTexture(texture)
+
+   local app_list = FiGUI.newContainer()
+   app_list:setAnchor(0,0,1,1)
    
-   local texture = textures["1x1white"]
-   
-   local http = require("libraries.http")
-   
+
    local clock_label = FiGUI:newLabel()
    clock_label:canCaptureCursor(false)
    clock_label:setAnchor(0,0.4,1,0.6)
@@ -39,10 +55,13 @@ local factory = function (window,tv)
    info_label:setTextEffect("SHADOW")
    ---@type Application
    local app = {}
-   
-   local wallpaper
 
    local function rebuildAppCatalog()
+      for key, value in pairs(app_list.Children) do
+         app_list:removeChild(value)
+      end
+      app_list.Children = {}
+
       local i = 0
       for _, appp in pairs(appManager.apps) do
          if appp.icon then
@@ -50,8 +69,8 @@ local factory = function (window,tv)
             local app_icon = FiGUI.newContainer()
             app_icon:setSize(12,12)
             app_icon:setPos(offset)
-            app_icon:setSprite(appp.icon)
-            window:addChild(app_icon)
+            app_icon:setSprite(FiGUI.newSprite():setTexture(appp.icon))
+            app_list:addChild(app_icon)
             app_icon:setMargin(2,2,2,2)
             app_icon.PRESSED:register(function ()
                tv:setApp(appp.name)
@@ -62,47 +81,22 @@ local factory = function (window,tv)
             app_label:setFontScale(0.2):setText(appp.name):setAlign(0.5,0.5)
             app_label:canCaptureCursor(false)
             app_label:setTextEffect("SHADOW")
-            window:addChild(app_label)
+            app_list:addChild(app_label)
             i = i + 1
          end
       end
-   end
-
-   wallpaper = FiGUI.newSprite()
-   :setTexture(texture)
-   :setRenderType("EMISSIVE_SOLID")
-   wallpaper:setColor(0, 0, 0)
-   if true then -- offline / online
-      http.get(
-         links[1],
-         function(output, err)
-            if err then return end
-            texture = textures:read('wallpaper', output)
-            wallpaper:setTexture(texture)
-            tween.tweenFunction(1,"inOutQuad",function (y)
-               wallpaper:setColor(y,y,y)
-            end)
-         end,
-         'base64'
-      )
-   else
-      texture = textures["TV.wallpaper"]
-      wallpaper:setTexture(texture)
-      wallpaper:setColor(1,1,1)
-
-      local dim = texture:getDimensions()
-      local aspect_ratio = dim.x/dim.y
-      local window_aspect_ratio = window.ContainmentRect.z/window.ContainmentRect.w
-      wallpaper:setUV(0,0,(dim.x-1) / aspect_ratio * window_aspect_ratio,dim.y-1)
    end
    
    window:addChild(clock_label)
    window:addChild(date_label)
    window:addChild(info_label)
    window:setSprite(wallpaper)
+   window:addChild(app_list)
    window:setPadding(2,2,2,2)
 
-   rebuildAppCatalog()
+   appManager.APP_LIST_CHANGED:register(function ()
+      rebuildAppCatalog()
+   end)
    
    local week = {
       "Sunday",
@@ -117,6 +111,14 @@ local factory = function (window,tv)
    local last_minute = 0
    local frame = 0
    function app.FRAME(dt,df)
+      if wallpaper_downloaded and _wallpaper_downloaded ~= wallpaper_downloaded then
+         local dim = texture:getDimensions()
+         local aspect_ratio = dim.x/dim.y
+         local window_aspect_ratio = window.ContainmentRect.z/window.ContainmentRect.w
+         wallpaper:setTexture(texture)
+         wallpaper:setUV(0,0,(dim.x-1) / aspect_ratio * window_aspect_ratio,dim.y-1)
+         _wallpaper_downloaded = true
+      end
       local date = client:getDate()
       if last_minute ~= date.minute then
          last_minute = date.minute

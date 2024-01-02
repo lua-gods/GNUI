@@ -1,4 +1,5 @@
 local FigUI = require("libraries.FiGUI")
+avatar:store("figui",FigUI)
 local skullHandler = require("libraries.skullHandler")
 local lorem = require("lorem")
 local tvs = {} -- collection of all loaded tvs
@@ -135,12 +136,14 @@ skullHandler.INIT:register(function(skull)
    end
 end)
 
+-->====================[ App Management ]====================<--
+
 local appManager = require("TV.appManager")
 
 function TV:setApp(id)
    if self.current_app then
       if self.current_app.CLOSE then
-         self.current_app.CLOSE(self.current_app.window,self)
+         self.current_app.CLOSE()
       end
       self.Window:removeChild(self.current_app.window)
    end
@@ -191,37 +194,11 @@ skullHandler.INIT:register(function (skull)
    end
 end)
 
--- CONTROL SERVER
+-->====================[ Control Server ]====================<--
 
 local remoteAuthAPI = {}
 local users = {} ---@type table<string,{selected_tv:TV}>
 local remoteAPI = {}
-
----@param client ClientAPI
-function remoteAuthAPI.handshake(client)
-   local player = client:getViewer()
-   local id = player:getUUID()
-   if not users[id] then
-      local api = {
-         setSelectedTV = function (tv_id)
-            return remoteAPI.setSelectedTV(id,tv_id)
-         end,
-         setCursorPos = function (uvpos)
-            return remoteAPI.setCursorPos(id,uvpos)
-         end,
-         click = function (right)
-            remoteAPI.click(id,right)
-         end,
-         keyPress = function (key,status,modifier)
-            return remoteAPI.keyPress(id,key,status,modifier)
-         end
-      }
-      users[id] = {api=api}
-      return api
-   else
-      return users[id]
-   end
-end
 
 function remoteAPI.setSelectedTV(id,tv_id)
    users[id].selected_tv = tvs[tv_id] and tvs[tv_id].tv or nil
@@ -255,6 +232,32 @@ function remoteAPI.keyPress(id,key,status,modifier)
       end
    end
    return users[id].selected_tv.current_app.capture_keyboard
+end
+
+---@param client ClientAPI
+function remoteAuthAPI.handshake(client)
+   local player = client:getViewer()
+   local id = player:getUUID()
+   if not users[id] then
+      local api = {
+         setSelectedTV = function (tv_id)
+            return remoteAPI.setSelectedTV(id,tv_id)
+         end,
+         setCursorPos = function (uvpos)
+            return remoteAPI.setCursorPos(id,uvpos)
+         end,
+         click = function (right)
+            remoteAPI.click(id,right)
+         end,
+         keyPress = function (key,status,modifier)
+            return remoteAPI.keyPress(id,key,status,modifier)
+         end
+      }
+      users[id] = api
+      return api
+   else
+      return users[id]
+   end
 end
 
 avatar:store("auth",remoteAuthAPI)

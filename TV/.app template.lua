@@ -1,6 +1,9 @@
--- app template version 2.1.1
-local appManager = require("TV.appManager")
-local FiGUI = require("libraries.FiGUI")
+-- app template version 2.2.1
+
+-- if FiGUI dosent exist in the host avatar, this attempts to get it from the TV itself.
+local FiGUI = require("libraries.FiGUI") 
+ or (world.avatarVars()["dc912a38-2f0f-40f8-9d6d-57c400185362"] 
+ and world.avatarVars()["dc912a38-2f0f-40f8-9d6d-57c400185362"].FiGUI or nil)
 
 -- gets called when an instance is created, aka init
 local factory = function (window,tv) -- creates an instance of the app
@@ -31,4 +34,12 @@ local factory = function (window,tv) -- creates an instance of the app
     return app
 end
 
-appManager:registerApp(factory,"Example app"--[[,icon]])
+-- set this into a texture you want to represent as the icon for this app.
+local icon
+
+
+avatar:store("app1",{
+    factory = factory,
+    name    = "Life",
+    icon    = icon,
+    uuid    = client:getSystemTime()})
