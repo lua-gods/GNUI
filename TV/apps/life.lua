@@ -41,49 +41,47 @@ local function uuid()
     return client.intUUIDToString(client.generateUUID())
 end
 
-local factory = function ()
+local factory = function (window,tv)
     ---@type Application
     local app = {}
     app.capture_keyboard = false
 
 
 
-    function app.OPEN(window,tv) 
-        local rect = window.ContainmentRect
-        local size = ((rect.zw - rect.xy).xy / DPI):floor() --[[@as Vector2]]
+    local rect = window.ContainmentRect
+    local size = ((rect.zw - rect.xy).xy / DPI):floor() --[[@as Vector2]]
 
-        local sprite = FiGUI.newSprite()
-        window:setSprite(sprite)
+    local sprite = FiGUI.newSprite()
+    window:setSprite(sprite)
 
-        app.data = {
-            size = size,
-            texture_new = textures:newTexture("life" .. uuid(), size.x, size.y),
-            texture_old = textures:newTexture("life" .. uuid(), size.x, size.y),
-            sprite = sprite,
-            modified = {}
-        }
+    app.data = {
+        size = size,
+        texture_new = textures:newTexture("life" .. uuid(), size.x, size.y),
+        texture_old = textures:newTexture("life" .. uuid(), size.x, size.y),
+        sprite = sprite,
+        modified = {}
+    }
 
-        math.randomseed(1)
-        app.data.texture_old:applyFunc(0, 0, size.x, size.y, function(_, x, y)
-            return math.random() > 0.5 and ALIVE or DEAD
-        end)
+    math.randomseed(1)
+    app.data.texture_old:applyFunc(0, 0, size.x, size.y, function(_, x, y)
+        return math.random() > 0.5 and ALIVE or DEAD
+    end)
 
-        sprite:setTexture(app.data.texture_old)
+    sprite:setTexture(app.data.texture_old)
 
-        local close = FiGUI.newLabel()
-        close:setText("X"):setFontScale(0.3)
-        close:setSize(3,3)
-        close:setAlign(0.5,0.5)
-        close:setAnchor(1,0,1,0)
-        close:setPos(-3,0)
-        close.PRESSED:register(function ()
-            tv:setApp(tv.default_app)
-        end)
-        window:addChild(close)
-    end
+    local close = FiGUI.newLabel()
+    close:setText("X"):setFontScale(0.3)
+    close:setSize(3,3)
+    close:setAlign(0.5,0.5)
+    close:setAnchor(1,0,1,0)
+    close:setPos(-3,0)
+    close.PRESSED:register(function ()
+        tv:setApp(tv.default_app)
+    end)
+    window:addChild(close)
     
 
-    function app.TICK(window,tv)
+    function app.TICK()
         if world.getTime() % 1 ~= 0 then return end
 
         local data = app.data

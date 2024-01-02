@@ -1,5 +1,10 @@
 local appManager = require("TV.appManager")
 
+local links = {
+   "https://media.discordapp.net/attachments/1124181688566681701/1191341307340259379/2024-01-01_19.18.55.png",
+   "https://cdn.discordapp.com/attachments/1135020117915344948/1187077856061292624/compression.png",
+}
+
 ---@param window GNUI.container
 ---@param tv TV
 ---@return Application
@@ -67,9 +72,9 @@ local factory = function (window,tv)
    :setTexture(texture)
    :setRenderType("EMISSIVE_SOLID")
    wallpaper:setColor(0, 0, 0)
-   if false then -- offline / online
+   if true then -- offline / online
       http.get(
-         'https://cdn.discordapp.com/attachments/1135020117915344948/1187077856061292624/compression.png?ex=65959367&is=65831e67&hm=ced1c5847b49e9716135cfd8924da6feb6887ed4e001a528cc5e2eb5b1b678a5&',
+         links[1],
          function(output, err)
             if err then return end
             texture = textures:read('wallpaper', output)
