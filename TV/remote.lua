@@ -56,10 +56,10 @@ events.KEY_PRESS:register(function (key,status,modifier)
    end
 end)
 
-local TV = world.avatarVars()["e4b91448-3b58-4c1f-8339-d40f75ecacc4"]
+local TV
 events.TICK:register(function ()
    if not connected then -- disconnected
-      TV = world.avatarVars()["e4b91448-3b58-4c1f-8339-d40f75ecacc4"]
+      TV = world.avatarVars()["dc912a38-2f0f-40f8-9d6d-57c400185362"]
       if TV.getEveryTV then
          local returned = TV.auth.handshake(client)
          if returned then
@@ -86,7 +86,7 @@ events.TICK:register(function ()
             local lpos = tvmat:apply(gpos)
             if  lpos.x > 0 and lpos.y > 0 
             and lpos.x < tv.rect.z and lpos.y < tv.rect.w
-            and (gpos-eyePos):length() < 5 then
+            and (gpos-eyePos):length() < 10 then
                if tv.id ~= hovering_tv then
                   remote.setSelectedTV(tv.id)
                   hovering_tv = tv.id
@@ -101,8 +101,8 @@ events.TICK:register(function ()
                   remote.setCursorPos(uvpos)
                   last_uv_pos = uvpos
                end
-               break
                --particles["end_rod"]:pos(gpos):spawn():scale(1):lifetime(0)
+               break
             end
          end
       end
