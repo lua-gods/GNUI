@@ -76,7 +76,7 @@ events.TICK:register(function ()
       if TV and TV.getEveryTV then
          local returned = TV.auth.handshake(client)
          if returned then
-            expiry = 200
+            expiry = 5*20
             remote = returned
             connected = true
          end
