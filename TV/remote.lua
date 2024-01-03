@@ -60,7 +60,7 @@ local TV
 events.TICK:register(function ()
    if not connected then -- disconnected
       TV = world.avatarVars()["dc912a38-2f0f-40f8-9d6d-57c400185362"]
-      if TV.getEveryTV then
+      if TV and TV.getEveryTV then
          local returned = TV.auth.handshake(client)
          if returned then
             remote = returned
