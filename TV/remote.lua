@@ -7,6 +7,7 @@ local remote
 local last_uv_pos = vectors.vec2(0,0)
 local hovering_tv -- the TV hovering on
 local selected_tv -- the TV clicked on
+local occupied = false
 
 ---@param ray_dir Vector3
 ---@param plane_dir Vector3
@@ -32,37 +33,50 @@ local input = {
 }
 
 input.primary.press = function ()
-   host:swingArm()
-   selected_tv = hovering_tv
-   if hovering_tv then
-      remote.click(false)
-      return true
+   if not occupied then
+      host:swingArm()
+      selected_tv = hovering_tv
+      if hovering_tv then
+         remote.click(false)
+         return true
+      end
    end
 end
 
 input.secondary.press = function ()
-   host:swingArm(true)
-   selected_tv = hovering_tv
-   if hovering_tv then
-      remote.click(true)
-      return true
+   if not occupied then
+      host:swingArm(true)
+      selected_tv = hovering_tv
+      if hovering_tv then
+         remote.click(true)
+         return true
+      end
    end
 end
 
 events.KEY_PRESS:register(function (key,status,modifier)
-   if hovering_tv and selected_tv == hovering_tv then
+   if hovering_tv and selected_tv == hovering_tv and not occupied then
       local captured = remote.keyPress(key,status,modifier)
       return status == 1 and captured
    end
 end)
 
+local expiry = 0
+
+
 local TV
 events.TICK:register(function ()
+   occupied = host:getScreen() ~= nil
+   expiry = expiry - 1
+   if expiry < 0 then
+      connected = false
+   end
    if not connected then -- disconnected
       TV = world.avatarVars()["dc912a38-2f0f-40f8-9d6d-57c400185362"]
       if TV and TV.getEveryTV then
          local returned = TV.auth.handshake(client)
          if returned then
+            expiry = 200
             remote = returned
             connected = true
          end
