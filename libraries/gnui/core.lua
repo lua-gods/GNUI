@@ -1,8 +1,8 @@
 local config = {
    debug_visible = false,
-   debug_scale = 0.4,
+   debug_scale = 1,
    
-   clipping_margin = 0.025,
+   clipping_margin = 1,
    --clipping_margin = 2,
    
    debug_event_name = "_c",

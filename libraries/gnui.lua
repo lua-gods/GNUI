@@ -13,13 +13,12 @@ local api = {}
 
 
 
-local eventLib = require("libraries.figui.eventHandler")
-local utils = require("libraries.figui.utils")
-local sprite = require("libraries.figui.spriteLib")
+local utils = require("libraries.gnui.utils")
+local sprite = require("libraries.gnui.spriteLib")
 
-local element = require("libraries.figui.elements.element")
-local container = require("libraries.figui.elements.container")
-local label = require("libraries.figui.elements.label")
+local element = require("libraries.gnui.elements.element")
+local container = require("libraries.gnui.elements.container")
+local label = require("libraries.gnui.elements.label")
 
 
 api.newContainer = container.new

@@ -1,8 +1,8 @@
 
 local default_texture = textures:newTexture("1x1white",1,1):setPixel(0,0,vectors.vec3(1,1,1))
-local eventLib = require("libraries.figui.eventHandler")
-local utils = require("libraries.figui.utils")
-local core = require("libraries.figui.core")
+local eventLib = require("libraries.eventHandler")
+local utils = require("libraries.gnui.utils")
+local core = require("libraries.gnui.core")
 
 
 ---@class Sprite
@@ -38,7 +38,7 @@ function sprite.new(obj)
    new.UV = new.UV or vectors.vec4(0,0,1,1)
    new.Size = new.Size or vectors.vec2(16,16)
    new.Color = new.Color or vectors.vec3(1,1,1)
-   new.Scale = new.Scale or 4
+   new.Scale = new.Scale or 1
    new.DIMENSIONS_CHANGED = eventLib.new()
    new.RenderTasks = {}
    new.RenderType = new.RenderType or "EMISSIVE_SOLID"

@@ -1,8 +1,9 @@
-local eventLib = require("libraries.figui.eventHandler")
-local utils = require("libraries.figui.utils")
+---@diagnostic disable: assign-type-mismatch, undefined-field
+local eventLib = require("libraries.eventHandler")
+local utils = require("libraries.gnui.utils")
 
-local container = require("libraries.figui.elements.container")
-local core = require("libraries.figui.core")
+local container = require("libraries.gnui.elements.container")
+local core = require("libraries.gnui.core")
 
 ---@alias TextEffect string
 ---| "NONE"
@@ -12,16 +13,18 @@ local core = require("libraries.figui.core")
 ---@class GNUI.Label : GNUI.container
 ---@field Text string
 ---@field TextEffect TextEffect
----@field Words table<any,{word:string,len:number}>
+---@field Words table<any,{word:string?,hex:string?,len:number?}>
 ---@field RenderTasks table<any,TextTask>
 ---@field TEXT_CHANGED EventLib
 ---@field Align Vector2
 ---@field AutoWarp boolean
 ---@field FontScale number
+---@field _TextChanged boolean -- for optimization purposes
 local label = {}
 label.__index = function (t,i)
    return label[i] or container[i]
 end
+label.__type = "GNUI.element.container.label"
 
 ---@return GNUI.Label
 function label.new(preset)
@@ -34,6 +37,7 @@ function label.new(preset)
    new.Words = {}
    new.RenderTasks = {}
    new.FontScale = 1
+   new._TextChanged = false
 
    new.TEXT_CHANGED:register(function ()
       new
@@ -95,43 +99,52 @@ end
 
 function label:_bakeWords()
    self.Words = utils.string2instructions(self.Text)
+   self._TextChanged = true
    return self
 end
 
 function label:_buildRenderTasks()
    for i, data in pairs(self.Words) do
-      if type(data) == "table" then
-         self.RenderTasks[i] = self.Part:newText("word" .. i):setText(data.word)   
+      local data_type = type(data)
+      if data_type == "table" and data.word then
+         self.RenderTasks[i] = self.Part:newText("word" .. i)
       end
    end
    return self
 end
 
+local e = 0
 function label:_updateRenderTasks()
+   e = e + 1
    if #self.Words == 0 then return end
    local cursor = vectors.vec2(self.ContainmentRect.x,0)
+   local current_color = "ffffff"
    local current_line = 1
    local line_len = 0
    local lines = {}
    
-   lines[current_line] = {width=0,len={}}
+   lines[current_line] = {width=0,len={},clr={}}
    -- generate lines
    for i, data in pairs(self.Words) do
       --- calculate where the next word should be placed
       local data_type = type(data)
       local current_word_width
-      if data_type == "table" then -- word
-         current_word_width = data.len * self.FontScale
-         cursor.x = cursor.x + current_word_width
-         line_len = line_len + current_word_width
-      elseif data_type == "number" then
+      if data_type == "table" then -- everything else
+         if data.word then -- word
+            current_word_width = data.len * self.FontScale
+            cursor.x = cursor.x + current_word_width
+            line_len = line_len + current_word_width
+         elseif data.hex then -- word
+            current_color = data.hex
+         end
+      elseif data_type == "number" then -- whitespace
          current_word_width = data * self.FontScale
          cursor.x = cursor.x + current_word_width
          line_len = line_len + current_word_width
       elseif data_type == "boolean" then
          cursor.x = math.huge
       end
-
+      
       -- inside bounds verification
       if cursor.x > self.ContainmentRect.z then
          -- reset cursor
@@ -142,30 +155,37 @@ function label:_updateRenderTasks()
          lines[current_line].width = line_len * self.FontScale
          line_len = 0
          current_line = current_line + 1
-         lines[current_line] = {width=0,len={}}
+         lines[current_line] = {width=0,len={},clr={}}
       end
-      if data_type == "table" then
+
+      -- pregenerating more temporary data
+      if data_type == "table" and data.word then
          lines[current_line].len[i] = vectors.vec2(-cursor.x + current_word_width,cursor.y) -- tells where the text should be positioned
+         lines[current_line].clr[i] = current_color
       end
    end
 
    --- finalize last line
    lines[current_line].width =  line_len
-
    -- place render tasks
    for key, line in pairs(lines) do
       for id, word_length in pairs(line.len) do
-         self.RenderTasks[id]
+         local rt = self.RenderTasks[id]
+         rt
          :setPos(
             word_length.x + (line.width - self.ContainmentRect.z + self.ContainmentRect.x) * self.Align.x,
             word_length.y + ((current_line) * 8 * self.FontScale - (self.ContainmentRect.w - self.ContainmentRect.y)) * self.Align.y - self.ContainmentRect.y,
-         -0.1)
+            -((self.Z + self.ChildIndex / (self.Parent and #self.Parent.Children or 1) * 0.99) * core.clipping_margin * 0.5))
          :setScale(self.FontScale,self.FontScale,1)
          :setShadow(self.TextEffect == "SHADOW")
          :setOutline(self.TextEffect == "OUTLINE")
          :setVisible(true)
+         if self._TextChanged then
+            rt:setText('{"text":"'..self.Words[id].word..'","color":"#'..line.clr[id]..'"}')
+         end
       end
    end
+   --self._TextChanged = false -- optimization breaks things for some reason :L
    return self
 end
 

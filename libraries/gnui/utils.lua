@@ -112,6 +112,9 @@ function utils.deepCopy(original)
 	return copy
 end
 
+--print(("#ffffff hello world"):gmatch("(#%x%x%x%x%x%x)([^%s]*)"))
+
+--(§%x%x%x%x%x%x)([^%s]+)
 ---Splits a string into instructions on how to split this.  
 ---{word:string,len:number} = word  
 ---number = whitespace  
@@ -119,15 +122,32 @@ end
 ---@param text string
 function utils.string2instructions(text)
    local instructions = {}
-   for line in text:gmatch('[^\n]+') do
-      for word,white in line:gmatch("([^%s]+)(%s*)") do
-         if #word > 0 then
-            table.insert(instructions,{word=word,len=client.getTextWidth(word)})
+   for line in text:gmatch('[^\n]+') do -- splits every line
+      for word,white in line:gmatch("([^%s]+)(%s*)") do -- splits every word
+         if #word > 0 then -- word
+            local splitted = false
+            for word_island_left, hex_format, word_island_right in word:gmatch("([^%s]*)%s*(#%x%x%x%x%x%x)%s*([^%s]*)") do
+               if #word_island_left > 0 then -- splitted word
+                  table.insert(instructions,{word=word_island_left,len=client.getTextWidth(word_island_left)})
+                  splitted = true
+               end
+               if #hex_format > 0 then -- §......
+                  table.insert(instructions,{hex=hex_format:sub(2,-1)})
+                  splitted = true
+               end
+               if #word_island_right > 0 then -- splitted word
+                  table.insert(instructions,{word=word_island_right,len=client.getTextWidth(word_island_right)})
+                  splitted = true
+               end
+            end
+            if not splitted then
+               table.insert(instructions,{word=word,len=client.getTextWidth(word)})
+            end
          end
-         table.insert(instructions,client.getTextWidth(white))
-      end
-      if type(instructions[#instructions]) == "number" then -- remove excess whitespace
-         instructions[#instructions] = nil
+         -- whitespace
+         if #white > 0 then
+            table.insert(instructions,client.getTextWidth(white))
+         end
       end
       table.insert(instructions,true)
    end
