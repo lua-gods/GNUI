@@ -15,6 +15,7 @@ local core = require("libraries.gnui.core")
 ---@field Z number
 ---@field ContainmentRect Vector4
 ---@field DIMENSIONS_CHANGED EventLib
+---@field SIZE_CHANGED EventLib
 ---@field Margin Vector4
 ---@field MARGIN_CHANGED EventLib
 ---@field Padding Vector4
@@ -30,6 +31,9 @@ local core = require("libraries.gnui.core")
 ---@field PRESSED EventLib
 ---@field MOUSE_ENTERED EventLib
 ---@field MOUSE_EXITED EventLib
+---@field ClipOnParent boolean
+---@field isClipping boolean
+---@field isVisible boolean
 ---@field Part ModelPart
 local container = {}
 container.__index = function (t,i)
@@ -48,6 +52,7 @@ function container.new(preset,force_debug)
    new.ContainerShift = vectors.vec2()
    new.Z = 0
    new.DIMENSIONS_CHANGED = eventLib.new()
+   new.SIZE_CHANGED = eventLib.new()
    new.ContainmentRect = vectors.vec4() -- Dimensions but with margins and anchored applied
    new.Anchor = vectors.vec4(0,0,0,0)
    new.ANCHOR_CHANGED = eventLib.new()
@@ -62,6 +67,9 @@ function container.new(preset,force_debug)
    new.CaptureCursor = true
    new.MOUSE_ENTERED = eventLib.new()
    new.MOUSE_EXITED = eventLib.new()
+   new.ClipOnParent = false
+   new.isClipping = false
+   new.isVisible = true
    new.Sprite = nil
    
    -->==========[ Internals ]==========<--
@@ -75,6 +83,7 @@ function container.new(preset,force_debug)
    end
 
    new.DIMENSIONS_CHANGED:register(function ()
+      local last_size = new.ContainmentRect.zw - new.ContainmentRect.xy
       -- generate the containment rect
       new.ContainmentRect = vectors.vec4(
          new.Dimensions.x,
@@ -83,6 +92,7 @@ function container.new(preset,force_debug)
          new.Dimensions.w
       )
       -- adjust based on parent if this has one
+      local clipping = false
       if new.Parent and new.Parent.ContainmentRect then 
          local parent_containment = new.Parent.ContainmentRect - new.Parent.ContainmentRect.xyxy
          local anchor_shift = vectors.vec4(
@@ -95,37 +105,58 @@ function container.new(preset,force_debug)
          new.ContainmentRect.y = new.ContainmentRect.y + anchor_shift.y
          new.ContainmentRect.z = new.ContainmentRect.z + anchor_shift.z
          new.ContainmentRect.w = new.ContainmentRect.w + anchor_shift.w
-      end
-      new.Part
-      :setPos(
-         -new.ContainmentRect.x,
-         -new.ContainmentRect.y,
-         -((new.Z + new.ChildIndex / (new.Parent and #new.Parent.Children or 1) * 0.99) * core.clipping_margin)
-      )
-      for key, value in pairs(new.Children) do
-         if value.DIMENSIONS_CHANGED then
-            value.DIMENSIONS_CHANGED:invoke(value.DIMENSIONS_CHANGED)
+
+         -- calculate clipping
+         if new.ClipOnParent then
+            clipping = parent_containment.x > new.ContainmentRect.x
+            or parent_containment.y > new.ContainmentRect.y
+            or parent_containment.z < new.ContainmentRect.z
+            or parent_containment.w < new.ContainmentRect.w
          end
       end
-      if new.Sprite then
-         local contain = new.ContainmentRect
-         new.Sprite
-            :setSize(
-               (contain.z - contain.x),
-               (contain.w - contain.y)
-            )
+      for _, child in pairs(new.Children) do
+         if child.DIMENSIONS_CHANGED then
+            child.DIMENSIONS_CHANGED:invoke(child.DIMENSIONS_CHANGED)
+         end
       end
-      if core.debug_visible or force_debug then
-         local contain = new.ContainmentRect
-         debug_container
+
+      local size = new.ContainmentRect.zw - new.ContainmentRect.xy
+      local size_changed = false
+      if last_size ~= new.ContainmentRect.zw - new.ContainmentRect.xy then
+         new.SIZE_CHANGED:invoke(size)
+         size_changed = true
+      end
+
+      local visible = new.isVisible and (not new.isClipping) and (not clipping)
+      new.Part:setVisible(visible)
+      if visible then
+         new.Part
          :setPos(
-            0,
-            0,
-            -((new.Z + 1 + new.ChildIndex / (new.Parent and #new.Parent.Children or 1)) * core.clipping_margin) * 0.6)
-         :setSize(
-            contain.z - contain.x,
-            contain.w - contain.y
+            -new.ContainmentRect.x,
+            -new.ContainmentRect.y,
+            -((new.Z + new.ChildIndex / (new.Parent and #new.Parent.Children or 1) * 0.99) * core.clipping_margin)
          )
+         if new.Sprite then
+            local contain = new.ContainmentRect
+            new.Sprite
+               :setSize(
+                  (contain.z - contain.x),
+                  (contain.w - contain.y)
+               )
+         end
+         if core.debug_visible or force_debug then
+            local contain = new.ContainmentRect
+            debug_container
+            :setPos(
+               0,
+               0,
+               -((new.Z + 1 + new.ChildIndex / (new.Parent and #new.Parent.Children or 1)) * core.clipping_margin) * 0.6)
+            if size_changed then
+               debug_container:setSize(
+                  contain.z - contain.x,
+                  contain.w - contain.y)
+            end
+         end
       end
    end,core.internal_events_name)
 
@@ -172,11 +203,21 @@ function container:setSprite(sprite_obj)
    return self
 end
 
---- toggles the visibility of the container and its children
+---Sets the visibility of the container and its children
 ---@param visible boolean
 ---@return GNUI.container
 function container:setVisible(visible)
-   self.Part:setVisible(visible)
+   self.isVisible = visible
+   self.DIMENSIONS_CHANGED:invoke()
+   return self
+end
+
+---Sets the flag if this container should go invisible once touching outside of its parent.
+---@param clip any
+---@return GNUI.container
+function container:setClipOnParent(clip)
+   self.ClipOnParent = clip
+   self.DIMENSIONS_CHANGED:invoke()
    return self
 end
 -->====================[ Dimensions ]====================<--
