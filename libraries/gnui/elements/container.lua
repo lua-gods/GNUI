@@ -74,12 +74,14 @@ function container.new(preset,force_debug)
    
    -->==========[ Internals ]==========<--
    local debug_container 
-   local debug_margin    
-   local debug_padding   
    local debug_cursor
+   local debug_cursor_x
+   local debug_cursor_y
    if core.debug_visible or force_debug then
       debug_container = sprite.new():setModelpart(new.Part):setTexture(debug_texture):setBorderThickness(1,1,1,1):setRenderType("EMISSIVE_SOLID"):setScale(core.debug_scale):setColor(1,1,1):excludeMiddle(true)
-      debug_cursor   = sprite.new():setModelpart(new.Part):setTexture(debug_texture):setUV(0,0,0,0):setRenderType("EMISSIVE_SOLID"):setSize(1,1)
+      debug_cursor   = sprite.new():setModelpart(new.Part):setTexture(debug_texture):setUV(0,0,0,0):setRenderType("EMISSIVE_SOLID"):setSize(1,1):setColor(1,1,0)
+      debug_cursor_x   = sprite.new():setModelpart(new.Part):setTexture(debug_texture):setUV(0,0,0,0):setRenderType("EMISSIVE_SOLID"):setSize(1,1):setColor(1,0,0)
+      debug_cursor_y   = sprite.new():setModelpart(new.Part):setTexture(debug_texture):setUV(0,0,0,0):setRenderType("EMISSIVE_SOLID"):setSize(1,1):setColor(0,1,0)
    end
 
    new.DIMENSIONS_CHANGED:register(function ()
@@ -169,8 +171,26 @@ function container.new(preset,force_debug)
                -new.Cursor.y,
                -((new.Z + 1 + new.ChildIndex / (new.Parent and #new.Parent.Children or 1)) * core.clipping_margin) * 0.9
             ):setVisible(true)
+
+            debug_cursor_x
+            :setSize(1,new.Cursor.y)
+            :setPos(
+               -new.Cursor.x,
+               0,
+               -((new.Z + 1 + new.ChildIndex / (new.Parent and #new.Parent.Children or 1)) * core.clipping_margin) * 0.9
+            ):setVisible(true)
+
+            debug_cursor_y
+            :setSize(new.Cursor.x,1)
+            :setPos(
+               0,
+               -new.Cursor.y,
+               -((new.Z + 1 + new.ChildIndex / (new.Parent and #new.Parent.Children or 1)) * core.clipping_margin) * 0.9
+            ):setVisible(true)
          else
             debug_cursor:setVisible(false)
+            debug_cursor_x:setVisible(false)
+            debug_cursor_y:setVisible(false)
          end
       end
    end,core.debug_event_name)
@@ -224,20 +244,25 @@ end
 
 ---Sets the dimensions of this container.  
 ---x,y is top left
----z,w is bottom right
----@param dimx Vector4|number
+---z,w is bottom right  
+--- if Z or W is missing, they will use X and Y instead
+---@overload fun(self : GNUI.container, vec4 : Vector4): GNUI.container
+---@param x number
 ---@param y number?
----@param z number?
 ---@param w number?
-function container:setDimensions(dimx,y,z,w)
-   local new = utils.figureOutVec4(dimx,y,z,w)
+---@param t number?
+---@return GNUI.container
+function container:setDimensions(x,y,w,t)
+   local new = utils.figureOutVec4(x,y,w or x,t or y)
    self.Dimensions = new
    self.DIMENSIONS_CHANGED:invoke(self.Dimensions)
+   return self
 end
 
 ---Sets the top left offset from the origin anchor of its parent.
 ---@param xpos number|Vector2
 ---@param y number?
+---@return GNUI.container
 function container:setTopLeft(xpos,y)
    self.Dimensions.xy = utils.figureOutVec2(xpos,y)
    self.DIMENSIONS_CHANGED:invoke(self.Dimensions)
@@ -247,6 +272,7 @@ end
 ---Sets the bottom right offset from the origin anchor of its parent.
 ---@param xsize number|Vector2
 ---@param y number?
+---@return GNUI.container
 function container:setBottomRight(xsize,y)
    self.Dimensions.zw = utils.figureOutVec2(xsize,y)
    self.DIMENSIONS_CHANGED:invoke(self.Dimensions)
@@ -256,6 +282,7 @@ end
 ---Shifts the container based on the top left.
 ---@param xpos number|Vector2
 ---@param y number?
+---@return GNUI.container
 function container:offsetTopLeft(xpos,y)
    local old,new = self.Dimensions.xy,utils.figureOutVec2(xpos,y)
    local delta = new-old
@@ -267,6 +294,7 @@ end
 ---Shifts the container based on the bottom right.
 ---@param zpos number|Vector2
 ---@param w number?
+---@return GNUI.container
 function container:offsetBottomRight(zpos,w)
    local old,new = self.Dimensions.xy+self.Dimensions.zw,utils.figureOutVec2(zpos,w)
    local delta = new-old
@@ -290,19 +318,25 @@ end
 
 ---Sets the Cursor position relative to the top left of the container.  
 ---Returns true if the cursor is hovering over the container.  
----if press is true, the container on the top most pressed position will have its PRESSED event invoked.
----if forced is true, the container will have its PRESSED event invoked.
----@param xpos number|Vector2
+---@overload fun(vec2 : Vector2, press : boolean?): GNUI.container
+---@overload fun(press : boolean): GNUI.container
+---@param x number?
 ---@param y number?
----@param forced boolean?
+---@param press boolean?
 ---@return boolean
-function container:setCursor(xpos,y,forced)
-   forced = forced or false
-   local pos = utils.figureOutVec2(xpos,y)
+function container:setCursor(x,y,press)
+   local pos
+   if type(x) == "boolean" and x then
+      press = true
+      pos = self.Cursor
+   else
+      press = press or false
+      pos = utils.figureOutVec2(x,y)
+   end
    local lhovering = self.Hovering
-   self.Hovering = self:isHovering(pos)
    self.Cursor = pos
-   if self.Hovering and not forced then
+   self.Hovering = self:isHovering(self.Cursor)
+   if self.Hovering then
       local hovering
       for i = #self.Children, 1, -1 do
          local child = self.Children[i]
@@ -310,7 +344,7 @@ function container:setCursor(xpos,y,forced)
             if child.CaptureCursor then
                hovering = child:setCursor(
                   self.Cursor.x-child.ContainmentRect.x,
-                  self.Cursor.y-child.ContainmentRect.y)
+                  self.Cursor.y-child.ContainmentRect.y,press)
                if hovering then -- obstructed by child
                   self.Hovering = false
                end
@@ -322,6 +356,9 @@ function container:setCursor(xpos,y,forced)
          end
       end
    end
+   if self.Hovering and press then
+      self.PRESSED:invoke()
+   end
    if self.Hovering ~= lhovering then
       if self.Hovering then
          self.MOUSE_ENTERED:invoke()
@@ -329,12 +366,8 @@ function container:setCursor(xpos,y,forced)
          self.MOUSE_EXITED:invoke()
       end
    end
-   if forced then
-      self.PRESSED:invoke()
-   else
-      if self.Hovering and self.CaptureCursor then
-         self.CURSOR_CHANGED:invoke(pos)
-      end
+   if self.Hovering and self.CaptureCursor then
+      self.CURSOR_CHANGED:invoke(pos)
    end
    --self.DIMENSIONS_CHANGED:invoke(self.Dimensions)
    return self.Hovering
@@ -427,13 +460,15 @@ end
 
 ---Sets the anchor for all sides.  
 --- x 0 <-> 1 = left <-> right  
---- y 0 <-> 1 = top <-> bottom
----@param left number|Vector4
----@param top number?
+--- y 0 <-> 1 = top <-> bottom  
+---if right and bottom are not given, they will use left and top instead.
+---@overload fun(self : GNUI.container, vec4): GNUI.container
+---@param left number
+---@param top number
 ---@param right number?
 ---@param bottom number?
 function container:setAnchor(left,top,right,bottom)
-   self.Anchor = utils.figureOutVec4(left,top,right,bottom)
+   self.Anchor = utils.figureOutVec4(left,top,right or left,bottom or top)
    self.DIMENSIONS_CHANGED:invoke(self.Dimensions)
    return self
 end
