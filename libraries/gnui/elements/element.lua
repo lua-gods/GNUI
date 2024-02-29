@@ -63,7 +63,7 @@ function element:addChild(child,index)
    return self
 end
 
----Abandons the child.
+---Abandons the child into the street.
 ---@param child GNUI.element
 ---@return GNUI.element
 function element:removeChild(child)
