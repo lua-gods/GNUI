@@ -41,7 +41,7 @@ function sprite.new(obj)
    new.Scale = new.Scale or 1
    new.DIMENSIONS_CHANGED = eventLib.new()
    new.RenderTasks = {}
-   new.RenderType = new.RenderType or "EMISSIVE_SOLID"
+   new.RenderType = new.RenderType or "CUTOUT_EMISSIVE_SOLID"
    new.BorderThickness = new.BorderThickness or vectors.vec4(0,0,0,0)
    new.BORDER_THICKNESS_CHANGED = eventLib.new()
    new.ExcludeMiddle = new.ExcludeMiddle or false
@@ -53,11 +53,6 @@ function sprite.new(obj)
    
    new.TEXTURE_CHANGED:register(function ()
       new:_updateRenderTasks()
-   end,core.internal_events_name)
-
-   new.MODELPART_CHANGED:register(function ()
-      new:_deleteRenderTasks()
-      new:_buildRenderTasks()
    end,core.internal_events_name)
 
    new.BORDER_THICKNESS_CHANGED:register(function ()
@@ -76,7 +71,11 @@ end
 ---@param part ModelPart
 ---@return Sprite
 function sprite:setModelpart(part)
+   if self.Modelpart then
+      self.Modelpart:_deleteRenderTasks()
+   end
    self.Modelpart = part
+   self:_buildRenderTasks()
    self.MODELPART_CHANGED:invoke(self.Modelpart)
    return self
 end
@@ -106,12 +105,13 @@ function sprite:setPos(xpos,y,depth)
 end
 
 ---Tints the Sprite multiplicatively
----@param rgb number|Vector3
----@param g number?
----@param b number?
+---@overload fun(rgb : Vector3): Sprite
+---@param r number
+---@param g number
+---@param b number
 ---@return Sprite
-function sprite:setColor(rgb,g,b)
-   self.Color = utils.figureOutVec3(rgb,g,b)
+function sprite:setColor(r,g,b)
+   self.Color = utils.figureOutVec3(r,g,b)
    self.DIMENSIONS_CHANGED:invoke(self,self.Position,self.Size)
    return self
 end
@@ -188,13 +188,15 @@ function sprite:setBorderThickness(left,top,right,bottom)
 end
 
 ---Sets the UV region of the sprite.
+--- if x2 and y2 are missing, they will use x and y as a substitute
+---@overload fun(self : Sprite, vec4 : Vector4): Sprite
 ---@param x number
 ---@param y number
----@param width number
----@param height number
+---@param x2 number
+---@param y2 number
 ---@return Sprite
-function sprite:setUV(x,y,width,height)
-   self.UV = vectors.vec4(x,y,width,height)
+function sprite:setUV(x,y,x2,y2)
+   self.UV = utils.figureOutVec4(x,y,x2 or x,y2 or y)
    self.BORDER_THICKNESS_CHANGED:invoke(self.BorderThickness)
    return self
 end
@@ -217,7 +219,7 @@ function sprite:excludeMiddle(toggle)
    return self
 end
 
-function sprite:duplicate()
+function sprite:copy()
    local copy = {}
    for key, value in pairs(self) do
       if type(value):find("Vector") then
@@ -265,13 +267,13 @@ end
 
 function sprite:_updateRenderTasks()
    if not self.Modelpart then return self end
-   local dim = self.Texture:getDimensions()
+   local res = self.Texture:getDimensions()
    local uv = self.UV:copy():add(0,0,1,1)
    if not self.is_ninepatch then
       self.RenderTasks[1]
       :setTexture(self.Texture)
       :setPos(self.Position)
-      :setScale(self.Size.x/dim.x,self.Size.y/dim.y)
+      :setScale(self.Size.x/res.x,self.Size.y/res.y)
       :setColor(self.Color)
       :setRenderType(self.RenderType)
       :setUVPixels(
@@ -282,8 +284,8 @@ function sprite:_updateRenderTasks()
          uv.w-uv.y
       ):setVisible(self.Visible)
    else
-      local sborder = self.BorderThickness*self.Scale
-      local pxborder = self.BorderThickness
+      local sborder = self.BorderThickness*self.Scale --scaled border, used in rendering
+      local border = self.BorderThickness             --border, used in UVs
       local pos = self.Position
       local size = self.Size
       local uvsize = vectors.vec2(uv.z-uv.x,uv.w-uv.y)
@@ -297,14 +299,14 @@ function sprite:_updateRenderTasks()
       :setPos(
          pos
       ):setScale(
-         sborder.x/dim.x,
-         sborder.y/dim.y
+         sborder.x/res.x,
+         sborder.y/res.y
       ):setUVPixels(
          uv.x,
          uv.y
       ):region(
-         pxborder.x,
-         pxborder.y
+         border.x,
+         border.y
       ):setVisible(self.Visible)
       
       self.RenderTasks[2]
@@ -313,14 +315,14 @@ function sprite:_updateRenderTasks()
          pos.y,
          pos.z
       ):setScale(
-         (size.x-sborder.z-sborder.x)/dim.x,
-         sborder.y/dim.y
+         (size.x-sborder.z-sborder.x)/res.x,
+         sborder.y/res.y
       ):setUVPixels(
-         uv.x+pxborder.x,
+         uv.x+border.x,
          uv.y
       ):region(
-         uvsize.x-pxborder.x-pxborder.z,
-         pxborder.y
+         uvsize.x-border.x-border.z,
+         border.y
       ):setVisible(self.Visible)
 
       self.RenderTasks[3]
@@ -329,13 +331,13 @@ function sprite:_updateRenderTasks()
          pos.y,
          pos.z
       ):setScale(
-         sborder.z/dim.x,sborder.y/dim.y
+         sborder.z/res.x,sborder.y/res.y
       ):setUVPixels(
-         uv.z-pxborder.z,
+         uv.z-border.z,
          uv.y
       ):region(
-         pxborder.z,
-         pxborder.y
+         border.z,
+         border.y
       ):setVisible(self.Visible)
 
       self.RenderTasks[4]
@@ -344,14 +346,14 @@ function sprite:_updateRenderTasks()
          pos.y-sborder.y,
          pos.z
       ):setScale(
-         sborder.x/dim.x,
-         (size.y-sborder.y-sborder.w)/dim.y
+         sborder.x/res.x,
+         (size.y-sborder.y-sborder.w)/res.y
       ):setUVPixels(
          uv.x,
-         uv.y+pxborder.y
+         uv.y+border.y
       ):region(
-         pxborder.x,
-         uvsize.y-pxborder.y-pxborder.w
+         border.x,
+         uvsize.y-border.y-border.w
       ):setVisible(self.Visible)
       if not self.ExcludeMiddle then
          self.RenderTasks[5]
@@ -361,14 +363,14 @@ function sprite:_updateRenderTasks()
             pos.z
          )
          :setScale(
-            (size.x-sborder.x-sborder.z)/dim.x,
-            (size.y-sborder.y-sborder.w)/dim.y
+            (size.x-sborder.x-sborder.z)/res.x,
+            (size.y-sborder.y-sborder.w)/res.y
          ):setUVPixels(
-            uv.x+pxborder.x,
-            uv.y+pxborder.y
+            uv.x+border.x,
+            uv.y+border.y
          ):region(
-            uvsize.x-pxborder.x-pxborder.z,
-            uvsize.y-pxborder.y-pxborder.w
+            uvsize.x-border.x-border.z,
+            uvsize.y-border.y-border.w
          ):setVisible(self.Visible)
       else
          self.RenderTasks[5]:setVisible(false)
@@ -381,14 +383,14 @@ function sprite:_updateRenderTasks()
          pos.z
       )
       :setScale(
-         sborder.z/dim.x,
-         (size.y-sborder.y-sborder.w)/dim.y
+         sborder.z/res.x,
+         (size.y-sborder.y-sborder.w)/res.y
       ):setUVPixels(
-         uv.z-pxborder.z,
-         uv.y+pxborder.y
+         uv.z-border.z,
+         uv.y+border.y
       ):region(
-         pxborder.z,
-         uvsize.y-pxborder.y-pxborder.w
+         border.z,
+         uvsize.y-border.y-border.w
       ):setVisible(self.Visible)
       
       
@@ -399,14 +401,14 @@ function sprite:_updateRenderTasks()
          pos.z
       )
       :setScale(
-         sborder.x/dim.x,
-         sborder.w/dim.y
+         sborder.x/res.x,
+         sborder.w/res.y
       ):setUVPixels(
          uv.x,
-         uv.w-pxborder.w
+         uv.w-border.w
       ):region(
-         pxborder.x,
-         pxborder.w
+         border.x,
+         border.w
       ):setVisible(self.Visible)
 
       self.RenderTasks[8]
@@ -415,14 +417,14 @@ function sprite:_updateRenderTasks()
          pos.y-size.y+sborder.w,
          pos.z
       ):setScale(
-         (size.x-sborder.z-sborder.x)/dim.x,
-         sborder.w/dim.y
+         (size.x-sborder.z-sborder.x)/res.x,
+         sborder.w/res.y
       ):setUVPixels(
-         uv.x+pxborder.x,
-         uv.w-pxborder.w
+         uv.x+border.x,
+         uv.w-border.w
       ):region(
-         uvsize.x-pxborder.x-pxborder.z,
-         pxborder.w
+         uvsize.x-border.x-border.z,
+         border.w
       ):setVisible(self.Visible)
 
       self.RenderTasks[9]
@@ -431,14 +433,14 @@ function sprite:_updateRenderTasks()
          pos.y-size.y+sborder.w,
          pos.z
       ):setScale(
-         sborder.z/dim.x,
-         sborder.w/dim.y
+         sborder.z/res.x,
+         sborder.w/res.y
       ):setUVPixels(
-         uv.z-pxborder.z,
-         uv.w-pxborder.w
+         uv.z-border.z,
+         uv.w-border.w
       ):region(
-         pxborder.z,
-         pxborder.w
+         border.z,
+         border.w
       ):setVisible(self.Visible)
    end
 end
