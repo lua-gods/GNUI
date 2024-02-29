@@ -51,12 +51,7 @@ function element:addChild(child,index)
    if not type(child):find("^GNUI.element") then
       error("invalid child given, recived"..type(child),2)
    end
-   index = index or #self.Children+1
-   for i = index, #self.Children, 1 do -- everything above index will get pushed up
-      self.Children[i] = self.Children[i+1]
-   end
-   self.Children[index] = child
-   child.ChildIndex = index
+   table.insert(self.Children, index or #self.Children+1, child)
    child.Parent = self
    child.PARENT_CHANGED:invoke(self)
    self:updateChildrenIndex()
@@ -68,11 +63,7 @@ end
 ---@return GNUI.element
 function element:removeChild(child)
    if child.Parent == self then -- check if the parent is even the one registered in the child's birth certificate
-      self.Children[child.ChildIndex] = nil -- lmao
-      for i = child.ChildIndex+1, #self.Children, 1 do -- everything above index will get pushed down
-         self.Children[i].ChildIndex = i - 1
-      end
-      self.Children[#self.Children] = nil -- remove duplicate on last
+      table.remove(self.Children, child.ChildIndex)
       child.Parent = nil
       child.ChildIndex = 0
       child.PARENT_CHANGED:invoke(nil)
