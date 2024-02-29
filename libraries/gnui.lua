@@ -9,6 +9,7 @@ Everything is in one file to make sure it is possible to load this script from a
 allowing me to put as much as I want without worrying about storage space.
 ]]
 
+---@class GNUI
 local api = {}
 
 
