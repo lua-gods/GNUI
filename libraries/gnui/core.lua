@@ -1,5 +1,5 @@
 local config = {
-   debug_visible = false,
+   debug_visible = hostconfig and hostconfig["gnui.debug"] or false,
    debug_scale = 1,
    
    clipping_margin = 0.05,
