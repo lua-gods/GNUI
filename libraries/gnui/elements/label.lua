@@ -1,12 +1,12 @@
 ---@diagnostic disable: assign-type-mismatch, undefined-field
 local eventLib = require("libraries.eventHandler")
-local utils = require("libraries.gnui.utils")
 
 local container = require("libraries.gnui.elements.container")
 local core = require("libraries.gnui.core")
 
 ---Calculates text length along with its spaces as well.  
 ---accepts raw json component as well, if the given text is a table.
+---This is a workaround for keeping the whitespace while getting the length because Minecraft trims them off.
 ---@param text string|table
 ---@return integer
 local function getlen(text)
@@ -27,31 +27,30 @@ end
 ---| "OUTLINE"
 ---| "SHADOW"
 
----@class GNUI.Label : GNUI.container
----@field Text string
----@field TextData table
----@field TextEffect TextEffect
----@field LineHeight number
----@field WrapText boolean
----@field RenderTasks table<any,TextTask>
----@field TEXT_CHANGED EventLib
----@field Align Vector2
----@field AutoWarp boolean
----@field Offset Vector2
----@field FontScale number
----@field _TextChanged boolean -- for optimization purposes
+---@class GNUI.Label : GNUI.container     
+---@field Text string|table               # The text that will be displayed on the label, for raw json, pass a table instead of a string json.
+---@field TextData table                  # Baked data of the text.
+---@field TextEffect TextEffect           # Determins the effects applied to the label.
+---@field LineHeight number               # the distance between each line, defaults to 10.
+---@field WrapText boolean                # Does nothing at the moment. but should send the text to the next line once the word is over the container's boundaries
+---@field RenderTasks table<any,TextTask> # every render task used for rendering text
+---@field Align Vector2                   # Determins where to fall on to when displaying the text (`0`-`1`, left-right, up-down)
+---@field AutoWarp boolean                # Does nothing at the moment, but should toggle the word warping option.
+---@field FontScale number                # Scales the text in the container.
+---@field private _TextChanged boolean    
+---@field TEXT_CHANGED EventLib           # Triggered when the text is changed.
 local label = {}
 label.__index = function (t,i)
    return label[i] or container[i]
 end
 label.__type = "GNUI.element.container.label"
 
+---Creates a new label, which is just a container but can render text, separated into its own class for optimization.
 ---@return GNUI.Label
-function label.new(preset)
+function label.new()
    ---@type GNUI.Label
-   local new = container.new() or preset
+   local new = container.new()
    new.Text = ""
-   new.TEXT_CHANGED = eventLib.new()
    new.TextEffect = "NONE"
    new.LineHeight = 8
    new.WrapText = false
@@ -60,7 +59,8 @@ function label.new(preset)
    new.RenderTasks = {}
    new.FontScale = 1
    new._TextChanged = false
-
+   new.TEXT_CHANGED = eventLib.new()
+   
    new.TEXT_CHANGED:register(function ()
       new
       :_bakeWords()
@@ -83,8 +83,9 @@ function label.new(preset)
    return new
 end
 
----@param text string|table
----@return GNUI.Label
+---Sets the text for the label to display.
+---@param text string|table # For raw json text, use a table instead.
+---@return self
 function label:setText(text)
    local t = type(text)
    if t == "table" then
@@ -99,20 +100,21 @@ function label:setText(text)
    return self
 end
 
+---NOTE: Does not work yet.  
+---determins whenever to allow word warping or not.
+---@param wrap boolean
+---@return self
 function label:wrapText(wrap)
    self.WrapText = wrap
-   self:_deleteRenderTasks()
-   self:_buildRenderTasks()
-   self:_updateRenderTasks()
+   self.DIMENSIONS_CHANGED:invoke()
+   return self
 end
 
 ---Sets how the text is anchored to the container.  
----left 0 <-> 1 right  
----up 0 <-> 1 down  
---- horizontal or vertical by default is 0
----@param horizontal number?
----@param vertical number?
----@return GNUI.Label
+--- horizontal or vertical by default is 0, making them clump up at the top left
+---@param horizontal number? # left 0 <-> 1 right
+---@param vertical number?   #up 0 <-> 1 down  
+---@return self
 function label:setAlign(horizontal,vertical)
    self.Align = vectors.vec2(horizontal or 0,vertical or 0)
    self:_updateRenderTasks()
@@ -120,14 +122,18 @@ function label:setAlign(horizontal,vertical)
 end
 
 ---Sets the font scale for all text thats by this container.
----@param scale number
+---@param scale number # defaults to `1`
+---@return self
 function label:setFontScale(scale)
    self.FontScale = scale or 1
    self:_updateRenderTasks()
    return self
 end
 
+---Determins the effect used for the label.  
+---NONE, OUTLINE or SHADOW.
 ---@param effect TextEffect
+---@return self
 function label:setTextEffect(effect)
    self.TextEffect = effect
    label:_buildRenderTasks()
@@ -135,6 +141,9 @@ function label:setTextEffect(effect)
    return self
 end
 
+---Flattens the json components into one long array of components. by merging the `extra` tag in components into the base array.
+---@param json table
+---@return table
 local function flattenComponents(json)
    local lines = {}
    local content = {}
@@ -188,6 +197,7 @@ local function flattenComponents(json)
 end
 
 ---@param from string|table
+---@return table # TextData
 local function parseText(from)
    local lines = {}
    local t = type(from)
@@ -208,13 +218,14 @@ local function parseText(from)
 end
 
 
-
+---@return self
 function label:_bakeWords()
    self.TextData = parseText(self.Text)
    self._TextChanged = true
    return self
 end
 
+---@return self
 function label:_buildRenderTasks()
    local i = 0
    if self.TextData then
@@ -222,7 +233,7 @@ function label:_buildRenderTasks()
          for _, component in pairs(lines.content) do
             if component.text then
                i = i + 1
-               local task = self.Part:newText("word" .. i):setText(toJson(component))
+               local task = self.ModelPart:newText("word" .. i):setText(toJson(component))
                if self.TextEffect == "OUTLINE" then
                   task:setOutline(true)
                elseif  self.TextEffect == "SHADOW" then
@@ -249,8 +260,8 @@ function label:_updateRenderTasks()
       for c, component in pairs(line.content) do
          i = i + 1
          local task = self.RenderTasks[i]
-         if (pos.x - component.length > size.x / self.FontScale) or c == 1 then
-            if self._TextChanged then
+         if (pos.x - component.length > size.x / self.FontScale) or true then
+            if self._TextChanged or true then
                task
                :setPos(pos.xy_:add(offset.x,offset.y) * self.FontScale)
                :setScale(self.FontScale,self.FontScale,self.FontScale)
@@ -266,7 +277,7 @@ end
 
 function label:_deleteRenderTasks()
    for key, task in pairs(self.RenderTasks) do
-      self.Part:removeTask(task:getName())
+      self.ModelPart:removeTask(task:getName())
    end
    return self
 end

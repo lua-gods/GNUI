@@ -3,15 +3,15 @@ local utils = require("libraries.gnui.utils")
 
 local element_next_free = 0
 ---@class GNUI.element
----@field Visible boolean
----@field VISIBILITY_CHANGED EventLib
----@field Children table<any,GNUI.element|GNUI.container>
----@field ChildIndex integer
----@field CHILDREN_CHANGED table
----@field Parent GNUI.element|GNUI.container
----@field PARENT_CHANGED table
----@field ON_FREE EventLib
----@field id EventLib
+---@field id integer                                       # A unique integer for this element. (next-free based)
+---@field Visible boolean                                  # `true` to see
+---@field Parent GNUI.element|GNUI.container               
+---@field Children table<any,GNUI.element|GNUI.container>  
+---@field ChildIndex integer                               # the element's place order on its parent
+---@field VISIBILITY_CHANGED EventLib                      # on change of visibility
+---@field CHILDREN_CHANGED table                           # when the order of the children changes.
+---@field PARENT_CHANGED table                             # when the parent changes
+---@field ON_FREE EventLib                                 # when the element is wiped from history.
 local element = {}
 element.__index = function (t,i)
    return rawget(t,i)
@@ -23,17 +23,28 @@ element.__type = "GNUI.element"
 ---@return GNUI.element
 function element.new(preset)
    local new = preset or {}
-   new.Visible = true
-   new.VISIBILITY_CHANGED = eventLib.new()
-   new.Children = {}
-   new.ChildIndex = 0
-   new.CHILDREN_CHANGED = eventLib.new()
-   new.PARENT_CHANGED = eventLib.new()
-   new.ON_FREE = eventLib.new()
    new.id = element_next_free
+   new.Visible            = true
+   new.VISIBILITY_CHANGED = eventLib.new()
+   new.Children           = {}
+   new.ChildIndex         = 0
+   new.CHILDREN_CHANGED   = eventLib.new()
+   new.PARENT_CHANGED     = eventLib.new()
+   new.ON_FREE            = eventLib.new()
    setmetatable(new,element)
    element_next_free = element_next_free + 1
    return new
+end
+
+---Sets the visibility of the container and its children
+---@param visible boolean
+---@return GNUI.element
+function element:setVisible(visible)
+   if self.isVisible ~= visible then
+      self.VISIBILITY_CHANGED:invoke(visible)
+      self.isVisible = visible
+   end
+   return self
 end
 
 function element:updateChildrenOrder()
