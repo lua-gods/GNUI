@@ -39,13 +39,17 @@ container.__type = "GNUI.element.container"
 ---@param force_debug boolean?
 ---@return self
 function container.new(preset,force_debug)
-   local new = setmetatable(element.new(),container) ---@type GNUI.container
+   preset = preset or {}
+   ---@type GNUI.container
+---@diagnostic disable-next-line: assign-type-mismatch
+   local new = element.new()
+   setmetatable(new,container)
    new.Dimensions         = preset.Dimensions         or vectors.vec4(0,0,0,0) 
    new.Z                  = preset.Z                  or 0
    new.SIZE_CHANGED       = eventLib.new()
    new.ContainmentRect    = preset.ContainmentRect    or vectors.vec4() -- Dimensions but with margins and anchored applied
    new.Anchor             = preset.Anchor             or vectors.vec4(0,0,0,0)
-   new.ModelPart          = preset.ModelPart:copy("container"..new.id) or models:newPart("container"..new.id)
+   new.ModelPart          = preset.ModelPart and preset.ModelPart:copy("container"..new.id) or models:newPart("container"..new.id)
    new.Cursor             = preset.Cursor             or vectors.vec2() -- in local space
    new.Hovering           = preset.Hovering           or false
    new.CaptureCursor      = preset.CaptureCursor      or true
