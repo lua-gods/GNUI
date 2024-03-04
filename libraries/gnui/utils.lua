@@ -83,12 +83,12 @@ end
 function utils.figureOutVec4(posx,y,z,w)
    local typa, typb, typc, typd = type(posx), type(y), type(z), type(w)
    
-   if typa == "Vector4" and typb == "nil" and typc == "nil" and typd == "nil" then
+   if typa == "Vector4" then
       return posx:copy()
    elseif typa == "number" and typb == "number" and typc == "number"  and typd == "number" then
       return vectors.vec4(posx,y,z,w)
    else
-      error("Invalid Vector4 parameter, expected Vector3 or (number, number, number), instead got ("..typa..", "..typb..", "..typc.. ", "..typd..")")
+      error("Invalid Vector4 parameter, expected Vector4 or (number, number, number, number), instead got ("..typa..", "..typb..", "..typc.. ", "..typd..")")
    end
 end
 
