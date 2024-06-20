@@ -68,14 +68,13 @@ function container.new()
    local debug_container 
    if core.debug_visible then
       debug_container  = sprite.new():setModelpart(new.ModelPart):setTexture(debug_texture):setBorderThickness(1,1,1,1):setRenderType("EMISSIVE_SOLID"):setScale(core.debug_scale):setColor(1,1,1):excludeMiddle(true)
+      new.MOUSE_PRESSENCE_CHANGED:register(function (h)
+         debug_container:setColor(1,1,h and 0.25 or 1)
+      end)
    end
 
    new.VISIBILITY_CHANGED:register(function (v)
       new.DIMENSIONS_CHANGED:invoke(new.Dimensions)
-   end)
-
-   new.MOUSE_PRESSENCE_CHANGED:register(function (h)
-      debug_container:setColor(1,1,h and 0.25 or 1)
    end)
 
    new.DIMENSIONS_CHANGED:register(function ()

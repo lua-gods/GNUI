@@ -3,7 +3,7 @@
 local hostconfig = world.avatarVars()[client:getViewer():getUUID()]
 
 local config = {
-   debug_visible = hostconfig and hostconfig["gnui.debug"] or true,
+   debug_visible = hostconfig and hostconfig["gnui.debug"] or false,
    debug_scale = 1, -- the thickness of the lines for debug lines
    
    -- The gap between the parent element to its children, change this depending on the situation
