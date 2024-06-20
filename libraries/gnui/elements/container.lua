@@ -313,7 +313,7 @@ end
 ---@param y number?
 ---@return boolean
 function container:isPositionInside(x,y)
-      if self.canCaptureCursor then return false end
+      if not self.canCaptureCursor then return false end
    ---@cast self GNUI.container
    local pos = utils.figureOutVec2(x,y)
    return (
