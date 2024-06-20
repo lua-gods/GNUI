@@ -252,6 +252,7 @@ end
 
 ---@param Element GNUI.any
 local function getHoveringChild(Element,position)
+   position = position - Element.ContainmentRect.xy
    for i = #Element.Children, 1, -1 do
       local child = Element.Children[i]
       if child.Visible and child.canCaptureCursor and child:isPositionInside(position) then
@@ -285,6 +286,7 @@ end
 ---@param Element GNUI.any
 ---@param event GNUI.InputEvent
 local function parseInputEventToChildren(Element,event,position)
+   position = position - Element.ContainmentRect.xy
    for i = #Element.Children, 1, -1 do
       local child = Element.Children[i]
       if child.Visible and child.canCaptureCursor and child:isPositionInside(position) then
