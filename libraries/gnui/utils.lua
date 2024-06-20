@@ -50,7 +50,7 @@ end
 function utils.figureOutVec2(posx,y)
    local typa, typb = type(posx), type(y)
    
-   if typa == "Vector2" and typb == "nil" then
+   if typa == "Vector2" then
       return posx:copy()
    elseif typa == "number" and typb == "number" then
       return vectors.vec2(posx,y)
@@ -66,7 +66,7 @@ end
 function utils.figureOutVec3(posx,y,z)
    local typa, typb, typc = type(posx), type(y), type(z)
    
-   if typa == "Vector3" and typb == "nil" and typc == "nil" then
+   if typa == "Vector3" then
       return posx:copy()
    elseif typa == "number" and typb == "number" and typc == "number" then
       return vectors.vec3(posx,y,z)

@@ -16,11 +16,10 @@ local core = require("libraries.gnui.core")
 ---@field ANCHOR_CHANGED eventLib      # Triggered when the anchors applied to the container is changed.
 ---@field Sprite Sprite                # the sprite that will be used for displaying textures.
 ---@field SPRITE_CHANGED eventLib      # Triggered when the sprite object set to this container has changed.
----@field Cursor Vector2?              # where the cursor will be from the top left of the final container dimensions.
----@field CURSOR_CHANGED eventLib      # Triggered when the Cursor set for this container changed
----@field Hovering boolean             # True when the cursor is hovering over it, compared with the parent container.
----@field CaptureCursor boolean        # if `true` will capture the cursor from its parent once `Hovering` over itself over the parent.
+---@field CursorHovering boolean     # True when the cursor is hovering over it, compared with the parent container.
 ---@field PRESSED eventLib             # Triggered when `setCursor` is called with the press argument set to true
+---@field INPUT eventLib               # Serves as the handler for all inputs within the boundaries of the container.
+---@field MOUSE_PRESSENCE_CHANGED eventLib
 ---@field MOUSE_ENTERED eventLib       # Triggered once the cursor is hovering over the container
 ---@field MOUSE_EXITED eventLib        # Triggered once the cursor leaves the confinement of this container.
 ---@field ClipOnParent boolean         # when `true`, the container will go invisible once touching outside the parent container.
@@ -35,55 +34,49 @@ end
 container.__type = "GNUI.element.container"
 
 ---Creates a new container.
----if `preset` is applied, it will just get duplicated into its own thing. 
----@param preset GNUI.container?
----@param force_debug boolean?
 ---@return self
-function container.new(preset,force_debug)
-   preset = preset or {}
+function container.new()
    ---@type GNUI.container
 ---@diagnostic disable-next-line: assign-type-mismatch
    local new = element.new()
    setmetatable(new,container)
-   new.Dimensions = preset.Dimensions or vectors.vec4(0,0,0,0) 
-   new.Z = preset.Z or 0
+   new.Dimensions = vectors.vec4(0,0,0,0) 
+   new.Z = 0
    new.SIZE_CHANGED = eventLib.new()
-   new.ContainmentRect = preset.ContainmentRect or vectors.vec4() -- Dimensions but with margins and anchored applied
-   new.Anchor = preset.Anchor or vectors.vec4(0,0,0,0)
-   new.ModelPart = preset.ModelPart and preset.ModelPart:copy("container"..new.id) or models:newPart("container"..new.id)
-   new.Cursor = preset.Cursor or vectors.vec2() -- in local space
-   new.Hovering = preset.Hovering or false
-   new.CaptureCursor = preset.CaptureCursor or true
-   new.ClipOnParent = preset.ClipOnParent or false
-   new.isClipping = preset.isClipping or false
-   new.Sprite = preset.Sprite or nil
-   new.ScaleFactor = preset.ScaleFactor or 1
-   new.AccumulatedScaleFactor = preset.AccumulatedScaleFactor or 1
+   new.ContainmentRect = vectors.vec4() -- Dimensions but with margins and anchored applied
+   new.Anchor = vectors.vec4(0,0,0,0)
+   new.ModelPart = models:newPart("container"..new.id)
+   new.ClipOnParent = false
+   new.isCursorHovering = false
+   new.isClipping = false
+   new.ScaleFactor = 1
+   new.canCaptureCursor = true
+   new.AccumulatedScaleFactor = 1
+   new.INPUT = eventLib.new()
    new.DIMENSIONS_CHANGED = eventLib.new()
    new.SPRITE_CHANGED = eventLib.new()
    new.ANCHOR_CHANGED = eventLib.new()
+   new.MOUSE_ENTERED = eventLib.new()
+   new.MOUSE_PRESSENCE_CHANGED = eventLib.new()
    new.MOUSE_EXITED = eventLib.new()
    new.PARENT_CHANGED = eventLib.new()
-   new.CURSOR_CHANGED = eventLib.new()
    new.PRESSED = eventLib.new()
-   new.MOUSE_ENTERED = eventLib.new()
    models:removeChild(new.ModelPart)
    
    -->==========[ Internals ]==========<--
    local debug_container 
-   local debug_cursor
-   local debug_cursor_x
-   local debug_cursor_y
-   if core.debug_visible or force_debug then
+   if core.debug_visible then
       debug_container  = sprite.new():setModelpart(new.ModelPart):setTexture(debug_texture):setBorderThickness(1,1,1,1):setRenderType("EMISSIVE_SOLID"):setScale(core.debug_scale):setColor(1,1,1):excludeMiddle(true)
-      debug_cursor     = sprite.new():setModelpart(new.ModelPart):setTexture(debug_texture):setUV(0,0,0,0):setRenderType("EMISSIVE_SOLID"):setSize(1,1):setColor(1,1,0)
-      debug_cursor_x   = sprite.new():setModelpart(new.ModelPart):setTexture(debug_texture):setUV(0,0,0,0):setRenderType("EMISSIVE_SOLID"):setSize(1,1):setColor(1,0,0)
-      debug_cursor_y   = sprite.new():setModelpart(new.ModelPart):setTexture(debug_texture):setUV(0,0,0,0):setRenderType("EMISSIVE_SOLID"):setSize(1,1):setColor(0,1,0)
    end
 
    new.VISIBILITY_CHANGED:register(function (v)
       new.DIMENSIONS_CHANGED:invoke(new.Dimensions)
    end)
+
+   new.MOUSE_PRESSENCE_CHANGED:register(function (h)
+      debug_container:setColor(1,1,h and 0.25 or 1)
+   end)
+
    new.DIMENSIONS_CHANGED:register(function ()
       new.AccumulatedScaleFactor = (new.Parent and new.Parent.AccumulatedScaleFactor or 1) * new.ScaleFactor
       local scale = new.AccumulatedScaleFactor
@@ -158,7 +151,7 @@ function container.new(preset,force_debug)
                   (contain.w - contain.y) * unscale_self
                )
          end
-         if core.debug_visible or force_debug then
+         if core.debug_visible then
             local contain = new.ContainmentRect
             debug_container
             :setPos(
@@ -174,39 +167,6 @@ function container.new(preset,force_debug)
       end
       new.Dimensions:scale(unscale)
    end,core.internal_events_name)
-
-   new.CURSOR_CHANGED:register(function ()
-      if core.debug_visible or force_debug then
-         -- Display the cursor in local space
-         if new.Hovering then
-            debug_cursor:setPos(
-               -new.Cursor.x,
-               -new.Cursor.y,
-               -((new.Z + 1 + new.ChildIndex / (new.Parent and #new.Parent.Children or 1)) * core.clipping_margin) * 0.9
-            ):setVisible(true)
-
-            debug_cursor_x
-            :setSize(1,new.Cursor.y)
-            :setPos(
-               -new.Cursor.x,
-               0,
-               -((new.Z + 1 + new.ChildIndex / (new.Parent and #new.Parent.Children or 1)) * core.clipping_margin) * 0.9
-            ):setVisible(true)
-
-            debug_cursor_y
-            :setSize(new.Cursor.x,1)
-            :setPos(
-               0,
-               -new.Cursor.y,
-               -((new.Z + 1 + new.ChildIndex / (new.Parent and #new.Parent.Children or 1)) * core.clipping_margin) * 0.9
-            ):setVisible(true)
-         else
-            debug_cursor:setVisible(false)
-            debug_cursor_x:setVisible(false)
-            debug_cursor_y:setVisible(false)
-         end
-      end
-   end,core.debug_event_name)
 
    new.PARENT_CHANGED:register(function ()
       if new.Parent then 
@@ -264,9 +224,9 @@ end
 ---@param self self
 ---@overload fun(self : self, vec4 : Vector4): GNUI.container
 ---@param x number
----@param y number?
----@param w number?
----@param t number?
+---@param y number
+---@param w number
+---@param t number
 ---@return self
 function container:setDimensions(x,y,w,t)
    ---@cast self GNUI.container
@@ -346,92 +306,19 @@ function container:offsetBottomRight(z,w)
    return self
 end
 
----Checks if the cursor in local coordinates is inside the bounding box of this container.
+---Checks if the given position is inside the container, in local BBunits of this container with dimension offset considered.
 ---@overload fun(self : self, vec2 : Vector4): boolean
 ---@param x number|Vector2
 ---@param y number?
 ---@return boolean
-function container:isHovering(x,y)
+function container:isPositionInside(x,y)
    ---@cast self GNUI.container
    local pos = utils.figureOutVec2(x,y)
    return (
-          pos.x > 0
-      and pos.y > 0
-      and pos.x < (self.ContainmentRect.z-self.ContainmentRect.x) / self.ScaleFactor 
-      and pos.y < (self.ContainmentRect.w-self.ContainmentRect.y) / self.ScaleFactor)
-end
-
----Sets the Cursor position relative to the top left of the container.  
----Returns true if the cursor is hovering over the container.  
----@overload fun(self: GNUI.container, vec2 : Vector2, press : boolean?): GNUI.container
----@overload fun(press : boolean): GNUI.container
----@overload fun(): GNUI.container
----@param x number?
----@param y number?
----@param press boolean?
----@return boolean
-function container:setCursor(x,y,press)
-   local xt = type(x)
-   ---@cast self GNUI.container
-   local pos
-   if xt == "nil" then
-      self.Cursor = nil
-      self.Hovering = false
-      self.CURSOR_CHANGED:invoke()
-      for key, value in pairs(self.Children) do
-         value:setCursor(nil)
-      end
-      return false
-   elseif self.Cursor and xt == "boolean" and x then
-      press = true
-      pos = self.Cursor
-      if not self.Cursor then return false end -- not selected at all
-   else
-      press = press or false
-      if x and y then
-         pos = utils.figureOutVec2(x,y)
-      else
-         return false
-      end
-   end
-   local lhovering = self.Hovering
-   self.Cursor = pos
-   self.Hovering = self:isHovering(self.Cursor)
-   if self.Hovering then
-      local hovering
-      for i = #self.Children, 1, -1 do
-         local child = self.Children[i]
-         if not hovering then
-            if child.CaptureCursor then
-               hovering = child:setCursor(
-                  self.Cursor.x-child.ContainmentRect.x,
-                  self.Cursor.y-child.ContainmentRect.y,press)
-               if hovering then -- obstructed by child
-                  self.Hovering = false
-               end
-            end
-         else
-            if child.Hovering then
-               child.Hovering = false
-            end
-         end
-      end
-   end
-   if self.Hovering and press then
-      self.PRESSED:invoke()
-   end
-   if self.Hovering ~= lhovering then
-      if self.Hovering then
-         self.MOUSE_ENTERED:invoke()
-      else
-         self.MOUSE_EXITED:invoke()
-      end
-   end
-   if self.Hovering and self.CaptureCursor then
-      self.CURSOR_CHANGED:invoke(pos)
-   end
-   --self.DIMENSIONS_CHANGED:invoke(self.Dimensions)
-   return self.Hovering
+          pos.x > self.ContainmentRect.x
+      and pos.y > self.ContainmentRect.y
+      and pos.x < self.ContainmentRect.z / self.ScaleFactor 
+      and pos.y < self.ContainmentRect.w / self.ScaleFactor)
 end
 
 ---Sets the offset of the depth for this container, a work around to fixing Z fighting issues when two elements overlap.
@@ -543,6 +430,20 @@ function container:setAnchor(left,top,right,bottom)
    ---@cast self GNUI.container
    self.Anchor = utils.figureOutVec4(left,top,right or left,bottom or top)
    self.DIMENSIONS_CHANGED:invoke(self.Dimensions)
+   return self
+end
+
+--The proper way to set if the cursor is hovering, this will tell the container that it has changed after setting its value
+function container:setIsCursorHovering(toggle)
+   if self.IsCursorHovering ~= toggle then
+      self.IsCursorHovering = toggle
+      self.MOUSE_PRESSENCE_CHANGED:invoke(toggle)
+      if toggle then
+         self.MOUSE_ENTERED:invoke()
+      else
+         self.MOUSE_EXITED:invoke()
+      end
+   end
    return self
 end
 

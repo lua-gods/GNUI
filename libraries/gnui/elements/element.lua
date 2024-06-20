@@ -1,8 +1,6 @@
 local eventLib = require("libraries.eventLib")
 local utils = require("libraries.gnui.utils")
 
----@alias GNUI.any GNUI.element|GNUI.container|GNUI.Label|GNUI.anchorPoint
-
 local element_next_free = 0
 ---@class GNUI.element # The base element of every GNUI element
 ---@field name string                 # An optional property used to get the element by a name
