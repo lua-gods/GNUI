@@ -9,10 +9,11 @@ for i = 1, 3, 1 do
    ---@param event GNUI.InputEvent
    btn.INPUT:register(function (event)
       if event.key == "key.mouse.left" and not event.isPressed then
-         btn:offsetDimensions(10,0)
+         return true
       end
-      return true
    end)
 
    screen:addChild(btn)
 end
+
+host:setUnlockCursor(true)

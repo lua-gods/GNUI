@@ -435,8 +435,8 @@ end
 
 --The proper way to set if the cursor is hovering, this will tell the container that it has changed after setting its value
 function container:setIsCursorHovering(toggle)
-   if self.IsCursorHovering ~= toggle then
-      self.IsCursorHovering = toggle
+   if self.isCursorHovering ~= toggle then
+      self.isCursorHovering = toggle
       self.MOUSE_PRESSENCE_CHANGED:invoke(toggle)
       if toggle then
          self.MOUSE_ENTERED:invoke()
