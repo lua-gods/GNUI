@@ -31,7 +31,9 @@ api.utils = utils
 
 
 
----Creates a new screen canvas.
+---Creates a Canvas onto your screen that automatically resizes to your window, and canceling all the inputs outside the screen. to disable canceling all the inputs outside the screen, use `Canvas:setCaptureInputs(false)` or `Canvas:setVisible(false)` to disable the functionality.
+---This serves as a quick setup for your screen.
+---@return GNUI.canvas
 function api.createScreenCanvas()
   local c = api.newCanvas()
   models:addChild(c.ModelPart)
