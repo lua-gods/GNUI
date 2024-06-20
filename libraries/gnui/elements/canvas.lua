@@ -194,7 +194,7 @@ events.MOUSE_MOVE:register(function (x, y)
    for key, value in pairs(canvases) do
       if value.isActive and value.Visible and not value.hasCustomCursorSetter then
          value:setMousePos(cursor_pos.x, cursor_pos.y, true)
-         if value.captureCursorMovement then return true end
+         if value.captureCursorMovement or value.captureInputs then return true end
       end
     end
 end)
