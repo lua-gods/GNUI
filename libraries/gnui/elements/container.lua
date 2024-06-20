@@ -20,6 +20,7 @@ local core = require("libraries.gnui.core")
 ---@field PRESSED eventLib             # Triggered when `setCursor` is called with the press argument set to true
 ---@field INPUT eventLib               # Serves as the handler for all inputs within the boundaries of the container.
 ---@field MOUSE_PRESSENCE_CHANGED eventLib
+---@field canCaptureCursor boolean
 ---@field MOUSE_ENTERED eventLib       # Triggered once the cursor is hovering over the container
 ---@field MOUSE_EXITED eventLib        # Triggered once the cursor leaves the confinement of this container.
 ---@field ClipOnParent boolean         # when `true`, the container will go invisible once touching outside the parent container.
@@ -312,6 +313,7 @@ end
 ---@param y number?
 ---@return boolean
 function container:isPositionInside(x,y)
+      if self.canCaptureCursor then return false end
    ---@cast self GNUI.container
    local pos = utils.figureOutVec2(x,y)
    return (
