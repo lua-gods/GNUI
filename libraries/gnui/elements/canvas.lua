@@ -250,16 +250,16 @@ function canvas:setMousePos(x,y,keep_auto)
    return self
 end
 
----@param Element GNUI.any
-local function getHoveringChild(Element,position)
-   position = position - Element.ContainmentRect.xy
-   for i = #Element.Children, 1, -1 do
-      local child = Element.Children[i]
+---@param e GNUI.any
+local function getHoveringChild(e,position)
+   position = position - e.ContainmentRect.xy
+   for i = #e.Children, 1, -1 do
+      local child = e.Children[i]
       if child.Visible and child.canCaptureCursor and child:isPositionInside(position) then
          return getHoveringChild(child,position)
       end
    end
-   return Element
+   return e
 end
 
 ---@package
