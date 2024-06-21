@@ -238,7 +238,7 @@ end
 
 ---@generic self
 ---@param self self
----@overload fun(self : self, vec2 : Vector4): GNUI.container
+---@overload fun(self : self, vec2 : Vector2): GNUI.container
 ---@param x number
 ---@param y number?
 ---@return self
