@@ -2,8 +2,8 @@
 local eventLib = require("libraries.eventLib")
 
 local utils = require("libraries.gnui.utils")
-local container = require("libraries.gnui.elements.container")
-local element = require("libraries.gnui.elements.element")
+local Container = require("libraries.gnui.elements.container")
+local Element = require("libraries.gnui.elements.element")
 
 ---@class GNUI.InputEvent
 ---@field key Minecraft.keyCode
@@ -17,157 +17,45 @@ local element = require("libraries.gnui.elements.element")
 ---@field pos Vector2 # local position 
 ---@field relative Vector2 # the change of position since last set
 
-local keymap = {
-    [32] = "space",
-    [39] = "apostrophe",
-    [44] = "comma",
-    [46] = "period",
-    [47] = "slash",
-    [48] = "0",
-    [49] = "1",
-    [50] = "2",
-    [51] = "3",
-    [52] = "4",
-    [53] = "5",
-    [54] = "6",
-    [55] = "7",
-    [56] = "8",
-    [57] = "9",
-    [59] = "semicolon",
-    [61] = "equal",
-    [65] = "a",
-    [66] = "b",
-    [67] = "c",
-    [68] = "d",
-    [69] = "e",
-    [60] = "f",
-    [71] = "g",
-    [72] = "h",
-    [73] = "i",
-    [74] = "j",
-    [75] = "k",
-    [76] = "l",
-    [77] = "m",
-    [78] = "n",
-    [79] = "o",
-    [70] = "p",
-    [81] = "q",
-    [82] = "r",
-    [83] = "s",
-    [84] = "t",
-    [85] = "u",
-    [86] = "v",
-    [87] = "w",
-    [88] = "x",
-    [89] = "y",
-    [90] = "z",
-    [91] = "left.bracket",
-    [92] = "left.backslash",
-    [93] = "right.bracket",
-    [96] = "grave.accent",
-    [161] = "world.1",
-    [162] = "world.2",
-    [256] = "escape",
-    [257] = "enter",
-    [258] = "tab",
-    [259] = "backspace",
-    [260] = "insert",
-    [261] = "delete",
-    [262] = "right",
-    [263] = "left",
-    [264] = "down",
-    [265] = "up",
-    [266] = "page.up",
-    [267] = "page.down",
-    [268] = "home",
-    [269] = "end",
-    [280] = "caps.lock",
-    [281] = "scroll.lock",
-    [282] = "number.lock",
-    [283] = "print.screen",
-    [284] = "pause",
-    [290] = "f1",
-    [291] = "f2",
-    [292] = "f3",
-    [293] = "f4",
-    [294] = "f5",
-    [295] = "f6",
-    [296] = "f7",
-    [297] = "f8",
-    [298] = "f9",
-    [299] = "f10",
-    [300] = "f11",
-    [301] = "f12",
-    [302] = "f13",
-    [303] = "f14",
-    [304] = "f15",
-    [305] = "f16",
-    [306] = "f17",
-    [307] = "f18",
-    [308] = "f19",
-    [309] = "f20",
-    [310] = "f21",
-    [311] = "f22",
-    [312] = "f23",
-    [313] = "f24",
-    [314] = "f25",
-    [320] = "keypad.0",
-    [321] = "keypad.1",
-    [322] = "keypad.2",
-    [323] = "keypad.3",
-    [324] = "keypad.4",
-    [325] = "keypad.5",
-    [326] = "keypad.6",
-    [327] = "keypad.7",
-    [328] = "keypad.8",
-    [329] = "keypad.9",
-    [330] = "keypad.decimal",
-    [331] = "keypad.divide",
-    [332] = "keypad.multiply",
-    [333] = "keypad.subtract",
-    [334] = "keypad.add",
-    [335] = "keypad.enter",
-    [336] = "keypad.equal",
-    [340] = "left.shift",
-    [341] = "left.control",
-    [342] = "left.alt",
-    --[343] = "⊞ Win` **/** `⌘ Command` **/** `❖ Super",
-    [344] = "right.shift",
-    [345] = "right.control",
-    [346] = "right.alt",
-  --[347] = "⊞ RWin` **/** `⌘ RCommand` **/** `❖ RSuper",
-    [348] = "menu"
+local keymap = {[32]="space",[39]="apostrophe",[44]="comma",[46]="period",[47]="slash",[48]="0",[49]="1",[50]="2",[51]="3",[52]="4",[53]="5",[54]="6",
+[55]="7",[56]="8",[57]="9",[59]="semicolon",[61]="equal",[65]="a",[66]="b",[67]="c",[68]="d",[69]="e",[60]="f",[71]="g",[72]="h",[73]="i",[74]="j",
+[75]="k",[76]="l",[77]="m",[78]="n",[79]="o",[70]="p",[81]="q",[82]="r",[83]="s",[84]="t",[85]="u",[86]="v",[87]="w",[88]="x",[89]="y",[90]="z",
+[91]="left.bracket",[92]="left.backslash",[93]="right.bracket",[96]="grave.accent",[161]="world.1",[162]="world.2",[256]="escape",[257]="enter",
+[258]="tab",[259]="backspace",[260]="insert",[261]="delete",[262]="right",[263]="left",[264]="down",[265]="up",[266]="page.up",[267]="page.down",
+[268]="home",[269]="end",[280]="caps.lock",[281]="scroll.lock",[282]="number.lock",[283]="print.screen",[284]="pause",[290]="f1",[291]="f2",[292]="f3",
+[293]="f4",[294]="f5",[295]="f6",[296]="f7",[297]="f8",[298]="f9",[299]="f10",[300]="f11",[301]="f12",[302]="f13",[303]="f14",[304]="f15",[305]="f16",
+[306]="f17",[307]="f18",[308]="f19",[309]="f20",[310]="f21",[311]="f22",[312]="f23",[313]="f24",[314]="f25",[320]="keypad.0",[321]="keypad.1",[322]="keypad.2",
+[323]="keypad.3",[324]="keypad.4",[325]="keypad.5",[326]="keypad.6",[327]="keypad.7",[328]="keypad.8",[329]="keypad.9",[330]="keypad.decimal",[331]="keypad.divide",
+[332]="keypad.multiply",[333]="keypad.subtract",[334]="keypad.add",[335]="keypad.enter",[336]="keypad.equal",[340]="left.shift",[341]="left.control",
+[342]="left.alt",[344]="right.shift",[345]="right.control",[346]="right.alt",[348]="menu"
 }
 
 for key, value in pairs(keymap) do keymap[key] = "key.keyboard." .. value end
 
 local mousemap = {
-   [0] = "left",
-   [1] = "right",
-   [2] = "middle",
-   [3] = "4",
-   [4] = "5",
-   [5] = "6",
-   [6] = "7",
-   [7] = "8"
+   [0]="left",[1]="right",
+   [2]="middle",[3]="4",
+   [4]="5",[5]="6",[6]="7",
+   [7]="8"
 }
 
 for key, value in pairs(mousemap) do mousemap[key] = "key.mouse." .. value end
 
 ---@class GNUI.canvas : GNUI.container # A special type of container that handles all the inputs
----@field MousePosition Vector2
----@field HoveredElement GNUI.any
----@field MOUSE_POSITION_CHANGED eventLib
+---@field MousePosition Vector2 # the position of the mouse
+---@field HoveredElement GNUI.any? # the element the mouse is currently hovering over
+---@field PressedElement GNUI.any? # the last pressed element, used to unpress buttons that have been unhovered.
+---@field MOUSE_POSITION_CHANGED eventLib # called when the mouse position changes
 ---@field isActive boolean # determins whether the canvas could capture input events
----@field captureCursorMovement boolean
----@field captureInputs boolean
+---@field captureCursorMovement boolean # true when the canvas should capture mouse movement, stopping the vanilla mouse movement, not the cursor itself
+---@field captureInputs boolean # true when the canvas should capture the inputs
 ---@field hasCustomCursorSetter boolean # true when the setCursor is called, while false, the canvas will use the screen cursor.
 ---@field INPUT eventLib # serves as the handler for all inputs within the boundaries of the canvas. called with the first argument being an input event
-local canvas = {}
-canvas.__index = function (t,i)
-   return rawget(t,i) or canvas[i] or container[i] or element[i]
+local Canvas = {}
+Canvas.__index = function (t,i)
+   return rawget(t,i) or Canvas[i] or Container[i] or Element[i]
 end
-canvas.__type = "GNUI.element.container.canvas"
+Canvas.__type = "GNUI.element.container.canvas"
 
 ---@type GNUI.canvas[]
 local canvases = {}
@@ -181,34 +69,32 @@ events.KEY_PRESS:register(function (key, state, modifiers)
    if key_string then
       for _, value in pairs(canvases) do
          if value.isActive and value.Visible then
-            value:parseInputEvent(key_string, state,
-            _shift,
-            _ctrl,
-            _alt
-            )
+            value:parseInputEvent(key_string, state,_shift,_ctrl,_alt)
             if value.captureInputs then return true end
          end
       end
    end
 end)
 
-
 events.MOUSE_MOVE:register(function (x, y)
    local cursor_pos = client:getMousePos() / client:getGuiScale()
-   for key, value in pairs(canvases) do
-      if value.isActive and value.Visible and not value.hasCustomCursorSetter then
-         value:setMousePos(cursor_pos.x, cursor_pos.y, true)
-         if value.captureCursorMovement or value.captureInputs then return true end
+   for _, c in pairs(canvases) do
+      if c.isActive and c.Visible and not c.hasCustomCursorSetter then
+         c:setMousePos(cursor_pos.x, cursor_pos.y, true)
+         if c.captureCursorMovement or c.captureInputs then return true end
       end
     end
 end)
 
 events.MOUSE_PRESS:register(function (button, state)
    if mousemap[button] then
-      for _, value in pairs(canvases) do
-         if value.isActive and value.Visible then
-            value:parseInputEvent(mousemap[button], state, _shift, _ctrl, _alt)
-            if value.captureInputs then return true end
+      for _, c in pairs(canvases) do
+         if c.isActive and c.Visible then
+            c:parseInputEvent(mousemap[button],state,_shift,_ctrl,_alt)
+            if state ~= 0 then
+               c.PressedElement = c.HoveredElement
+            end
+            if c.captureInputs then return true end
          end
       end
    end
@@ -216,8 +102,8 @@ end)
 
 ---Creates a new canvas.
 ---@return GNUI.canvas
-function canvas.new()
-   local new = container.new()
+function Canvas.new()
+   local new = Container.new()
    new.MousePosition = vectors.vec2()
    new.isActive = true
    new.MOUSE_POSITION_CHANGED = eventLib.new()
@@ -225,7 +111,7 @@ function canvas.new()
    new.unlockCursorWhenActive = true
    new.captureKeyInputs = true
    canvases[#canvases+1] = new
-   setmetatable(new, canvas)
+   setmetatable(new, Canvas)
    return new
 end
 
@@ -238,7 +124,7 @@ end
 ---@generic self
 ---@param self self
 ---@return self
-function canvas:setMousePos(x,y,keep_auto)
+function Canvas:setMousePos(x,y,keep_auto)
    ---@cast self GNUI.canvas
    local mpos = utils.figureOutVec2(x,y)
    local relative = mpos - self.MousePosition
@@ -269,7 +155,7 @@ local function getHoveringChild(e,position)
 end
 
 ---@package
-function canvas:updateHoveringChild()
+function Canvas:updateHoveringChild()
    local hovered_element = getHoveringChild(self,self.MousePosition)
    if hovered_element ~= self.HoveredElement then   
       if self.HoveredElement then
@@ -285,26 +171,31 @@ end
 
 ---Returns which element the mouse cursor is on top of.
 ---@return GNUI.any
-function canvas:getHoveredElement()
+function Canvas:getHoveredElement()
    return self.HoveredElement
 end
 
----@param Element GNUI.any
+local function parseInputEventOnElement(element,event)
+   local statuses = element.INPUT:invoke(event)
+   for j = 1, #statuses, 1 do
+      if statuses[j] then return true end
+   end
+end
+
+---@param element GNUI.any
 ---@param event GNUI.InputEvent
-local function parseInputEventToChildren(Element,event,position)
-   position = position - Element.ContainmentRect.xy
-   for i = #Element.Children, 1, -1 do
-      local child = Element.Children[i]
+local function parseInputEventToChildren(element,event,position)
+   position = position - element.ContainmentRect.xy
+   for i = #element.Children, 1, -1 do
+      local child = element.Children[i]
       if child.Visible and child.canCaptureCursor and child:isPositionInside(position) then
-         local statuses = child.INPUT:invoke(event)
-         for j = 1, #statuses, 1 do
-            if statuses[j] then return true end
-         end
+         parseInputEventOnElement(child,event)
          return parseInputEventToChildren(child,event,position)
       end
    end
    return false
 end
+
 
 
 ---Simulates a key event into the container.
@@ -313,7 +204,7 @@ end
 ---@param ctrl boolean
 ---@param alt boolean
 ---@param shift boolean
-function canvas:parseInputEvent(key,status,shift,ctrl,alt)
+function Canvas:parseInputEvent(key,status,shift,ctrl,alt)
    ---@type GNUI.InputEvent
    local key_event = {
       key = key,
@@ -333,6 +224,9 @@ function canvas:parseInputEvent(key,status,shift,ctrl,alt)
    end
    if not captured then
       parseInputEventToChildren(self,key_event,self.MousePosition)
+      if self.PressedElement and status == 0 then -- QOL fix for buttons that have been unhovered but still pressed
+         parseInputEventOnElement(self.PressedElement,key_event)
+      end
    end
    return self
 end
@@ -342,7 +236,7 @@ end
 ---@generic self
 ---@param self self
 ---@return self
-function canvas:setCaptureMouseMovement(toggle)
+function Canvas:setCaptureMouseMovement(toggle)
 ---@cast self GNUI.canvas
    self.captureCursorMovement = toggle
    return self
@@ -353,10 +247,10 @@ end
 ---@generic self
 ---@param self self
 ---@return self
-function canvas:setCaptureInputs(toggle)
+function Canvas:setCaptureInputs(toggle)
 ---@cast self GNUI.canvas
    self.captureInputs = toggle
    return self
 end
 
-return canvas
+return Canvas
