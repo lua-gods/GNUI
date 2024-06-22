@@ -111,7 +111,7 @@ function element:updateChildrenOrder()
 end
 
 ---Adopts an element as its child.
----@param child GNUI.element
+---@param child GNUI.any
 ---@param index integer?
 ---@generic self
 ---@param self self

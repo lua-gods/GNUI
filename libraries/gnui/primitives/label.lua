@@ -2,8 +2,8 @@
 ---@diagnostic disable: assign-type-mismatch, undefined-field
 local eventLib = require("libraries.eventLib")
 
-local container = require("libraries.gnui.elements.container")
-local element = require("libraries.gnui.elements.element")
+local container = require("libraries.gnui.primitives.container")
+local element = require("libraries.gnui.primitives.element")
 
 local dot = "."
 local dot_length = client.getTextWidth(dot)

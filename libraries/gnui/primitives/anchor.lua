@@ -2,7 +2,7 @@ local eventLib = require("libraries.eventLib")
 local utils = require("libraries.gnui.utils")
 
 local debug_texture = textures['gnui_debug_outline'] or textures:newTexture("gnui_debug_outline",3,3):fill(0,0,3,3,vectors.vec3(1,1,1)):setPixel(1,1,vectors.vec3(0,0,0))
-local element = require("libraries.gnui.elements.element")
+local element = require("libraries.gnui.primitives.element")
 local sprite = require("libraries.gnui.spriteLib")
 local core = require("libraries.gnui.core")
 

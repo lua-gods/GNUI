@@ -2,8 +2,8 @@
 local eventLib = require("libraries.eventLib")
 
 local utils = require("libraries.gnui.utils")
-local Container = require("libraries.gnui.elements.container")
-local Element = require("libraries.gnui.elements.element")
+local Container = require("libraries.gnui.primitives.container")
+local Element = require("libraries.gnui.primitives.element")
 
 ---@class GNUI.InputEvent
 ---@field key Minecraft.keyCode
@@ -68,7 +68,7 @@ events.KEY_PRESS:register(function (key, state, modifiers)
    local key_string = keymap[key]
    if key_string then
       for _, value in pairs(canvases) do
-         if value.isActive and value.Visible then
+         if value.isActive and value.Visible and value.canCaptureCursor then
             value:parseInputEvent(key_string, state,_shift,_ctrl,_alt)
             if value.captureInputs then return true end
          end
@@ -145,10 +145,12 @@ end
 ---@param e GNUI.any
 local function getHoveringChild(e,position)
    position = position - e.ContainmentRect.xy
-   for i = #e.Children, 1, -1 do
-      local child = e.Children[i]
-      if child.Visible and child.canCaptureCursor and child:isPositionInside(position) then
-         return getHoveringChild(child,position)
+   if e.Visible and e.canCaptureCursor then
+      for i = #e.Children, 1, -1 do
+         local child = e.Children[i]
+         if child.Visible and child.canCaptureCursor and child:isPositionInside(position) then
+            return getHoveringChild(child,position)
+         end
       end
    end
    return e

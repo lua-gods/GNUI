@@ -40,7 +40,7 @@ function sprite.new(obj)
    new.MODELPART_CHANGED = eventLib.new()
    new.Position = obj.Position or vectors.vec3()
    new.UV = obj.UV or vectors.vec4(0,0,1,1)
-   new.Size = obj.Size or vectors.vec2(16,16)
+   new.Size = obj.Size or vectors.vec2(0,0)
    new.Alpha = obj.Alpha or 1
    new.Color = obj.Color or vectors.vec3(1,1,1)
    new.Scale = obj.Scale or 1
