@@ -1,6 +1,6 @@
 local GNUI = require("libraries.gnui")
 
-local screen = GNUI.createScreenCanvas()
+local screen = GNUI.getScreenCanvas()
 
 for i = 1, 3, 1 do
    local btn = GNUI.newContainer()
