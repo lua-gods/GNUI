@@ -112,9 +112,9 @@ end
 ---@param self self
 ---@param wrap boolean
 ---@return self
-function label:wrapText(wrap)
+function label:setWrapText(wrap)
    self.WrapText = wrap
-   self.DIMENSIONS_CHANGED:invoke()
+   self:_updateRenderTasks()
    return self
 end
 
@@ -278,6 +278,10 @@ function label:_updateRenderTasks()
       offset.x = (size.x / scale) * self.Align.x + line.length * self.Align.x
       for c, component in pairs(line.content) do
          i = i + 1
+         if self.WrapText and (pos.x - component.length < size.x / scale)  then
+            pos.y = pos.y - self.LineHeight
+            pos.x = 0
+         end
          local task = self.RenderTasks[i]
          if (pos.x - component.length > size.x / scale) or true then
             task

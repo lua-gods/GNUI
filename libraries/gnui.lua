@@ -18,16 +18,26 @@ local utils = require("libraries.gnui.utils")
 local label = require("libraries.gnui.primitives.label")
 local sprite = require("libraries.gnui.spriteLib")
 local canvas = require("libraries.gnui.primitives.canvas")
+local element = require("libraries.gnui.primitives.element")
 local container = require("libraries.gnui.primitives.container")
-local point_anchor = require("libraries.gnui.primitives.anchor")
----                             Blast off! ~ ~ ~~~$%$#%%$#%#!@!#%|>=========>
-api.newPointAnchor = point_anchor.new
+local anchor = require("libraries.gnui.primitives.anchor")
+
+api.newPointAnchor = anchor.new
 api.newContainer = container.new
 api.newCanvas = canvas.new
 api.newSprite = sprite.new
 api.newLabel = label.new
+
 api.utils = utils
 
+api.metatables = {
+  container = container,
+  anchor = anchor,
+  element = element,
+  canvas = canvas,
+  sprite = sprite,
+  label = label,
+}
 
 local screenCanvas
 ---Gets a canvas for the screen. Quick startup for putting UI elements onto the screen.

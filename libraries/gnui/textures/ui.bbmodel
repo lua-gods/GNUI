@@ -1,0 +1,34 @@
+{
+  "meta": {
+    "format_version": "4.10",
+    "model_format": "free",
+    "box_uv": false
+  },
+  "name": "ui",
+  "resolution": {
+    "width": 16,
+    "height": 16
+  },
+  "elements": [],
+  "outliner": [],
+  "textures": [
+    {
+      "path": "D:\\GNs Figura Rewrite Library\\avatars\\A\\on GNUI\\libraries\\gnui\\textures\\gnui_theme.png",
+      "name": "gnui_theme.png",
+      "id": "0",
+      "width": 64,
+      "height": 128,
+      "uv_width": 16,
+      "uv_height": 16,
+      "sync_to_project": "",
+      "render_mode": "default",
+      "render_sides": "auto",
+      "visible": true,
+      "internal": true,
+      "saved": true,
+      "uuid": "17bb8db9-c143-0e0d-e82a-78fe0d671c0f",
+      "relative_path": "gnui_theme.png",
+      "source": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAACACAYAAAC7gW9qAAAAAXNSR0IArs4c6QAABQNJREFUeF7tnE9IVEEcx2fJhHChQKJg7eBqLUiFQStRbIJ08BCepE5eOnSQLp2CwA4JQacu4aFDF0+FJ+ngIQRbinCDpELc0lVoF8oQClYCMzZ+mzO+Zt9rf2/HN2/3t793HObf9/P7zm9m3vqMiJCfWCxWklMoFAoR29OxPqAuEADk83nR0dEhGAA7gJeA9SVpfcC6ywGlUkllYX1ykUgkcEChJ0EA4CZUlju3Ked2tZfloe4CGAADAwNl7WtrayKXy5W3KwAwOjpaLl9aWhKzs7OqPB6Pl8vX19dFsVhU5V79NAQAEK8LAgAgXgcDAGRdACGBAQC3fuoegBQEYvSIgiB4nM6IRqPlevqS8erHCcD2yTCCWQJ6cpQR3Yty6MM5B9tJsQzA6/xtYxdgAPXggFq2wUQiUeGcbDZb3h38LA3bt7+Ksw4mB8htzZnsAEBfX5/qb35+XkgAkATl40yabv0wgJAJoHaBpneA25omlQPC3gbDXAV1cQ4IHUAt26DXdhemmFrGRiVBeYuDAZy3PnkbhPKJiYlQXmrWItrZBg0A9nnY93UAMzMzYnBwUAEgeRDy4wAA4LZtQrlbP6YRNG2PcoDXye5/Jz64HgMI5zUZAOhOMhVg2j4wAHJiOgBZLpeSqQDT9igAfi43DZkD+CDkQcDWCxFTG5u03/MlYDKZMNqiAHw8//e1ODwnXu2+/v50/YYqP/7oId2DEADYXFkVbV2dFQBKHxZF5GSPkAAaMglWuwv4cQAAeHLgsHLG1Z/f1O8Cbv2EYXvfR2EvQW+PdKq+znxdVUKh/sutX+JC636hA9CdRBaAFEbCAXwQCtunAY7Pb4Qwvwv4WQIBBiuQrlEHof6nZ9Xgc1feqGx/J3NJld9NPqd7EAIA2ffbInGqRegA5la/i/7OQ0ICIHkQ8uMAALBvOKmc8Xsqoxzj1k8gvvbRKWoJeAk6OtarhvoyvqCEQv3NlW3R1tUidAC6k3zMNZCqgQGQsyXhAD+7QEPmAC9vNc0LkaYHUO067GcJBJKpAuwUlQQL0zk1hdhQXGX7H4t5VX6wJ5y/9zdlgweQ+SxE8pjQARSXt0S0u1VIAA2ZBKstAT8OAACFoQe7jpm+qRzj1o9pBE3b4xzgJWhsblfoeP+uUKi/kBaiNyViOgDNSaYCTNsHB2BnZhUAZPlOLjEVYNoeBcDPLtCQOaDpzwFND6DaLuBnCZiuSdvtUTkA/p5fPvIDR/ln7Xq5bQGm46EBvF7IiXO9cfWFpwTgVt5IjkEDwDoAwEw9e6EYDF++qM4Hbk4yjaBpexSAW/ceq3Hu376mBHkJhfLMu2WRPN0tdAC6Y0wFmLYPDICcGAkH+FnTfBAy9aTl9v/8NNYMr8B0vioHyJ/I4DsA+PRlZGSkNDk5GWlvby9tbGwE/g2x5cCr4TwBpFKpUjqdLn8EFcZ/drAFxBOAFC5B2JqQ7XE4B9gmXm/jkU1uWNAMAEuKaj12ANXIYnWxA7CkqNZjB1CNLFYXOwBLimo9dgDVyGJ1sQOwpKjWYwdQjSxWFzsAS4pqPXYA1chidbEDsKSo1mMHUI0sVhc7AEuKaj12ANXIYnWxA7CkqNZjB1CNLFYXOwBLimo9dgDVyGJ1sQOwpKjWYwdQjSxWFzsAS4pqPXYA1chidbEDsKSo1mMHUI0sVhc7AEuKaj12ANXIYnWxA7CkqNZjB1CNLFbXH6H1bttcH4XNAAAAAElFTkSuQmCC"
+    }
+  ]
+}

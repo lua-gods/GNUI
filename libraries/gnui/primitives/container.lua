@@ -1,7 +1,11 @@
 local eventLib = require("libraries.eventLib")
 local utils = require("libraries.gnui.utils")
 
-local debug_texture = textures['gnui_debug_outline'] or textures:newTexture("gnui_debug_outline",3,3):fill(0,0,3,3,vectors.vec3(1,1,1)):setPixel(1,1,vectors.vec3(0,0,0))
+local debug_texture = textures['gnui_debug_outline'] or 
+textures:newTexture("gnui_debug_outline",6,6)
+:fill(0,0,6,6,vectors.vec3())
+:fill(1,1,4,4,vectors.vec3(1,1,1))
+:fill(2,2,2,2,vectors.vec3())
 local element = require("libraries.gnui.primitives.element")
 local sprite = require("libraries.gnui.spriteLib")
 local core = require("libraries.gnui.core")
@@ -14,7 +18,7 @@ local core = require("libraries.gnui.core")
 ---@field SIZE_CHANGED eventLib            # Triggered when the size of the final container dimensions is different from the last tick.
 ---@field Anchor Vector4                   # Determins where to attach to its parent, (`0`-`1`, left-right, up-down)
 ---@field ANCHOR_CHANGED eventLib          # Triggered when the anchors applied to the container is changed.
----@field Sprite Sprite                    # the sprite that will be used for displaying textures.
+---@field Sprite Ninepatch                    # the sprite that will be used for displaying textures.
 ---@field SPRITE_CHANGED eventLib          # Triggered when the sprite object set to this container has changed.
 ---@field CursorHovering boolean           # True when the cursor is hovering over the container, compared with the parent container.
 ---@field PRESSED eventLib                 # Triggered when `setCursor` is called with the press argument set to true
@@ -29,21 +33,21 @@ local core = require("libraries.gnui.core")
 ---@field isClipping boolean               # `true` when the container is touching outside the parent's container.
 ---@field ModelPart ModelPart              # The `ModelPart` used to handle where to display debug features and the sprite.
 ---@field CustomMinimumSize Vector2        # Minimum size that the container will use.
----@field TheoreticalMinimumSize Vector2   # The minimum size that the container can use, set by the container itself.
+---@field SystemMinimumSize Vector2   # The minimum size that the container can use, set by the container itself.
 ---@field GrowDirection Vector2            # The direction in which the container grows into when is too small for the parent container.
-local container = {}
-container.__index = function (t,i)
-   return rawget(t,i) or container[i] or element[i]
+local Container = {}
+Container.__index = function (t,i)
+   return rawget(t,i) or Container[i] or element[i]
 end
-container.__type = "GNUI.element.container"
+Container.__type = "GNUI.element.container"
 
 ---Creates a new container.
 ---@return self
-function container.new()
+function Container.new()
    ---@type GNUI.container
 ---@diagnostic disable-next-line: assign-type-mismatch
    local new = element.new()
-   setmetatable(new,container)
+   setmetatable(new,Container)
    new.Dimensions = vectors.vec4(0,0,0,0) 
    new.Z = 0
    new.SIZE_CHANGED = eventLib.new()
@@ -65,15 +69,14 @@ function container.new()
    new.MOUSE_EXITED = eventLib.new()
    new.PARENT_CHANGED = eventLib.new()
    new.PRESSED = eventLib.new()
-   new.TheoreticalMinimumSize = vectors.vec2()
-   new.GrowDirection = vectors.vec2(0.5,0.5)
+   new.SystemMinimumSize = vectors.vec2()
+   new.GrowDirection = vectors.vec2(1,1)
    models:removeChild(new.ModelPart)
    -->==========[ Internals ]==========<--
-   local debug_container 
    if core.debug_visible then
-      debug_container  = sprite.new():setModelpart(new.ModelPart):setTexture(debug_texture):setBorderThickness(1,1,1,1):setRenderType("EMISSIVE_SOLID"):setScale(core.debug_scale):setColor(1,1,1):excludeMiddle(true)
+      new.debug_container  = sprite.new():setModelpart(new.ModelPart):setTexture(debug_texture):setRenderType("EMISSIVE_SOLID"):setBorderThickness(3,3,3,3):setScale(core.debug_scale):setColor(1,1,1):excludeMiddle(true)
       new.MOUSE_PRESSENCE_CHANGED:register(function (h)
-         debug_container:setColor(1,1,h and 0.25 or 1)
+         new.debug_container:setColor(1,1,h and 0.25 or 1)
       end)
    end
 
@@ -81,91 +84,7 @@ function container.new()
       new.DIMENSIONS_CHANGED:invoke(new.Dimensions)
    end)
 
-   new.DIMENSIONS_CHANGED:register(function ()
-      new.AccumulatedScaleFactor = (new.Parent and new.Parent.AccumulatedScaleFactor or 1) * new.ScaleFactor
-      local scale = new.AccumulatedScaleFactor
-      local unscale = 1 / scale
-      local scale_self = new.ScaleFactor
-      local unscale_self = 1 / new.ScaleFactor
-      new.Dimensions:scale(scale)
-      local last_size = new.ContainmentRect.zw - new.ContainmentRect.xy
-      -- generate the containment rect
-      new.ContainmentRect = new.Dimensions:copy()
-      -- adjust based on parent if this has one
-      local clipping = false
-      if new.Parent and new.Parent.ContainmentRect then 
-         local parent_scale = 1 / new.Parent.ScaleFactor
-         local parent_containment = new.Parent.ContainmentRect - new.Parent.ContainmentRect.xyxy
-         local anchor_shift = vectors.vec4(
-            math.lerp(parent_containment.x,parent_containment.z,new.Anchor.x),
-            math.lerp(parent_containment.y,parent_containment.w,new.Anchor.y),
-            math.lerp(parent_containment.x,parent_containment.z,new.Anchor.z),
-            math.lerp(parent_containment.y,parent_containment.w,new.Anchor.w)
-         ) * parent_scale * scale_self
-         new.ContainmentRect.x = new.ContainmentRect.x + anchor_shift.x
-         new.ContainmentRect.y = new.ContainmentRect.y + anchor_shift.y
-         new.ContainmentRect.z = new.ContainmentRect.z + anchor_shift.z
-         new.ContainmentRect.w = new.ContainmentRect.w + anchor_shift.w
-
-         -- calculate clipping
-         if new.ClipOnParent then
-            clipping = parent_containment.x > new.ContainmentRect.x
-            or parent_containment.y > new.ContainmentRect.y
-            or parent_containment.z < new.ContainmentRect.z
-            or parent_containment.w < new.ContainmentRect.w
-         end
-      end
-      for _, child in pairs(new.Children) do
-         if child.DIMENSIONS_CHANGED then
-            child.DIMENSIONS_CHANGED:invoke(child.Dimensions)
-         end
-      end
-
-      local size = new.ContainmentRect.zw - new.ContainmentRect.xy
-      local size_changed = false
-      if last_size ~= size then
-         new.SIZE_CHANGED:invoke(size)
-         size_changed = true
-      end
-
-      local visible = new.cache.final_visible
-      if new.ClipOnParent and visible then
-         if clipping then
-            visible = false
-         end
-      end
-      new.ModelPart:setVisible(new.Visible)
-      if visible then
-         new.ModelPart
-         :setPos(
-            -new.ContainmentRect.x * unscale_self,
-            -new.ContainmentRect.y * unscale_self,
-            -((new.Z + new.ChildIndex / (new.Parent and #new.Parent.Children or 1) * 0.99) * core.clipping_margin)
-         )
-         if new.Sprite then
-            local contain = new.ContainmentRect
-            new.Sprite
-               :setSize(
-                  (contain.z - contain.x) * unscale_self,
-                  (contain.w - contain.y) * unscale_self
-               )
-         end
-         if core.debug_visible then
-            local contain = new.ContainmentRect
-            debug_container
-            :setPos(
-               0,
-               0,
-               -((new.Z + 1 + new.ChildIndex / (new.Parent and #new.Parent.Children or 1)) * core.clipping_margin) * 0.6)
-            if size_changed then
-               debug_container:setSize(
-                  contain.z - contain.x,
-                  contain.w - contain.y)
-            end
-         end
-      end
-      new.Dimensions:scale(unscale)
-   end,core.internal_events_name)
+   new:_updateDimensions()
 
    new.PARENT_CHANGED:register(function ()
       if new.Parent then 
@@ -178,29 +97,13 @@ function container.new()
    return new
 end
 
----Creates a new container that is a child of this container.
----@return GNUI.container
-function container:newContainer()
-   local new = self.new()
-   self:addChild(new)
-   return new
-end
-
----Creates a new label that is a child of this container.
----@return GNUI.Label
-function container:newLabel()
-   local new = self:newLabel()
-   self:addChild(new)
-   return new
-end
-
 ---Sets the backdrop of the container.  
 ---note: the object dosent get applied directly, its duplicated and the clone is used instead of the original.
 ---@generic self
 ---@param self self
----@param sprite_obj Sprite?
+---@param sprite_obj Ninepatch?
 ---@return self
-function container:setSprite(sprite_obj)
+function Container:setSprite(sprite_obj)
    ---@cast self self
    if self.Sprite then
       self.Sprite:deleteRenderTasks()
@@ -210,7 +113,7 @@ function container:setSprite(sprite_obj)
       self.Sprite = sprite_obj
       sprite_obj:setModelpart(self.ModelPart)
    end
-   self.DIMENSIONS_CHANGED:invoke()
+   self:_updateDimensions()
    self.SPRITE_CHANGED:invoke()
    return self
 end
@@ -222,10 +125,10 @@ end
 ---@param self self
 ---@param clip any
 ---@return self
-function container:setClipOnParent(clip)
+function Container:setClipOnParent(clip)
    ---@cast self GNUI.container
    self.ClipOnParent = clip
-   self.DIMENSIONS_CHANGED:invoke()
+   self:_updateDimensions()
    return self
 end
 -->====================[ Dimensions ]====================<--
@@ -243,25 +146,43 @@ end
 ---@param w number
 ---@param t number
 ---@return self
-function container:setDimensions(x,y,w,t)
+function Container:setDimensions(x,y,w,t)
    ---@cast self GNUI.container
    local new = utils.figureOutVec4(x,y,w or x,t or y)
    self.Dimensions = new
-   self.DIMENSIONS_CHANGED:invoke(self.Dimensions)
+   self:_updateDimensions()
    return self
 end
 
+---Sets the position of this container
 ---@generic self
 ---@param self self
 ---@overload fun(self : self, vec2 : Vector2): GNUI.container
 ---@param x number
 ---@param y number?
 ---@return self
-function container:offsetDimensions(x,y)
+function Container:setPos(x,y)
    ---@cast self GNUI.container
    local new = utils.figureOutVec2(x,y)
-   self.Dimensions:add(new.x,new.y,new.x,new.y)
-   self.DIMENSIONS_CHANGED:invoke(self.Dimensions)
+   local size = self.Dimensions.zw - self.Dimensions.xy
+   self.Dimensions = vectors.vec4(new.x,new.y,new.x + size.x,new.y + size.y)
+   self:_updateDimensions()
+   return self
+end
+
+
+---Sets the Size of this container.
+---@generic self
+---@param self self
+---@overload fun(self : self, vec2 : Vector2): GNUI.container
+---@param x number
+---@param y number
+---@return self
+function Container:setSize(x,y)
+   ---@cast self GNUI.container
+   local size = utils.figureOutVec2(x,y)
+   self.Dimensions.zw = self.Dimensions.xy + size
+   self:_updateDimensions()
    return self
 end
 
@@ -272,10 +193,10 @@ end
 ---@param x number
 ---@param y number
 ---@return self
-function container:setTopLeft(x,y)
+function Container:setTopLeft(x,y)
    ---@cast self GNUI.container
    self.Dimensions.xy = utils.figureOutVec2(x,y)
-   self.DIMENSIONS_CHANGED:invoke(self.Dimensions)
+   self:_updateDimensions()
    return self
 end
 
@@ -286,10 +207,10 @@ end
 ---@param x number
 ---@param y number
 ---@return self
-function container:setBottomRight(x,y)
+function Container:setBottomRight(x,y)
    ---@cast self GNUI.container
    self.Dimensions.zw = utils.figureOutVec2(x,y)
-   self.DIMENSIONS_CHANGED:invoke(self.Dimensions)
+   self:_updateDimensions()
    return self
 end
 
@@ -298,12 +219,12 @@ end
 ---@param x number
 ---@param y number
 ---@return self
-function container:offsetTopLeft(x,y)
+function Container:offsetTopLeft(x,y)
    ---@cast self GNUI.container
    local old,new = self.Dimensions.xy,utils.figureOutVec2(x,y)
    local delta = new-old
    self.Dimensions.xy,self.Dimensions.zw = new,self.Dimensions.zw - delta
-   self.DIMENSIONS_CHANGED:invoke(self.Dimensions)
+   self:_updateDimensions()
    return self
 end
 
@@ -312,12 +233,12 @@ end
 ---@param z number
 ---@param w number
 ---@return self
-function container:offsetBottomRight(z,w)
+function Container:offsetBottomRight(z,w)
    ---@cast self GNUI.container
    local old,new = self.Dimensions.xy+self.Dimensions.zw,utils.figureOutVec2(z,w)
    local delta = new-old
    self.Dimensions.zw = self.Dimensions.zw + delta
-   self.DIMENSIONS_CHANGED:invoke(self.Dimensions)
+   self:_updateDimensions()
    return self
 end
 
@@ -326,7 +247,7 @@ end
 ---@param x number|Vector2
 ---@param y number?
 ---@return boolean
-function container:isPositionInside(x,y)
+function Container:isPositionInside(x,y)
    ---@cast self GNUI.container
    local pos = utils.figureOutVec2(x,y)
    return (
@@ -341,10 +262,10 @@ end
 ---@generic self
 ---@param self self
 ---@return self
-function container:setZ(depth)
+function Container:setZ(depth)
    ---@cast self GNUI.container
    self.Z = depth
-   self.DIMENSIONS_CHANGED:invoke(self.Dimensions)
+   self:_updateDimensions()
    return self
 end
 
@@ -353,7 +274,7 @@ end
 ---@generic self
 ---@param self self
 ---@return self
-function container:setCanCaptureCursor(capture)
+function Container:setCanCaptureCursor(capture)
    ---@cast self GNUI.container
    self.canCaptureCursor = capture
    return self
@@ -363,10 +284,10 @@ end
 ---@generic self
 ---@param self self
 ---@return self
-function container:setScaleFactor(factor)
+function Container:setScaleFactor(factor)
    ---@cast self GNUI.container
    self.ScaleFactor = factor
-   self.DIMENSIONS_CHANGED:invoke(self.Dimensions)
+   self:_updateDimensions()
    return self
 end
 
@@ -378,10 +299,10 @@ end
 ---@generic self
 ---@param self self
 ---@return self
-function container:setAnchorTop(units)
+function Container:setAnchorTop(units)
    ---@cast self GNUI.container
    self.Anchor.y = units or 0
-   self.DIMENSIONS_CHANGED:invoke(self.Dimensions)
+   self:_updateDimensions()
    return self
 end
 
@@ -392,10 +313,10 @@ end
 ---@generic self
 ---@param self self
 ---@return self
-function container:setAnchorLeft(units)
+function Container:setAnchorLeft(units)
    ---@cast self GNUI.container
    self.Anchor.x = units or 0
-   self.DIMENSIONS_CHANGED:invoke(self.Dimensions)
+   self:_updateDimensions()
    return self
 end
 
@@ -406,10 +327,10 @@ end
 ---@generic self
 ---@param self self
 ---@return self
-function container:setAnchorDown(units)
+function Container:setAnchorDown(units)
    ---@cast self GNUI.container
    self.Anchor.z = units or 0
-   self.DIMENSIONS_CHANGED:invoke(self.Dimensions)
+   self:_updateDimensions()
    return self
 end
 
@@ -420,10 +341,10 @@ end
 ---@generic self
 ---@param self self
 ---@return self
-function container:setAnchorRight(units)
+function Container:setAnchorRight(units)
    ---@cast self GNUI.container
    self.Anchor.w = units or 0
-   self.DIMENSIONS_CHANGED:invoke(self.Dimensions)
+   self:_updateDimensions()
    return self
 end
 
@@ -440,10 +361,10 @@ end
 ---@generic self
 ---@param self self
 ---@return self
-function container:setAnchor(left,top,right,bottom)
+function Container:setAnchor(left,top,right,bottom)
    ---@cast self GNUI.container
    self.Anchor = utils.figureOutVec4(left,top,right or left,bottom or top)
-   self.DIMENSIONS_CHANGED:invoke(self.Dimensions)
+   self:_updateDimensions()
    return self
 end
 
@@ -452,7 +373,7 @@ end
 ---@generic self
 ---@param self self
 ---@return self
-function container:setIsCursorHovering(toggle)
+function Container:setIsCursorHovering(toggle)
    ---@cast self GNUI.container
    if self.isCursorHovering ~= toggle then
       self.isCursorHovering = toggle
@@ -466,20 +387,31 @@ function container:setIsCursorHovering(toggle)
    return self
 end
 
---Sets the minimum size of the container
+--Sets the minimum size of the container. resets to none if no arguments is given
 ---@overload fun(self : GNUI.container, vec2 : Vector2): GNUI.container
 ---@param x number
 ---@param y number
 ---@generic self
 ---@param self self
 ---@return self
-function container:setCustomMinimumSize(x,y)
+function Container:setCustomMinimumSize(x,y)
    ---@cast self GNUI.container
-   self.CustomMinimumSize = utils.figureOutVec2(x,y)
-   self.DIMENSIONS_CHANGED:invoke(self.Dimensions)
+   if (x and y) then
+      local value = utils.figureOutVec2(x,y)
+      if value.x == 0 and value.y == 0 then
+         self.CustomMinimumSize = nil
+      else
+         self.CustomMinimumSize = value
+      end
+   else
+      self.CustomMinimumSize = nil
+   end
+   self:_updateDimensions()
    return self
 end
 
+--- x -1 <-> 1 = left <-> right  
+--- y -1 <-> 1 = top <-> bottom  
 --Sets the grow direction of the container
 ---@overload fun(self : GNUI.container, vec2 : Vector2): GNUI.container
 ---@param x number
@@ -487,11 +419,133 @@ end
 ---@generic self
 ---@param self self
 ---@return self
-function container:setGrowDirection(x,y)
+function Container:setGrowDirection(x,y)
    ---@cast self GNUI.container
-   self.GrowDirection = utils.figureOutVec2(x,y)
-   self.DIMENSIONS_CHANGED:invoke(self.Dimensions)
+   self.GrowDirection = utils.figureOutVec2(x or 0,y or 0)
+   self:_updateDimensions()
    return self
 end
 
-return container
+---Gets the minimum size of the container.
+function Container:getMinimumSize()
+   return vectors.vec2(
+      math.min(self.CustomMinimumSize.x,self.SystemMinimumSize.x),
+      math.min(self.CustomMinimumSize.y,self.SystemMinimumSize.y)
+   )
+end
+
+function Container:_updateDimensions()
+   self.AccumulatedScaleFactor = (self.Parent and self.Parent.AccumulatedScaleFactor or 1) * self.ScaleFactor
+   local scale = self.AccumulatedScaleFactor
+   local unscale = 1 / scale
+   local scale_self = self.ScaleFactor
+   local unscale_self = 1 / self.ScaleFactor
+   self.Dimensions:scale(scale)
+   local last_size = self.ContainmentRect.zw - self.ContainmentRect.xy
+   -- generate the containment rect
+   local containment_rect = self.Dimensions:copy()
+   -- adjust based on parent if this has one
+   local clipping = false
+   local size
+   if self.Parent and self.Parent.ContainmentRect then 
+      local parent_scale = 1 / self.Parent.ScaleFactor
+      local parent_containment = self.Parent.ContainmentRect - self.Parent.ContainmentRect.xyxy
+      local anchor_shift = vectors.vec4(
+         math.lerp(parent_containment.x,parent_containment.z,self.Anchor.x),
+         math.lerp(parent_containment.y,parent_containment.w,self.Anchor.y),
+         math.lerp(parent_containment.x,parent_containment.z,self.Anchor.z),
+         math.lerp(parent_containment.y,parent_containment.w,self.Anchor.w)
+      ) * parent_scale * scale_self
+      containment_rect.x = containment_rect.x + anchor_shift.x
+      containment_rect.y = containment_rect.y + anchor_shift.y
+      containment_rect.z = containment_rect.z + anchor_shift.z
+      containment_rect.w = containment_rect.w + anchor_shift.w
+      
+      size = containment_rect.zw - containment_rect.xy
+      
+      if self.CustomMinimumSize or self.SystemMinimumSize then
+         local final_minimum_size = vectors.vec2(0,0)
+         if self.CustomMinimumSize then
+            final_minimum_size.x = math.max(final_minimum_size.x,self.CustomMinimumSize.x)
+            final_minimum_size.y = math.max(final_minimum_size.y,self.CustomMinimumSize.y)
+         end
+         if self.SystemMinimumSize then
+            final_minimum_size.x = math.max(final_minimum_size.x,self.SystemMinimumSize.x)
+            final_minimum_size.y = math.max(final_minimum_size.y,self.SystemMinimumSize.y)
+         end
+         containment_rect.z = math.max(containment_rect.z,containment_rect.x + final_minimum_size.x)
+         containment_rect.w = math.max(containment_rect.w,containment_rect.y + final_minimum_size.y)
+         local shift = (size - (containment_rect.zw - containment_rect.xy)) * -(self.GrowDirection  * -0.5 + 0.5)
+         
+         containment_rect.x = containment_rect.x - shift.x
+         containment_rect.y = containment_rect.y - shift.y
+         containment_rect.z = containment_rect.z - shift.x
+         containment_rect.w = containment_rect.w - shift.y
+      end
+      
+      -- calculate clipping
+      if self.ClipOnParent then
+         clipping = parent_containment.x > containment_rect.x
+         or parent_containment.y > containment_rect.y
+         or parent_containment.z < containment_rect.z
+         or parent_containment.w < containment_rect.w
+      end
+   else
+      size = containment_rect.zw - containment_rect.xy
+   end
+
+   self.ContainmentRect = containment_rect
+   self.Dimensions:scale(unscale)
+   
+   local size_changed = false
+   if last_size ~= size then
+      self.SIZE_CHANGED:invoke(size)
+      size_changed = true
+   end
+   self.DIMENSIONS_CHANGED:invoke()
+   
+   for _, child in pairs(self.Children) do
+      child:_updateDimensions()
+   end
+
+   local visible = self.cache.final_visible
+   if self.ClipOnParent and visible then
+      if clipping then
+         visible = false
+      end
+   end
+   self.ModelPart:setVisible(self.Visible)
+   if visible then
+      self.ModelPart
+      :setPos(
+         -containment_rect.x * unscale_self,
+         -containment_rect.y * unscale_self,
+         -((self.Z + self.ChildIndex / (self.Parent and #self.Parent.Children or 1) * 0.99) * core.clipping_margin)
+      )
+      if self.Sprite then
+         local contain = containment_rect
+         self.Sprite
+            :setSize(
+               (contain.z - contain.x) * unscale_self,
+               (contain.w - contain.y) * unscale_self
+            )
+      end
+      if core.debug_visible then
+         local contain = containment_rect
+---@diagnostic disable-next-line: undefined-field
+self.debug_container
+:setPos(
+   0,
+   0,
+   -((self.Z + 1 + self.ChildIndex / (self.Parent and #self.Parent.Children or 1)) * core.clipping_margin) * 0.6)
+   if size_changed then
+      ---@diagnostic disable-next-line: undefined-field
+            self.debug_container:setSize(
+               contain.z - contain.x,
+               contain.w - contain.y)
+         end
+      end
+   end
+end
+
+return Container
