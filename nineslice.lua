@@ -39,16 +39,16 @@ local update = {}
 ---@field Visible boolean
 ---@field id integer
 ---@field package _queue_update boolean
-local N = {}
-N.__index = N
-N.__type = "Sprite"
+local Nineslice = {}
+Nineslice.__index = Nineslice
+Nineslice.__type = "Sprite"
 
 local sprite_next_free = 0
 ---@return Nineslice
-function N.new(obj)
+function Nineslice.new(obj)
   obj = obj or {}
   local new = {}
-  setmetatable(new,N)
+  setmetatable(new,Nineslice)
   new.Texture = obj.Texture or default_texture
   new.TEXTURE_CHANGED = eventLib.new()
   new.MODELPART_CHANGED = eventLib.new()
@@ -91,7 +91,7 @@ end
 ---Sets the modelpart to parent to.
 ---@param part ModelPart?
 ---@return Nineslice
-function N:setModelpart(part)
+function Nineslice:setModelpart(part)
   self:deleteRenderTasks()
   self.Modelpart = part
   
@@ -106,7 +106,7 @@ end
 ---Sets the displayed image texture on the sprite.
 ---@param texture Texture
 ---@return Nineslice
-function N:setTexture(texture)
+function Nineslice:setTexture(texture)
   if type(texture) ~= "Texture" then error("Invalid texture, recived "..type(texture)..".",2) end
   self.Texture = texture
   local dim = texture:getDimensions()
@@ -119,7 +119,7 @@ end
 ---@param xpos number
 ---@param y number
 ---@return Nineslice
-function N:setPos(xpos,y)
+function Nineslice:setPos(xpos,y)
   self.Position = utils.vec2(xpos,y)
   self.DIMENSIONS_CHANGED:invoke(self,self.Position,self.Size)
   return self
@@ -130,7 +130,7 @@ end
 ---@param g number?
 ---@param b number?
 ---@return Nineslice
-function N:setColor(r,g,b)
+function Nineslice:setColor(r,g,b)
   self.Color = utils.vec3(r,g,b)
   self.DIMENSIONS_CHANGED:invoke(self,self.Position,self.Size)
   return self
@@ -139,7 +139,7 @@ end
 
 ---@param a number
 ---@return Nineslice
-function N:setOpacity(a)
+function Nineslice:setOpacity(a)
   self.Alpha = math.clamp(a or 1,0,1)
   self.DIMENSIONS_CHANGED:invoke(self,self.Position,self.Size)
   return self
@@ -149,7 +149,7 @@ end
 ---@param xpos number|Vector2
 ---@param y number?
 ---@return Nineslice
-function N:setSize(xpos,y)
+function Nineslice:setSize(xpos,y)
   self.Size = utils.vec2(xpos,y)
   self.DIMENSIONS_CHANGED:invoke(self,self.Position,self.Size)
   return self
@@ -157,7 +157,7 @@ end
 
 ---@param scale number
 ---@return Nineslice
-function N:setScale(scale)
+function Nineslice:setScale(scale)
   self.Scale = scale
   self.BORDER_THICKNESS_CHANGED:invoke(self,self.BorderThickness)
   return self
@@ -168,7 +168,7 @@ end
 ---Sets the top border thickness.
 ---@param units number?
 ---@return Nineslice
-function N:setBorderTop(units)
+function Nineslice:setBorderTop(units)
   self.BorderThickness.y = units or 0
   self.BORDER_THICKNESS_CHANGED:invoke(self,self.BorderThickness)
   return self
@@ -177,7 +177,7 @@ end
 ---Sets the left border thickness.
 ---@param units number?
 ---@return Nineslice
-function N:setBorderLeft(units)
+function Nineslice:setBorderLeft(units)
   self.BorderThickness.x = units or 0
   self.BORDER_THICKNESS_CHANGED:invoke(self,self.BorderThickness)
   return self
@@ -186,7 +186,7 @@ end
 ---Sets the down border thickness.
 ---@param units number?
 ---@return Nineslice
-function N:setBorderBottom(units)
+function Nineslice:setBorderBottom(units)
   self.BorderThickness.w = units or 0
   self.BORDER_THICKNESS_CHANGED:invoke(self,self.BorderThickness)
   return self
@@ -195,7 +195,7 @@ end
 ---Sets the right expansion.
 ---@param units number?
 ---@return Nineslice
-function N:setBorderRight(units)
+function Nineslice:setBorderRight(units)
   self.BorderThickness.z = units or 0
   self.BORDER_THICKNESS_CHANGED:invoke(self,self.BorderThickness)
   return self
@@ -206,7 +206,7 @@ end
 ---Sets the top expansion.
 ---@param units number?
 ---@return Nineslice
-function N:setExpandTop(units)
+function Nineslice:setExpandTop(units)
   self.BorderExpand.y = units or 0
   self.BORDER_EXPAND_CHANGED:invoke(self,self.BorderExpand)
   return self
@@ -215,7 +215,7 @@ end
 ---Sets the left expansion.
 ---@param units number?
 ---@return Nineslice
-function N:setExpandLeft(units)
+function Nineslice:setExpandLeft(units)
   self.BorderExpand.x = units or 0
   self.BORDER_EXPAND_CHANGED:invoke(self,self.BorderExpand)
   return self
@@ -224,7 +224,7 @@ end
 ---Sets the down expansion.
 ---@param units number?
 ---@return Nineslice
-function N:setExpandBottom(units)
+function Nineslice:setExpandBottom(units)
   self.BorderExpand.w = units or 0
   self.BORDER_EXPAND_CHANGED:invoke(self,self.BorderExpand)
   return self
@@ -233,7 +233,7 @@ end
 ---Sets the right expansion.
 ---@param units number?
 ---@return Nineslice
-function N:setExpandRight(units)
+function Nineslice:setExpandRight(units)
   self.BorderExpand.z = units or 0
   self.BORDER_EXPAND_CHANGED:invoke(self,self.BorderExpand)
   return self
@@ -246,7 +246,7 @@ end
 ---@param right number?
 ---@param bottom number?
 ---@return Nineslice
-function N:setBorderThickness(left,top,right,bottom)
+function Nineslice:setBorderThickness(left,top,right,bottom)
   self.BorderThickness.x = left  or 0
   self.BorderThickness.y = top   or 0
   self.BorderThickness.z = right  or 0
@@ -262,7 +262,7 @@ end
 ---@param x2 number?
 ---@param y2 number?
 ---@return Nineslice
-function N:setUV(x,y,x2,y2)
+function Nineslice:setUV(x,y,x2,y2)
   self.UV = utils.vec4(x,y,x2 or x,y2 or y)
   self.DIMENSIONS_CHANGED:invoke(self.BorderThickness)
   return self
@@ -271,7 +271,7 @@ end
 ---Sets the render type of your sprite
 ---@param renderType ModelPart.renderType
 ---@return Nineslice
-function N:setRenderType(renderType)
+function Nineslice:setRenderType(renderType)
   self.RenderType = renderType
   self:deleteRenderTasks()
   self:buildRenderTasks()
@@ -281,12 +281,12 @@ end
 ---Set to true if you want a hole in the middle of your ninepatch
 ---@param toggle boolean
 ---@return Nineslice
-function N:excludeMiddle(toggle)
+function Nineslice:excludeMiddle(toggle)
   self.ExcludeMiddle = toggle
   return self
 end
 
-function N:copy()
+function Nineslice:copy()
   local copy = {}
   for key, value in pairs(self) do
     if type(value):find("Vector") then
@@ -294,28 +294,28 @@ function N:copy()
     end
     copy[key] = value
   end
-  return N.new(copy)
+  return Nineslice.new(copy)
 end
 
-function N:setVisible(visibility)
+function Nineslice:setVisible(visibility)
   self.Visible = visibility
   self:update()
   return self
 end
 
-function N:setDepthOffset(offset_units)
+function Nineslice:setDepthOffset(offset_units)
   self.DepthOffset = offset_units
   return self
 end
 
-function N:update()
+function Nineslice:update()
   if not self._queue_update then
     self._queue_update = true
     update[#update+1] = self
   end
 end
 
-function N:deleteRenderTasks()
+function Nineslice:deleteRenderTasks()
   if self.Modelpart then
     for _, task in pairs(self.RenderTasks) do
       self.Modelpart:removeTask(task:getName())
@@ -324,41 +324,44 @@ function N:deleteRenderTasks()
   return self
 end
 
-function N:free()
+function Nineslice:free()
   self:deleteRenderTasks()
   return self
 end
 
-function N:buildRenderTasks()
+function Nineslice:buildRenderTasks()
   if not self.Modelpart then return self end
   local b = self.BorderThickness
   local d = self.Texture:getDimensions()
-  self.is_ninepatch = not (b.x == 0 and b.y == 0 and b.z == 0 and b.w == 0)
-  if not self.is_ninepatch then -- not 9-Patch
-    self.RenderTasks[1] = self.Modelpart:newSprite(self.id.."patch"):setTexture(self.Texture,d.x,d.y)
+  self.is_nineslice = not (b.x == 0 and b.y == 0 and b.z == 0 and b.w == 0)
+  if not self.is_nineslice then -- not 9-Slice
+    self.RenderTasks[1] = self.Modelpart:newSprite(self.id.."slice"):setTexture(self.Texture,d.x,d.y)
   else
     self.RenderTasks = {
-      self.Modelpart:newSprite(self.id.."patch_tl" ):setTexture(self.Texture,d.x,d.y):setVisible(false),
-      self.Modelpart:newSprite(self.id.."patch_t"  ):setTexture(self.Texture,d.x,d.y):setVisible(false),
-      self.Modelpart:newSprite(self.id.."patch_tr" ):setTexture(self.Texture,d.x,d.y):setVisible(false),
-      self.Modelpart:newSprite(self.id.."patch_ml" ):setTexture(self.Texture,d.x,d.y):setVisible(false),
-      self.Modelpart:newSprite(self.id.."patch_m"  ):setTexture(self.Texture,d.x,d.y):setVisible(false),
-      self.Modelpart:newSprite(self.id.."patch_mr" ):setTexture(self.Texture,d.x,d.y):setVisible(false),
-      self.Modelpart:newSprite(self.id.."patch_bl" ):setTexture(self.Texture,d.x,d.y):setVisible(false),
-      self.Modelpart:newSprite(self.id.."patch_b"  ):setTexture(self.Texture,d.x,d.y):setVisible(false),
-      self.Modelpart:newSprite(self.id.."patch_br" ):setTexture(self.Texture,d.x,d.y):setVisible(false),
+      self.Modelpart:newSprite(self.id.."slice_tl"),
+      self.Modelpart:newSprite(self.id.."slice_t" ),
+      self.Modelpart:newSprite(self.id.."slice_tr"),
+      self.Modelpart:newSprite(self.id.."slice_ml"),
+      self.Modelpart:newSprite(self.id.."slice_m" ),
+      self.Modelpart:newSprite(self.id.."slice_mr"),
+      self.Modelpart:newSprite(self.id.."slice_bl"),
+      self.Modelpart:newSprite(self.id.."slice_b" ),
+      self.Modelpart:newSprite(self.id.."slice_br"),
     }
+    for i = 1, 9, 1 do
+      self.RenderTasks[i]:setTexture(self.Texture,d.x,d.y):setVisible(false)
+    end
   end
   self:update()
 end
 
-function N:updateRenderTasks()
+function Nineslice:updateRenderTasks()
   if not self.Modelpart then return self end
   local res = self.Texture:getDimensions()
   local uv = self.UV:copy():add(0,0,1,1)
   local pos = vec(self.Position.x+self.BorderExpand.x,self.Position.y+self.BorderExpand.y,self.DepthOffset)
   local size = self.Size+self.BorderExpand.xy+self.BorderExpand.zw
-  if not self.is_ninepatch then
+  if not self.is_nineslice then
     self.RenderTasks[1]
     :setPos(pos)
     :setScale(size.x/res.x,size.y/res.y,0)
@@ -543,4 +546,4 @@ events.WORLD_TICK:register(function ()
   end,"GNUI_priority-last")
 end)
 
-return N
+return Nineslice
