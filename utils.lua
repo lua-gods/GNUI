@@ -1,4 +1,5 @@
 ---@diagnostic disable: assign-type-mismatch
+---@class GNUI.UtilsAPI
 local utils = {}
 
 ---Returns the same vector but the `X` `Y` are the **min** and `Z` `W` are the **max**.  

@@ -10,10 +10,9 @@ Everything is in one file to make sure it is possible to load this script from a
 allowing me to put as much as I want without worrying about storage space.
 ]]
 
-local cfg = require("GNUI.config")
----@class GNUI
+---@class GNUIAPI
+local api = {}
 
-local api = {path = cfg.path}
 ---@alias GNUI.any GNUI.Box|GNUI.Box|GNUI.Canvas
 
 local u = require("GNUI.utils")

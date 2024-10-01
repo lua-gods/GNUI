@@ -10,34 +10,34 @@ local eventLib,utils = cfg.event, cfg.utils
 
 local update = {}
 
----@class Nineslice
----@field Texture Texture
+---@class Nineslice # a representation of a sprite / 9-slice sprite in GNUI
+---@field Texture Texture # the texture of the sprite
 ---@field TEXTURE_CHANGED EventLib
----@field Modelpart ModelPart?
+---@field Modelpart ModelPart? # the `ModelPart` used to handle where to display debug features and the sprite.
 ---@field MODELPART_CHANGED EventLib
----@field UV Vector4
+---@field UV Vector4 # the UV of the texture in the sprite, in the form (x,y,z,w) with each unit is a pixel
 ---
----@field Position Vector2
----@field Size Vector2
+---@field Position Vector2 # the position of the sprite.
+---@field Size Vector2 # the size of the sprite.
 ---@field DIMENSIONS_CHANGED EventLib
 ---
----@field Color Vector3
----@field Alpha number
----@field Scale number
+---@field Color Vector3 # The tint applied to the sprite.
+---@field Alpha number # The opacity of the sprite.
+---@field Scale number # The scale of the borders of a 9-slice.
 ---
----@field RenderTasks table<any,SpriteTask>
----@field RenderType ModelPart.renderType
+---@field RenderTasks table<any,SpriteTask> # a list of sprite tasks used by the sprite
+---@field RenderType ModelPart.renderType # the render type of the sprite.
 ---
----@field BorderThickness Vector4
+---@field BorderThickness Vector4 # the thickness of the border in the form (left, top, right, bottom)
 ---@field BORDER_THICKNESS_CHANGED EventLib
 ---
----@field BorderExpand Vector4
+---@field BorderExpand Vector4 # the expansion of the border in the form (left, top, right, bottom)
 ---@field BORDER_EXPAND_CHANGED EventLib
 ---
----@field ExcludeMiddle boolean
----@field DepthOffset number
----@field Visible boolean
----@field id integer
+---@field ExcludeMiddle boolean # if true, the middle of the sprite will not be rendered
+---@field DepthOffset number # the depth offset of the sprite
+---@field Visible boolean # if true, the sprite will be rendered
+---@field id integer # a unique integer for the sprite
 ---@field package _queue_update boolean
 local Nineslice = {}
 Nineslice.__index = Nineslice

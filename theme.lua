@@ -12,12 +12,13 @@ for _, path in pairs(listFiles("GNUI.theme")) do
 end
 local theme = themePath and require(themePath) or {}
 
-local API = {}
+---@class GNUI.ThemeAPI
+local Theme = {}
 
 ---Styles a given class using the theme script, the single lua file in the theme folder.
 ---@param object GNUI.Box
 ---@param variant string?
-function API.style(object,variant)
+function Theme.style(object,variant)
   local class = object.__type:match("[^%.]+$") -- GNUI.Button -> Button
   variant = variant or "Default"
   if theme[class] and theme[class][variant] then
@@ -26,4 +27,4 @@ function API.style(object,variant)
   return object
 end
 
-return API
+return Theme
