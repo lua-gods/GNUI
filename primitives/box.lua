@@ -72,7 +72,7 @@ local nextID = 0
 ---@field TextTasks TextTask[]             # A list of tasks to be executed when the text is changed.
 --- ============================ RENDERING ============================
 ---@field ModelPart ModelPart              # The `ModelPart` used to handle where to display debug features and the sprite.
----@field Nineslice Nineslice                    # the sprite that will be used for displaying textures.
+---@field Nineslice Nineslice              # the sprite that will be used for displaying textures.
 ---@field SPRITE_CHANGED EventLib          # Triggered when the sprite object set to this box has changed.
 ---
 --- ============================ INPUTS ============================

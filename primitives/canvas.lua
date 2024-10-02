@@ -222,7 +222,7 @@ for key, value in pairs(mousemap) do mousemap[key] = "key.mouse." .. value end
 ---@field HOVERING_ELEMENT_CHANGED EventLib # triggered when the hovering element changes
 ---@field PASSIVE_HOVERING_ELEMENT_CHANGED EventLib # Just like the HOVERING_BOX_CHANGED, but will never be nil if there is nothing being hovered.
 ---
----@field PressedElement GNUI.any? # the last pressed element, used to unpress buttons that have been unhovered.
+---@field PressedElements GNUI.any[]? # the last pressed element, used to unpress buttons that have been unhovered.
 ---@field MOUSE_POSITION_CHANGED EventLib # called when the mouse position changes
 ---@field reciveInputs boolean # EventLibs whether the canvas could capture input events
 ---@field captureCursorMovement boolean # true when the canvas should capture mouse movement, stopping the vanilla mouse movement, not the cursor itself
@@ -276,9 +276,6 @@ events.MOUSE_PRESS:register(function (button, state)
    for _, c in pairs(autoCanvases) do
     if c.reciveInputs and c.Visible then
       c:parseInputEvent(mousemap[button],state,_shift,_ctrl,_alt)
-      if state ~= 0 then
-       c.PressedElement = c.HoveredElement
-      end
       if c.captureInputs then return true end
     end
    end
@@ -315,6 +312,7 @@ function Canvas.new(autoScreenInputs)
   new.HOVERING_ELEMENT_CHANGED = eventLib.new()
   new.hasCustomCursorSetter = not autoScreenInputs
   new.PASSIVE_HOVERING_ELEMENT_CHANGED = eventLib.new()
+  new.PressedElements = {}
   
   WORLD_RENDER:register(function ()
    new:_propagateUpdateToChildren()
@@ -348,8 +346,11 @@ function Canvas:setMousePos(x,y)
    if self.HoveredElement then
     self.HoveredElement.MOUSE_MOVED:invoke(event)
    end
-   if self.PressedElement and self.PressedElement ~= self.HoveredElement then
-    self.PressedElement.MOUSE_MOVED:invoke(event)
+   
+   for _, e in pairs(self.PressedElements) do
+     if e ~= self.HoveredElement then
+        e.MOUSE_MOVED:invoke(event)
+     end
    end
    self:pos2HoveringChild(self.MousePosition)
   end
@@ -363,7 +364,7 @@ end
 local function parseInputEventOnElement(element,event)
   local statuses = element.INPUT:invoke(event)
   if element.isCursorHovering and event.isPressed and event.key:find"$key.mouse" then
-   element.Canvas.PressedElement = element
+   element.Canvas.PressedElements = element
   end
   for j = 1, #statuses, 1 do
    if statuses[j] and statuses[j][1] then 
@@ -420,12 +421,24 @@ function Canvas:parseInputEvent(key,status,shift,ctrl,alt,char,strength)
     break
    end
   end
+  
+  
+  
   if not captured then
-   parseInputEventToChildren(self,event,self.MousePosition)
-   if self.PressedElement and status == 0 and self.PressedElement ~= self.HoveredElement then -- QOL fix for buttons that have been unhovered but still pressed
-    parseInputEventOnElement(self.PressedElement,event)
-   end
+    parseInputEventToChildren(self,event,self.MousePosition)
+    for _, e in pairs(self.PressedElements) do
+      if e ~= self.HoveredElement then
+        parseInputEventOnElement(e,event)
+      end
+    end
   end
+  
+  if status == 1 then -- QOL feature that allows boxes to recive a button being unpressed even when not hovered anymore.
+    self.PressedElements[key] = self.HoveredElement
+  elseif status == 0 then
+    self.PressedElements[key] = nil
+  end
+  
   if not event.isHandled then
    self.UNHANDLED_INPUT:invoke(event)
   end
