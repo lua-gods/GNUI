@@ -630,7 +630,7 @@ end
 --- y 0 <-> 1 = top <-> bottom  
 ---if right and bottom are not given, they will use left and top instead.
 ---@param left number|Vector4|Vector2
----@param top number|Vector2
+---@param top number|Vector2?
 ---@param right number?
 ---@param bottom number?
 ---@generic self
