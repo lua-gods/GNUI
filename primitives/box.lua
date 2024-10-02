@@ -1,4 +1,4 @@
----@diagnostic disable: param-type-mismatch
+---@diagnostic disable: param-type-mismatch, inject-field
 local cfg = require"GNUI.config"
 local eventLib,utils = cfg.event, cfg.utils
 
@@ -61,6 +61,7 @@ local nextID = 0
 ---@field Text table                       # The text to be displayed.
 ---@field TextOffset Vector2               # Specifies how much to offset the text from its final position.
 ---@field TextEffect GNUI.TextEffect       # The effect to be applied to the text.
+---@field FontScale number                 # The scale of the text.
 ---@field BakedText string[]               # The baked text to be displayed.
 ---@field DefaultTextColor string          # The color to be used when the text color is not specified.
 ---@field TextAlign Vector2                # The alignment of the text within the box.
@@ -145,6 +146,7 @@ function Box.new(parent)
     -->====================[ Text ]====================<--
     TextAlign = vec(0,0),
     TextOffset = vec(0,0),
+    FontScale = 1,
     TextEffect = "NONE",
     DefaultColor = "#FFFFFF",
     TextHandling = true,
@@ -835,7 +837,10 @@ end
 function Box:_update()
   local scale = (self.Parent and self.Parent.AccumulatedScaleFactor or 1) * self.ScaleFactor
   local shift = vec(0,0)
-  self.AccumulatedScaleFactor = scale
+  if self.AccumulatedScaleFactor ~= scale then
+    self.AccumulatedScaleFactor = scale
+    self:rebuildTextTasks()
+  end
   self.Dimensions:scale(scale)
   -- generate the containment rect
   local cr = self.Dimensions:copy():add(self.Parent and self.Parent.offsetChildren.xyxy or vec(0,0,0,0))
@@ -941,22 +946,22 @@ end
 
 function Box:updateSpriteTasks(forced_resize_sprites)
   local containment_rect = self.ContainmentRect
-  local unscale_self = 1 / self.ScaleFactor
-  local child_count = self.Parent and (#self.Parent.Children) or 1
-  self.ZSquish = (self.Parent and self.Parent.ZSquish or 1) * (1 / child_count)
-  local child_weight = self.ChildIndex / child_count
+  local unscaleSelf = 1 / self.ScaleFactor
+  local childCount = self.Parent and (#self.Parent.Children) or 1
+  self.ZSquish = (self.Parent and self.Parent.ZSquish or 1) * (1 / childCount)
+  local child_weight = self.ChildIndex / childCount
   if self.cache.final_visible then
    self.ModelPart
     :setPos(
-      -containment_rect.x * unscale_self,
-      -containment_rect.y * unscale_self,
+      -containment_rect.x * unscaleSelf,
+      -containment_rect.y * unscaleSelf,
       -(child_weight) * cfg.clipping_margin * self.Z * self.ZSquish
     ):setVisible(true)
     if self.Sprite and (self.cache.size_changed or forced_resize_sprites) then
       self.Sprite
        :setSize(
-        (containment_rect.z - containment_rect.x) * unscale_self,
-        (containment_rect.w - containment_rect.y) * unscale_self
+        (containment_rect.z - containment_rect.x) * unscaleSelf,
+        (containment_rect.w - containment_rect.y) * unscaleSelf
        )
     end
   end
@@ -970,8 +975,8 @@ function Box:updateSpriteTasks(forced_resize_sprites)
     if self.cache.size_changed then
       ---@diagnostic disable-next-line: undefined-field
         self.debugBox:setSize(
-          containment_rect.z - containment_rect.x,
-          containment_rect.w - containment_rect.y)
+          (containment_rect.z - containment_rect.x) * unscaleSelf,
+          (containment_rect.w - containment_rect.y) * unscaleSelf)
     end
   end
   if self.Text then
@@ -1177,10 +1182,11 @@ end
 function Box:rebuildTextTasks()
   ---@cast self GNUI.Box
   local part = self.TextPart
+  local fs = self.FontScale*self.AccumulatedScaleFactor
   self.TextPart:removeTask()
   local tasks = {}
   for i = 1, #self.BakedText, 1 do
-    tasks[i] = part:newText(i):setText(self.BakedText[i])
+    tasks[i] = part:newText(i):setText(self.BakedText[i]):setScale(fs,fs,fs)
   end
   if self.TextEffect == "SHADOW" then
     for i = 1, #self.BakedText, 1 do
@@ -1203,6 +1209,7 @@ function Box:repositionText()
   local pos = vec(0,0)
   local size = self.Size
   local o = self.TextOffset
+  local fs = self.FontScale*self.AccumulatedScaleFactor
   local lineWidth = {}
   local poses = {}
   
@@ -1213,10 +1220,10 @@ function Box:repositionText()
       lineWidth[#lineWidth+1] = {width=pos.x,poses=poses}
       poses = {}
       pos.x = 0
-      pos.y = pos.y - 10
+      pos.y = pos.y - 10 * fs
     end
     poses[#poses+1] = pos:copy()
-    pos.x = pos.x + len
+    pos.x = pos.x + len*fs
   end
   lineWidth[#lineWidth+1] = {width=pos.x,poses=poses}
   
@@ -1246,6 +1253,7 @@ function Box:setText(text)
     text = {{text=text}}
   end
   local t = flattenJsonText(text)
+  if not t[1] then t = {t} end -- convert to array
   for _, c in pairs(t) do
     if (c.color and c.color == "default") or c.color == nil then
       c.color = self.DefaultTextColor
@@ -1259,6 +1267,18 @@ function Box:setText(text)
     self.BakedText[i] = toJson(bt)
   end
   self.TEXT_CHANGED:invoke(self.Text)
+  self:rebuildTextTasks()
+  return self
+end
+
+---Sets the scale of the text being displayed.
+---@param scale number
+---@generic self
+---@param self self
+---@return self
+function Box:setFontScale(scale)
+  ---@cast self GNUI.Box
+  self.FontScale = scale
   self:rebuildTextTasks()
   return self
 end

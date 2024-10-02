@@ -2,12 +2,12 @@ local config = {
 
 
 -->==========[ Debug ]==========<--
-debug_mode = false, -- enable to view debug information about the boxes
+debug_mode = true, -- enable to view debug information about the boxes
 debug_scale = 1/client:getGuiScale(), -- the thickness of the lines for debug lines, in BBunits
 
 
 -->==========[ Rendering ]==========<--
-clipping_margin = 64, -- The gap between the parent element to its children.
+clipping_margin = 1, -- The gap between the parent element to its children.
 
 
 -->==========[ Labeling ]==========<--
