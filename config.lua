@@ -19,7 +19,7 @@ internal_events_name = "__a",
 utils = require("GNUI.utils"),
 
 -->==========[ External Libraries ]==========<--
-event = require("libraries.eventLib"),
+event = require("GNUI.eventLib"),
 }
 
 return config
