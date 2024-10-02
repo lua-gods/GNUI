@@ -72,7 +72,7 @@ local nextID = 0
 ---@field TextTasks TextTask[]             # A list of tasks to be executed when the text is changed.
 --- ============================ RENDERING ============================
 ---@field ModelPart ModelPart              # The `ModelPart` used to handle where to display debug features and the sprite.
----@field Sprite Nineslice                    # the sprite that will be used for displaying textures.
+---@field Nineslice Nineslice                    # the sprite that will be used for displaying textures.
 ---@field SPRITE_CHANGED EventLib          # Triggered when the sprite object set to this box has changed.
 ---
 --- ============================ INPUTS ============================
@@ -436,12 +436,12 @@ end
 ---@return self
 function Box:setNineslice(nineslice)
   ---@cast self self
-  if nineslice ~= self.Sprite then
-   if self.Sprite then
-    self.Sprite:setModelpart()
+  if nineslice ~= self.Nineslice then
+   if self.Nineslice then
+    self.Nineslice:setModelpart()
    end
    if nineslice then
-    self.Sprite = nineslice
+    self.Nineslice = nineslice
     nineslice:setModelpart(self.ModelPart)
    end
    self:updateSpriteTasks(true)
@@ -957,12 +957,12 @@ function Box:updateSpriteTasks(forced_resize_sprites)
       -containment_rect.y * unscaleSelf,
       -(child_weight) * cfg.clipping_margin * self.Z * self.ZSquish
     ):setVisible(true)
-    if self.Sprite and (self.cache.size_changed or forced_resize_sprites) then
-      self.Sprite
+    if self.Nineslice and (self.cache.size_changed or forced_resize_sprites) then
+      self.Nineslice
        :setSize(
         (containment_rect.z - containment_rect.x) * unscaleSelf,
         (containment_rect.w - containment_rect.y) * unscaleSelf
-       )
+       ):setScale(self.AccumulatedScaleFactor)
     end
   end
    if cfg.debug_mode then
