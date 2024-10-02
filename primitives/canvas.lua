@@ -264,7 +264,7 @@ events.MOUSE_MOVE:register(function (x, y)
    local cursor_pos = client:getMousePos() / client:getGuiScale()
    for _, c in pairs(autoCanvases) do
     if c.reciveInputs and c.Visible and not c.hasCustomCursorSetter then
-      c:setMousePos(cursor_pos.x, cursor_pos.y, true)
+      c:setMousePos(cursor_pos.x, cursor_pos.y)
       if c.captureCursorMovement or c.captureInputs then return true end
     end
     end
@@ -379,7 +379,6 @@ end
 ---@param element GNUI.any
 ---@param event GNUI.InputEvent
 local function parseInputEventToChildren(element,event,position)
-  position = position - element.ContainmentRect.xy
   for i = #element.Children, 1, -1 do
    local child = element.Children[i]
    if child.Visible and child.canCaptureCursor and child:isPosInside(position) then
@@ -438,7 +437,9 @@ end
 ---Returns the child that the point at the given position is on top of.
 ---@param pos Vector2
 function Canvas:getChildFromPos(pos)
-  pos = pos - self.ContainmentRect.xy
+  if self.Parent then
+    pos = pos - self.ContainmentRect.xy
+  end
   if self.Visible and self.canCaptureCursor then
    for i = #self.Children, 1, -1 do
     local child = self.Children[i]

@@ -1166,7 +1166,7 @@ local function fractureComponents(input,pattern)
   if not input[1] then input = {input} end
   for i = 1, #input, 1 do
     local c = input[i]
-    for word in string.gmatch(c.text,pattern) do
+    for word in string.gmatch(c.text or "",pattern) do
       local cc = clone(c)
       cc.text = word
       output[#output+1] = cc

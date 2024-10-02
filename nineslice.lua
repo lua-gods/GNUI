@@ -61,7 +61,7 @@ function Nineslice.new(obj)
   new.Scale = obj.Scale or 1
   new.DIMENSIONS_CHANGED = eventLib.new()
   new.RenderTasks = {}
-  new.RenderType = obj.RenderType or "CUTOUT"
+  new.RenderType = obj.RenderType or "CUTOUT_EMISSIVE_SOLID"
   new.BorderThickness = obj.BorderThickness or vec(0,0,0,0)
   new.BorderExpand = obj.BorderExpand or vec(0,0,0,0)
   new.BORDER_THICKNESS_CHANGED = eventLib.new()
