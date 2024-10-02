@@ -303,7 +303,7 @@ end,"GNUI")
 
 ---Creates a new canvas.
 ---if autoScreenInputs is true, the canvas will capture input events
----@param autoScreenInputs boolean # if true, the canvas will capture input events
+---@param autoScreenInputs boolean? # if true, the canvas will capture input events
 ---@return GNUI.Canvas
 function Canvas.new(autoScreenInputs)
   local new = Container.new()
