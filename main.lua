@@ -32,8 +32,8 @@ api.newBox = function (parent)
 end
 
 
----@param autoInputs boolean # true when the canvas should capture the inputs from the screen.
----@return unknown
+---@param autoInputs boolean? # true when the canvas should capture the inputs from the screen.
+---@return GNUI.Canvas
 api.newCanvas = function (autoInputs)return ca.new(autoInputs) end
 
 

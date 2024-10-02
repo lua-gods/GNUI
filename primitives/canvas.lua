@@ -1,4 +1,4 @@
----@diagnostic disable: assign-type-mismatch, undefined-field, return-type-mismatch
+---@diagnostic disable: assign-type-mismatch, undefined-field, return-type-mismatch, inject-field
 local cfg = require("GNUI.config")
 local eventLib,utils = cfg.event, cfg.utils
 local Container = require("GNUI.primitives.box")
@@ -303,16 +303,17 @@ end,"GNUI")
 
 ---Creates a new canvas.
 ---if autoScreenInputs is true, the canvas will capture input events
----@param autoScreenInputs boolean # if true, the canvas will capture input events
+---@param autoScreenInputs boolean? # if true, the canvas will capture input events
 ---@return GNUI.Canvas
 function Canvas.new(autoScreenInputs)
-  local new = Container.new()
+  local new = Container.new()---@type GNUI.Canvas
   new.MousePosition = vec(0,0)
   new.reciveInputs = true
   new.MOUSE_POSITION_CHANGED = eventLib.new()
   new.INPUT = eventLib.new()
   new.UNHANDLED_INPUT = eventLib.new()
   new.HOVERING_ELEMENT_CHANGED = eventLib.new()
+  new.hasCustomCursorSetter = not autoScreenInputs
   new.PASSIVE_HOVERING_ELEMENT_CHANGED = eventLib.new()
   
   WORLD_RENDER:register(function ()
@@ -330,11 +331,10 @@ end
 ---Sets the Mouse position relative to the canvas. meaning in canvas local space.
 ---@param x number|Vector2
 ---@param y number?
----@param keep_auto boolean
 ---@generic self
 ---@param self self
 ---@return self
-function Canvas:setMousePos(x,y,keep_auto)
+function Canvas:setMousePos(x,y)
   ---@cast self GNUI.Canvas
   local mpos = utils.vec2(x,y)
   local relative = mpos - self.MousePosition
@@ -343,7 +343,6 @@ function Canvas:setMousePos(x,y,keep_auto)
    
    ---@type GNUI.InputEventMouseMotion
    local event = {relative = relative,pos = self.MousePosition}
-   self.hasCustomCursorSetter = not keep_auto
    self.INPUT:invoke(event)
    self.MOUSE_POSITION_CHANGED:invoke(event)
    if self.HoveredElement then
