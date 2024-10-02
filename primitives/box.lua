@@ -843,7 +843,7 @@ function Box:_update()
   end
   self.Dimensions:scale(scale)
   -- generate the containment rect
-  local cr = self.Dimensions:copy():add(self.Parent and self.Parent.offsetChildren.xyxy or vec(0,0,0,0))
+  local cr = self.Dimensions:copy():add(self.Parent and self.Parent.offsetChildren.xyxy * self.AccumulatedScaleFactor or vec(0,0,0,0))
   -- adjust based on parent if this has one
   local clipping = false
   local size
@@ -888,7 +888,6 @@ function Box:_update()
     
     ---@diagnostic disable-next-line: param-type-mismatch
     cr:sub(shift.x,shift.y,shift.x,shift.y)
-    local sh = self.Parent.offsetChildren
     
     size = vec(
     math.floor((cr.z - cr.x) * 100 + 0.5) / 100,
@@ -1208,22 +1207,22 @@ function Box:repositionText()
   local textLenghts = self.TextLengths
   local pos = vec(0,0)
   local size = self.Size
-  local o = self.TextOffset
-  local fs = self.FontScale*self.AccumulatedScaleFactor
+  local o = self.TextOffset*self.AccumulatedScaleFactor
+  local scale = self.FontScale*self.AccumulatedScaleFactor
   local lineWidth = {}
   local poses = {}
   
   for i = 1, #self.BakedText, 1 do
     
     local len = textLenghts[i]
-    if pos.x > size.x - len and self.TextBehavior == "WRAP" then
+    if pos.x > size.x / scale - len and self.TextBehavior == "WRAP" then
       lineWidth[#lineWidth+1] = {width=pos.x,poses=poses}
       poses = {}
       pos.x = 0
-      pos.y = pos.y - 10 * fs
+      pos.y = pos.y - 10 * scale
     end
     poses[#poses+1] = pos:copy()
-    pos.x = pos.x + len*fs
+    pos.x = pos.x + len*scale
   end
   lineWidth[#lineWidth+1] = {width=pos.x,poses=poses}
   
@@ -1235,7 +1234,9 @@ function Box:repositionText()
     for i = 1, #line.poses, 1 do
       j = j + 1
       local p = line.poses[i]
-      tasks[j]:setPos(-(size.x*align.x+p.x-line.width*align.x)-o.x,-(size.y-p.y-lines*10)*align.y+p.y*(1-align.y)-o.y,0)
+      tasks[j]:setPos(
+      -(size.x*align.x+p.x-line.width*align.x)-o.x,
+      -((size.y-#lineWidth*10*scale)*align.y+p.y)-o.y,-0.1)
     end
   end
 end
