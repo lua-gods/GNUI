@@ -36,7 +36,7 @@ return {
       local spriteHover = GNUI.newNineslice(atlas,19,1,25,7 ,3,3,3,3, 2,2,2,2)
       
       box:setDefaultTextColor("black"):setTextAlign(0.5,0.5)
-      box.HoverBox:setNineslice(spriteHover):setAnchor(0,0,1,1):setBlockMouse(false):setZMul(200)
+      box.HoverBox:setNineslice(spriteHover):setAnchor(0,0,1,1):setBlockMouse(false):setZMul(1.1)
       local wasPressed = true
       local function update(pressed,hovering)
         box.HoverBox:setVisible(hovering)
