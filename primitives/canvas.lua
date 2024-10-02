@@ -395,9 +395,9 @@ end
 ---Simulates a boolean key event into the canvas.
 ---@param key Minecraft.keyCode
 ---@param status Event.Press.state
----@param ctrl boolean
----@param alt boolean
----@param shift boolean
+---@param ctrl boolean?
+---@param alt boolean?
+---@param shift boolean?
 ---@param strength number?
 ---@param char string?
 function Canvas:parseInputEvent(key,status,shift,ctrl,alt,char,strength)
@@ -407,9 +407,9 @@ function Canvas:parseInputEvent(key,status,shift,ctrl,alt,char,strength)
    key = key,
    isPressed = status ~= 0,
    status = status,
-   ctrl = ctrl,
-   alt = alt,
-   shift = shift,
+   ctrl = ctrl or false,
+   alt = alt or false,
+   shift = shift or false,
    isHandled = false,
    strength = strength or 1
   }
