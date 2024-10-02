@@ -61,7 +61,7 @@ function Nineslice.new(obj)
   new.Scale = obj.Scale or 1
   new.DIMENSIONS_CHANGED = eventLib.new()
   new.RenderTasks = {}
-  new.RenderType = obj.RenderType or "CUTOUT_EMISSIVE_SOLID"
+  new.RenderType = obj.RenderType or "CUTOUT"
   new.BorderThickness = obj.BorderThickness or vec(0,0,0,0)
   new.BorderExpand = obj.BorderExpand or vec(0,0,0,0)
   new.BORDER_THICKNESS_CHANGED = eventLib.new()
@@ -359,8 +359,9 @@ function Nineslice:updateRenderTasks()
   if not self.Modelpart then return self end
   local res = self.Texture:getDimensions()
   local uv = self.UV:copy():add(0,0,1,1)
-  local pos = vec(self.Position.x+self.BorderExpand.x,self.Position.y+self.BorderExpand.y,self.DepthOffset)
-  local size = self.Size+self.BorderExpand.xy+self.BorderExpand.zw
+  local s = self.Scale
+  local pos = vec(self.Position.x+self.BorderExpand.x*s,self.Position.y+self.BorderExpand.y*s,self.DepthOffset)
+  local size = self.Size+(self.BorderExpand.xy+self.BorderExpand.zw)*s
   if not self.is_nineslice then
     self.RenderTasks[1]
     :setPos(pos)
