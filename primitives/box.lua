@@ -74,7 +74,7 @@ local nextID = 0
 ---@field ModelPart ModelPart              # The `ModelPart` used to handle where to display debug features and the sprite.
 ---@field Nineslice Nineslice              # the sprite that will be used for displaying textures.
 ---@field SPRITE_CHANGED EventLib          # Triggered when the sprite object set to this box has changed.
----
+---@field Color Vector3                    # The tint applied to the sprite.
 --- ============================ INPUTS ============================
 ---@field CursorHovering boolean           # True when the cursor is hovering over the container, compared with the parent container.
 ---@field INPUT EventLib                   # Serves as the handler for all inputs within the boundaries of the container.
@@ -241,6 +241,23 @@ function Box:setVisible(visible)
       self:_updateVisibility()
     end
   end
+  return self
+end
+
+---Sets the color of the element.
+---@param r number|Vector3|string
+---@param g number?
+---@param b number?
+---@generic self
+---@param self self
+---@return self
+function Box:setColor(r,g,b)
+  ---@cast self GNUI.Box
+  if type(r) == "string" then
+    r,g,b = vectors.hexToRGB(r):unpack()
+  end
+  self.Color = utils.vec3(r,g,b)
+  self:setNineslice(self.Nineslice)
   return self
 end
 
@@ -436,13 +453,14 @@ end
 ---@return self
 function Box:setNineslice(nineslice)
   ---@cast self self
-  if nineslice ~= self.Nineslice then
-   if self.Nineslice then
-    self.Nineslice:setModelpart()
-   end
-   if nineslice then
-    self.Nineslice = nineslice
-    nineslice:setModelpart(self.ModelPart)
+  if self.Nineslice then
+   self.Nineslice:setModelpart()
+  end
+  if nineslice then
+   self.Nineslice = nineslice
+   nineslice:setModelpart(self.ModelPart)
+   if self.Color then
+     nineslice:setColor(self.Color)
    end
    self:updateSpriteTasks(true)
    self.SPRITE_CHANGED:invoke()
