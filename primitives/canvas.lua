@@ -6,8 +6,7 @@ local Container = require("GNUI.primitives.box")
 ---@class GNUI.InputEvent
 ---@field char string
 ---@field key GNUI.keyCode
----@field isPressed boolean
----@field status Event.Press.state
+---@field state Event.Press.state
 ---@field ctrl boolean
 ---@field shift boolean
 ---@field alt boolean
@@ -363,7 +362,7 @@ end
 ---@return boolean
 local function parseInputEventOnElement(element,event)
   local statuses = element.INPUT:invoke(event)
-  if element.isCursorHovering and event.isPressed and event.key:find"$key.mouse" then
+  if element.isCursorHovering and event.state and event.key:find"$key.mouse" then
    element.Canvas.PressedElements = element
   end
   for j = 1, #statuses, 1 do
@@ -380,6 +379,9 @@ end
 ---@param element GNUI.any
 ---@param event GNUI.InputEvent
 local function parseInputEventToChildren(element,event,position)
+  if element.Parent then
+    position = position - element.ContainmentRect.xy
+  end
   for i = #element.Children, 1, -1 do
    local child = element.Children[i]
    if child.Visible and child.canCaptureCursor and child:isPosInside(position) then
@@ -394,19 +396,18 @@ end
 
 ---Simulates a boolean key event into the canvas.
 ---@param key Minecraft.keyCode
----@param status Event.Press.state
+---@param state Event.Press.state
 ---@param ctrl boolean?
 ---@param alt boolean?
 ---@param shift boolean?
 ---@param strength number?
 ---@param char string?
-function Canvas:parseInputEvent(key,status,shift,ctrl,alt,char,strength)
+function Canvas:parseInputEvent(key,state,shift,ctrl,alt,char,strength)
   ---@type GNUI.InputEvent
   local event = {
    char = char,
    key = key,
-   isPressed = status ~= 0,
-   status = status,
+   state = state,
    ctrl = ctrl or false,
    alt = alt or false,
    shift = shift or false,
@@ -421,9 +422,6 @@ function Canvas:parseInputEvent(key,status,shift,ctrl,alt,char,strength)
     break
    end
   end
-  
-  
-  
   if not captured then
     parseInputEventToChildren(self,event,self.MousePosition)
     for _, e in pairs(self.PressedElements) do
@@ -433,9 +431,9 @@ function Canvas:parseInputEvent(key,status,shift,ctrl,alt,char,strength)
     end
   end
   
-  if status == 1 then -- QOL feature that allows boxes to recive a button being unpressed even when not hovered anymore.
+  if state == 1 then -- QOL feature that allows boxes to recive a button being unpressed even when not hovered anymore.
     self.PressedElements[key] = self.HoveredElement
-  elseif status == 0 then
+  elseif state == 0 then
     self.PressedElements[key] = nil
   end
   
