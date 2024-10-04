@@ -27,7 +27,7 @@ Button.__type = "GNUI.Button"
 
 
 ---@param parent GNUI.Box?
----@param variant string?
+---@param variant string|"none"|"default"?
 ---@return GNUI.Button
 function Button.new(parent,variant)
   
@@ -41,7 +41,7 @@ function Button.new(parent,variant)
   new.isToggle = false
   new.isPressed = false
   
-  local hoverBox = Box.new(new)
+  local hoverBox = Box.new(new):setAnchor(0,0,1,1)
   new.HoverBox = hoverBox
   
   new.MOUSE_PRESSENCE_CHANGED:register(function (isHovering)
@@ -51,7 +51,7 @@ function Button.new(parent,variant)
   ---@param event GNUI.InputEvent
   new.INPUT:register(function (event)
     if event.key == new.keybind then
-      if event.isPressed then
+      if event.state == 1 then
         new:press()
       else
         new:release()
@@ -100,6 +100,7 @@ function Button:release()
   if not self.isToggle then
     self.isPressed = false
     self.BUTTON_UP:invoke()
+    self.PRESSED:invoke()
     self.BUTTON_CHANGED:invoke(self.isPressed,self.isCursorHovering)
   end
 end
