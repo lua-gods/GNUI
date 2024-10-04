@@ -17,10 +17,10 @@ local Theme = {}
 
 ---Styles a given class using the theme script, the single lua file in the theme folder.
 ---@param object GNUI.Box
----@param variant string?
+---@param variant string|"none"|"default"?
 function Theme.style(object,variant)
   local class = object.__type:match("[^%.]+$") -- GNUI.Button -> Button
-  variant = variant or "Default"
+  variant = variant or "default"
   if theme[class] and theme[class][variant] then
     theme[class][variant](object)
   end
