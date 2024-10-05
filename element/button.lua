@@ -97,7 +97,7 @@ function Button:press()
 end
 
 function Button:release()
-  if not self.isToggle then
+  if not self.isToggle and self.isPressed then
     self.isPressed = false
     self.BUTTON_UP:invoke()
     self.PRESSED:invoke()
