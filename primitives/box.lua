@@ -1268,7 +1268,7 @@ local lengthTrim = client.getTextWidth("|")*2
 ---@param text string|table
 function Box:setText(text)
   ---@cast self GNUI.Box
-  if type(text) == "string" then
+  if type(text) ~= "table" then
     text = {{text=text}}
   end
   local t = flattenJsonText(text)
@@ -1278,6 +1278,8 @@ function Box:setText(text)
       c.color = self.DefaultTextColor
     end
   end
+  self.BakedText = {}
+  self.TextLengths = {}
   self.Text = text
   local ft = fractureComponents(t,"%s*%S+%s*")
   for i = 1, #ft, 1 do
