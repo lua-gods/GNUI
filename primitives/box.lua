@@ -34,6 +34,7 @@ local nextID = 0
 ---@field VISIBILITY_CHANGED EventLib      # on change of visibility.
 ---@field CHILDREN_ADDED EventLib          # when a child is added. first parameter is the child added.
 ---@field CHILDREN_REMOVED EventLib        # when a child is removed. first parameter is the child removed.
+---@field CHILDREN_CHANGED EventLib        # when the children list is changed.
 ---@field PARENT_CHANGED table             # when the parent changes.
 ---@field isFreed boolean                  # true when the element is being freed.
 ---@field ON_FREE EventLib                 # when the element is wiped from history.
@@ -70,6 +71,7 @@ local nextID = 0
 ---@field TextLengths integer[]            # The length of each separated text
 ---@field TextPart ModelPart               # The `ModelPart` used to display text.
 ---@field TextTasks TextTask[]             # A list of tasks to be executed when the text is changed.
+---@field TextLimitsHeight boolean         # If true, the text will clamp to the height of the box
 --- ============================ RENDERING ============================
 ---@field ModelPart ModelPart              # The `ModelPart` used to handle where to display debug features and the sprite.
 ---@field Nineslice Nineslice              # the sprite that will be used for displaying textures.
@@ -120,6 +122,7 @@ function Box.new(parent)
     ChildIndex = 0,
     CHILDREN_ADDED = eventLib.new(),
     CHILDREN_REMOVED = eventLib.new(),
+    CHILDREN_CHANGED = eventLib.new(),
     PARENT_CHANGED = eventLib.new(),
     isFreed = false,
     ON_FREE = eventLib.new(),
@@ -152,6 +155,7 @@ function Box.new(parent)
     TextHandling = true,
     TextBehavior = "NONE",
     TEXT_CHANGED = eventLib.new(),
+    TextLimitsHeight = true,
     TextPart = textModel,
     TextLengths = {},
     TextTasks = {},
@@ -377,6 +381,7 @@ function Box:updateChildrenIndex()
       child:update()
     end
   end
+  self.CHILDREN_CHANGED:invoke()
   return self
 end
 
@@ -1256,6 +1261,9 @@ function Box:repositionText()
       -(size.x*align.x+p.x-line.width*align.x)-o.x,
       -((size.y-#lineWidth*10*scale)*align.y+p.y)-o.y,-0.1)
     end
+  end
+  if self.TextLimitsHeight then
+    self:setSystemMinimumSize(self.SystemMinimumSize.x,#lineWidth*10*scale)
   end
 end
 
