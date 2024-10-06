@@ -1344,7 +1344,7 @@ function Box:setText(text)
   self.BakedText = {}
   self.TextLengths = {}
   self.Text = text
-  local ft = fractureComponents(t,"%s*%S+%s*")
+  local ft = fractureComponents(t,"[\x00-\x7F\xC2-\xF4][\x80-\xBF]*")
   --printTable(t,2)
   for i = 1, #ft, 1 do
     local bt = ft[i]
