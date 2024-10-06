@@ -1065,12 +1065,12 @@ end
 ---@field fallback string? # Optional. If no corresponding translation can be found, this is used as the translated text. Ignored if  translate is not present.
 ---@field with Minecraft.RawJSONText.Component[]? #Optional. A list of raw JSON text components to be inserted into slots in the translation text. Ignored if  translate is not present.
 ---
----@field score Minecraft.RawJSONText.Component.Score #Displays a score holder's current score in an objective. Displays nothing if the given score holder or the given objective do not exist, or if the score holder is not tracked in the objective. 
+---@field score Minecraft.RawJSONText.Component.Score? #Displays a score holder's current score in an objective. Displays nothing if the given score holder or the given objective do not exist, or if the score holder is not tracked in the objective. 
 ---
 ---@field selector string?
 ---@field separator Minecraft.RawJSONText.Component?
 ---
----@field keybind Minecraft.keybind #  A keybind identifier, to be displayed as the name of the button that is currently bound to that action. For example, `{"keybind": "key.inventory"}` displays "e" if the player is using the default control scheme.
+---@field keybind Minecraft.keybind? #  A keybind identifier, to be displayed as the name of the button that is currently bound to that action. For example, `{"keybind": "key.inventory"}` displays "e" if the player is using the default control scheme.
 ---
 ---@field text string? # A string containing plain text to display directly.
 ---@field extra Minecraft.RawJSONText.Component|Minecraft.RawJSONText.Component[]? # A list of additional raw JSON text components to be displayed after this one. 
@@ -1140,6 +1140,23 @@ local function clone(tbl)
   return output
 end
 
+local function isTableTheSame(a,b)
+  if #a ~= #b then
+    return false
+  end
+  for key, value in pairs(a) do
+    if value ~= b[key] then
+      return false
+    end
+  end
+  for key, value in pairs(b) do
+    if value ~= a[key] then
+      return false
+    end
+  end
+  return true
+end
+
 --- flattens all nested components into one big array.
 ---@param input Minecraft.RawJSONText.Component|Minecraft.RawJSONText.Component[]
 local function flattenJsonText(input)
@@ -1153,33 +1170,61 @@ local function flattenJsonText(input)
       local extra ---@type Minecraft.RawJSONText.Component[]
       if input.extra[1] then -- is an array
         extra = input.extra
-      else
-        extra = {input.extra}
+      else extra = {input.extra}
       end
       local output = {input}
       input.extra = nil
       for i = 1, #extra, 1 do
-        local ec = extra[i]
-        local ecFlat = clone(ec)
-        for key, value in pairs(input) do
-          ecFlat[key] = ec[key] or value
+        local ref = extra[i] -- as a reference data
+        local out = clone(ref) -- as a modified data
+        for key, value in pairs(input) do -- merge extra tags into children components
+          out[key] = ref[key] or value
         end
         
-        ecFlat = flattenJsonText(ecFlat) -- flattens nested extra tags
+        out = flattenJsonText(out) -- flattens nested extra tags
         
         -- merges the tables into one array
-        if ecFlat[1] then -- is an array
-          for j = 1, #ecFlat, 1 do
-            output[#output+1] = ecFlat[j]
+        if out[1] then -- is an array
+          for j = 1, #out, 1 do
+            output[#output+1] = out[j]
           end
-        else output[#output+1] = ecFlat end
+        else output[#output+1] = out end
       end
       input = output
     end
   end
+  if input[1] then -- is an array
+    --- optimize raw json text components by removing empty ones
+    local i = 0
+    while i < #input do
+      i = i + 1
+      local c = input[i]
+      local r = false
+      if c.text and (c.text == "") then r = true end -- empty component
+      -- merge the two components if the same
+      if not r and input[i-1] and input[i-1].text and c.text then -- merge same components
+        local c2 = input[i-1]
+        local at = c.text
+        local bt = c2.text
+        c.text = nil
+        c2.text = nil
+        if isTableTheSame(c,c2) then
+          r = true
+          c2.text = at .. bt
+        else
+          c.text = at
+          c2.text = bt
+        end
+      end
+      
+      if r then -- remove
+        table.remove(input,i)
+        i = i - 1
+      end
+    end
+  end
   return input
 end
-
 
 ---Splits all components by each word
 ---@param input Minecraft.RawJSONText.Component[]
@@ -1290,6 +1335,7 @@ function Box:setText(text)
   self.TextLengths = {}
   self.Text = text
   local ft = fractureComponents(t,"%s*%S+%s*")
+  --printTable(t,2)
   for i = 1, #ft, 1 do
     local bt = ft[i]
     self.TextLengths[i] = client.getTextWidth("|"..bt.text.."|")-lengthTrim
