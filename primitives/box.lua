@@ -727,6 +727,7 @@ function Box:setSystemMinimumSize(x,y)
    self.SystemMinimumSize = vec(0,0)
   end
   self.cache.final_minimum_size_changed = true
+  self:update()
   return self
 end
 
@@ -963,6 +964,9 @@ function Box:_update()
   if visible then
    self:updateSpriteTasks()
   end
+  if self.Text then
+    self:repositionText()
+   end
 end
 
 
@@ -1001,14 +1005,17 @@ function Box:updateSpriteTasks(forced_resize_sprites)
           (containment_rect.w - containment_rect.y) * unscaleSelf)
     end
   end
-  if self.Text then
-   self:repositionText()
-  end
 end
 
+--- Forces an update of the box.
+---@generic self
+---@param self self
+---@return self
 function Box:forceUpdate()
+  ---@cast self GNUI.Box
   self:_update()
   self:_propagateUpdateToChildren()
+  return self
 end
 
 function Box:_propagateUpdateToChildren(force_all)
@@ -1210,7 +1217,7 @@ local function flattenJsonText(input)
         c2.text = nil
         if isTableTheSame(c,c2) then
           r = true
-          c2.text = at .. bt
+          c2.text = bt .. at
         else
           c.text = at
           c2.text = bt
@@ -1296,7 +1303,6 @@ function Box:repositionText()
   
   local align = self.TextAlign
   local j = 0
-  local lines = #lineWidth
   for l = 1, #lineWidth, 1 do
     local line = lineWidth[l]
     for i = 1, #line.poses, 1 do
@@ -1304,11 +1310,15 @@ function Box:repositionText()
       local p = line.poses[i]
       tasks[j]:setPos(
       -(size.x*align.x+p.x-line.width*align.x)-o.x,
-      -((size.y-#lineWidth*10*scale)*align.y+p.y)-o.y,-0.1)
+      -((size.y-#lineWidth*10*scale)*align.y-p.y)-o.y,-0.1)
     end
   end
+
   if self.TextLimitsHeight then
-    self:setSystemMinimumSize(self.SystemMinimumSize.x,#lineWidth*10*scale)
+    local height = #lineWidth*10*scale
+    if height ~= self.SystemMinimumSize.y then
+      self:setSystemMinimumSize(self.SystemMinimumSize.x,height)
+    end
   end
 end
 
@@ -1364,11 +1374,14 @@ end
 ---@param self self
 ---@return self
 function Box:setDefaultTextColor(color)
+  ---@cast self GNUI.Box
   if type(color):find("Vector") then
     self.DefaultTextColor = "#"..vectors.rgbToHex(color)
   else
+---@diagnostic disable-next-line: assign-type-mismatch
     self.DefaultTextColor = color
   end
+  self:repositionText()
   return self
 end
 
@@ -1379,6 +1392,7 @@ end
 ---@param v number?
 function Box:setTextAlign(h,v)
   self.TextAlign = vec(h or 0,v or 0)
+  self:repositionText()
   return self
 end
 
@@ -1390,6 +1404,7 @@ end
 function Box:setTextBehavior(behavior)
   ---@cast self GNUI.Box
   self.TextBehavior = behavior or "NONE"
+  self:update()
   return self
 end
 
