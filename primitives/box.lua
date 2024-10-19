@@ -902,16 +902,17 @@ function Box:_update()
        fms.x = math.max(fms.x,self.SystemMinimumSize.x)
        fms.y = math.max(fms.y,self.SystemMinimumSize.y)
       end
-      shift = (size - (cr.zw - cr.xy) ) * -(self.GrowDirection  * -0.5 + 0.5)
+      shift = (fms - size) * -(self.GrowDirection  * -0.5 + 0.5)
       self.cache.final_minimum_size = fms
+      self.cache.final_minimum_size_shift = shift
     else
       fms = self.cache.final_minimum_size
+      shift = self.cache.final_minimum_size_shift
     end
     cr.z = math.max(cr.z,cr.x + fms.x)
     cr.w = math.max(cr.w,cr.y + fms.y)
     
-    ---@diagnostic disable-next-line: param-type-mismatch
-    cr:sub(shift.x,shift.y,shift.x,shift.y)
+    cr:add(shift.x,shift.y,shift.x,shift.y)
     
     size = vec(
     math.floor((cr.z - cr.x) * 100 + 0.5) / 100,
