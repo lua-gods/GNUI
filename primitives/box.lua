@@ -506,7 +506,8 @@ function Box:setDimensions(x,y,w,t)
   return self
 end
 
----Sets the position of this container
+---Sets the position of this container.  
+---check out `Box:setEnd()` for setting the position from the other end.
 ---@generic self
 ---@param self self
 ---@param x number|Vector2
@@ -514,12 +515,30 @@ end
 ---@return self
 function Box:setPos(x,y)
   ---@cast self GNUI.Box
-  local new = utils.vec2(x,y)
+  local new = utils.vec2(x or 0,y or 0)
   local size = self.Dimensions.zw - self.Dimensions.xy
   self.Dimensions = vec(new.x,new.y,new.x + size.x,new.y + size.y)
   self:update()
   return self
 end
+
+
+---Sets the position of this container.  
+---check out `Box:setPos()` for setting the position from the other end.
+---@generic self
+---@param self self
+---@param x number|Vector2
+---@param y number?
+---@return self
+function Box:setEnd(x,y)
+  ---@cast self GNUI.Box
+  local new = utils.vec2(x or 0,y or 0)
+  local size = self.Dimensions.zw - self.Dimensions.xy
+  self.Dimensions = vec(new.z - size.x,new.w - size.y,new.z,new.w)
+  self:update()
+  return self
+end
+
 
 
 ---Sets the Size of this container.
@@ -530,7 +549,7 @@ end
 ---@return self
 function Box:setSize(x,y)
   ---@cast self GNUI.Box
-  local size = utils.vec2(x,y)
+  local size = utils.vec2(x or 0,y or 0)
   self.Dimensions.zw = self.Dimensions.xy + size
   self:update()
   return self
