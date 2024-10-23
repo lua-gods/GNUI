@@ -68,7 +68,6 @@ theme.Button = {
 }
 
 theme.Slider = {
-  
   ---@param box GNUI.Slider
   Default = function (box)
     local spriteButton = GNUI.newNineslice(atlas,7,1,11,7 ,2,2,2,4, 2)
@@ -110,6 +109,16 @@ theme.Slider = {
     box:setNineslice(spriteBG)
     box.BUTTON_CHANGED:register(update)
     update(false)
+  end
+}
+
+theme.TextField = {
+  ---@param box GNUI.TextField
+  Default = function (box)
+    local spriteBG = GNUI.newNineslice(atlas,13,9,17,13, 2,2,2,2)
+    box:setNineslice(spriteBG)
+    :setTextAlign(0,0.5)
+    :setTextOffset(3,1)
   end
 }
 

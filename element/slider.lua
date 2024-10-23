@@ -1,7 +1,7 @@
 --[[______   __
   / ____/ | / / by: GNamimates, Discord: "@gn8.", Youtube: @GNamimates
- / / __/  |/ / The Button Class.
-/ /_/ / /|  / The base class for all clickable buttons.
+ / / __/  |/ / The Slider Class.
+/ /_/ / /|  / a number range box.
 \____/_/ |_/ Source: link]]
 ---@diagnostic disable: assign-type-mismatch
 local Box = require"GNUI.primitives.box"
@@ -57,12 +57,13 @@ function Slider.new(isVertical,min,max,step,value,parent,showNumber,variant)
   
   local lastEvent -- workaround to getting the current mouse pos outside the mouse moved event
   local function updateEvent()
-    local lastValue = new.value
+    if lastEvent then
       local diff = math.abs(new.min-new.max)
       local pos = new:toLocal(lastEvent.pos) / new.Size * (1+1/diff)
       pos.x = math.clamp(pos.x,0,1)
       pos.y = math.clamp(pos.y,0,1)
       new:setValue(math.floor(math.lerp(new.min,new.max,pos.x) / new.step + 1/diff) * new.step)
+    end
   end
   
   ---@param event GNUI.InputEvent
@@ -71,12 +72,14 @@ function Slider.new(isVertical,min,max,step,value,parent,showNumber,variant)
       if event.state == 1 then
         new:press()
         updateEvent()
+        return true
       else
         new:release()
       end
     elseif event.key == "key.mouse.scroll" then
       local dir = event.strength > 0 and 1 or -1
       new:setValue(new.value + new.step * dir)
+      return true
     end
   end,"GNUI.Input")
   

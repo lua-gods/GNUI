@@ -95,6 +95,16 @@ function Button:press()
   return self
 end
 
+--- Presses and releases the button.
+---@generic self
+---@param self self
+---@return self
+function Button:click()
+  ---@cast self GNUI.Button
+  self:press():release()
+  return self
+end
+
 ---Releases the button, if the button is not a toggle, if it is, call `press()` again to release.
 ---@generic self
 ---@param self self

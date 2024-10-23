@@ -363,7 +363,7 @@ end
 local function parseInputEventOnElement(element,event)
   local statuses = element.INPUT:invoke(event)
   if element.isCursorHovering and event.state and event.key:find"$key.mouse" then
-   element.Canvas.PressedElements = element
+   element.Canvas.PressedElements = {element}
   end
   for j = 1, #statuses, 1 do
    if statuses[j] and statuses[j][1] then 
@@ -395,7 +395,7 @@ end
 
 
 ---Simulates a boolean key event into the canvas.
----@param key Minecraft.keyCode
+---@param key GNUI.keyCode
 ---@param state Event.Press.state
 ---@param ctrl boolean?
 ---@param alt boolean?
@@ -430,8 +430,7 @@ function Canvas:parseInputEvent(key,state,shift,ctrl,alt,char,strength)
       end
     end
   end
-  
-  if state == 1 then -- QOL feature that allows boxes to recive a button being unpressed even when not hovered anymore.
+  if state == 1 and key ~= "key.mouse.scroll" then -- QOL feature that allows boxes to recive a button being unpressed even when not hovered anymore.
     self.PressedElements[key] = self.HoveredElement
   elseif state == 0 then
     self.PressedElements[key] = nil
