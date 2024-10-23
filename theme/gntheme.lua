@@ -20,45 +20,97 @@ local GNUI = require "GNUI.main"
 local atlas = textures["GNUI.theme.gnuiTheme"]
 
 ---@type GNUI.Theme
-local theme = {
-  Box = {
-    Default = function (box)end,
-    Background = function (box)
-      local spritePressed = GNUI.newNineslice(atlas,1,7,3,9 ,2,2,2,2)
-      box:setNineslice(spritePressed)
-    end
-  },
-  Button = {
-    ---@param box GNUI.Button
-    Default = function (box)
-      local spriteNormal = GNUI.newNineslice(atlas,7,1,11,7 ,2,2,2,4, 2)
-      local spritePressed = GNUI.newNineslice(atlas,13,3,17,7 ,2,2,2,2)
-      local spriteHover = GNUI.newNineslice(atlas,19,1,25,7 ,3,3,3,3, 2,2,2,2)
-      
-      box:setDefaultTextColor("black"):setTextAlign(0.5,0.5)
-      box.HoverBox:setNineslice(spriteHover):setAnchor(0,0,1,1):setBlockMouse(false):setZMul(1.1)
-      local wasPressed = true
-      local function update(pressed,hovering)
-        box.HoverBox:setVisible(hovering)
-        if pressed ~= wasPressed then
-          wasPressed = pressed
-          if pressed then
-            box:setNineslice(spritePressed)
-            :setTextOffset(0,2)
-            :setChildrenOffset(0,0)
-            GNUI.playSound("minecraft:ui.button.click",1)
-          else
-            box:setNineslice(spriteNormal)
-            :setTextOffset(0,0)
-            :setChildrenOffset(0,-2)
-          end
+local theme = {}
+
+theme.Box = {
+  Default = function (box)end,
+  Background = function (box)
+    local spritePressed = GNUI.newNineslice(atlas,1,7,3,9 ,2,2,2,2)
+    box:setNineslice(spritePressed)
+  end
+}
+
+theme.Button = {
+  ---@param box GNUI.Button
+  All = function (box)
+    local spriteHover = GNUI.newNineslice(atlas,19,1,25,7 ,3,3,3,3, 2,2,2,2)
+    box.HoverBox:setNineslice(spriteHover):setAnchor(0,0,1,1):setCanCaptureCursor(false):setZMul(1.1)
+    box.BUTTON_CHANGED:register(function (pressed,hovering)
+      box.HoverBox:setVisible(hovering)
+    end,"GNUI.Hover")
+    box.HoverBox:setVisible(false)
+  end,
+  ---@param box GNUI.Button
+  Default = function (box)
+    local spriteNormal = GNUI.newNineslice(atlas,7,1,11,7 ,2,2,2,4, 2)
+    local spritePressed = GNUI.newNineslice(atlas,13,3,17,7 ,2,2,2,2)
+    
+    box:setDefaultTextColor("black"):setTextAlign(0.5,0.5)
+    local wasPressed = true
+    local function update(pressed,hovering)
+      if pressed ~= wasPressed then
+        wasPressed = pressed
+        if pressed then
+          box:setNineslice(spritePressed)
+          :setTextOffset(0,2)
+          :setChildrenOffset(0,0)
+          GNUI.playSound("minecraft:ui.button.click",1) -- click
+        else
+          box:setNineslice(spriteNormal)
+          :setTextOffset(0,0)
+          :setChildrenOffset(0,-2)
         end
       end
-      
-      box.BUTTON_CHANGED:register(update)
-      update(false,false)
     end
-  },
+    box.BUTTON_CHANGED:register(update)
+    update(false,false)
+  end
+}
+
+theme.Slider = {
+  
+  ---@param box GNUI.Slider
+  Default = function (box)
+    local spriteButton = GNUI.newNineslice(atlas,7,1,11,7 ,2,2,2,4, 2)
+    local spriteBG = GNUI.newNineslice(atlas,29,7,31,9, 1,1,1,1)
+    
+    box.sliderBox:setNineslice(spriteButton)
+    box.numberBox:setTextAlign(0.5,0.7)
+    
+   
+    local wasPressed = true
+    local function update(pressed)
+      
+      if pressed ~= wasPressed then
+        wasPressed = pressed
+        if pressed then
+          GNUI.playSound("minecraft:ui.button.click",1) -- click
+        else
+        end
+      end
+    end
+    if box.showNumber then
+      box.VALUE_CHANGED:register(function ()
+        GNUI.playSound("minecraft:block.note_block.hat",2) -- click
+      end)
+    end
+    
+    box.VALUE_CHANGED:register(function ()
+      local diff = math.min(math.abs(box.max - box.min),10) + 1
+    local mul = (diff-1) / (box.max - box.min)
+    local a1,a2 = (box.value * mul)/diff,(box.value * mul+1)/diff
+      if a1<0.5 and a2>0.5 then
+        box.numberBox:setDefaultTextColor("black")
+      else
+        box.numberBox:setDefaultTextColor("white")
+      end
+    end)
+    box.numberBox:setDefaultTextColor("white")
+    
+    box:setNineslice(spriteBG)
+    box.BUTTON_CHANGED:register(update)
+    update(false)
+  end
 }
 
 theme.Dialog = {

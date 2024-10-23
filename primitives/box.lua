@@ -81,7 +81,7 @@ local nextID = 0
 ---@field CursorHovering boolean           # True when the cursor is hovering over the container, compared with the parent container.
 ---@field INPUT EventLib                   # Serves as the handler for all inputs within the boundaries of the container.
 ---@field canCaptureCursor boolean         # True when the box can capture the cursor. from its parent
----@field MOUSE_MOVED EventLib             # Triggered when the mouse position changes within this container
+---@field MOUSE_MOVED EventLib             # Triggered when the mouse position changes within this container.  `GNUI.InputEventMouseMotion` being the first agument, containing data about the event.
 ---@field MOUSE_PRESSENCE_CHANGED EventLib # Triggered when the state of the mouse to box interaction changes, arguments include: (hovering: boolean, pressed: boolean)
 ---@field MOUSE_ENTERED EventLib           # Triggered once the cursor is hovering over the container
 ---@field MOUSE_EXITED EventLib            # Triggered once the cursor leaves the confinement of this container.
@@ -594,7 +594,7 @@ end
 ---@generic self
 ---@param self self
 ---@return self
-function Box:setBlockMouse(capture)
+function Box:setCanCaptureCursor(capture)
   ---@cast self GNUI.Box
   self.canCaptureCursor = capture
   return self
@@ -1348,11 +1348,12 @@ local lengthTrim = client.getTextWidth("|")*2
 ---@generic self
 ---@param self self
 ---@return self
----@param text string|table
+---@param text any
 function Box:setText(text)
   ---@cast self GNUI.Box
+  self.Text = text
   if type(text) ~= "table" then
-    text = {{text=text}}
+    text = {{text=tostring(text)}}
   end
   local t = flattenJsonText(text)
   if not t[1] then t = {t} end -- convert to array
@@ -1363,7 +1364,6 @@ function Box:setText(text)
   end
   self.BakedText = {}
   self.TextLengths = {}
-  self.Text = text
   local ft = fractureComponents(t,"[\x00-\x7F\xC2-\xF4][\x80-\xBF]*")
   --printTable(t,2)
   for i = 1, #ft, 1 do
@@ -1401,7 +1401,9 @@ function Box:setDefaultTextColor(color)
 ---@diagnostic disable-next-line: assign-type-mismatch
     self.DefaultTextColor = color
   end
-  self:repositionText()
+  if self.Text then
+    self:setText(self.Text)
+  end
   return self
 end
 

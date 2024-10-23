@@ -41,7 +41,7 @@ function Button.new(parent,variant)
   new.isToggle = false
   new.isPressed = false
   
-  local hoverBox = Box.new(new):setAnchor(0,0,1,1)
+  local hoverBox = Box.new(new):setAnchor(0,0,1,1):setCanCaptureCursor(false)
   new.HoverBox = hoverBox
   
   new.MOUSE_PRESSENCE_CHANGED:register(function (isHovering)
@@ -57,8 +57,7 @@ function Button.new(parent,variant)
         new:release()
       end
     end
-  end)
-  
+  end,"GNUI.Input")
   Theme.style(new,variant)
   return new
 end
