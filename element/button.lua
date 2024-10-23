@@ -75,7 +75,7 @@ function Button:setToggle(toggle)
   return self
 end
 
----Presses the button
+---Presses the button. or if the button is a toggle and is pressed, this releases the button.
 ---@generic self
 ---@param self self
 ---@return self
@@ -96,13 +96,19 @@ function Button:press()
   return self
 end
 
+---Releases the button, if the button is not a toggle, if it is, call `press()` again to release.
+---@generic self
+---@param self self
+---@return self
 function Button:release()
+  ---@cast self GNUI.Button
   if not self.isToggle and self.isPressed then
     self.isPressed = false
     self.BUTTON_UP:invoke()
     self.PRESSED:invoke()
     self.BUTTON_CHANGED:invoke(self.isPressed,self.isCursorHovering)
   end
+  return self
 end
 
 return Button
