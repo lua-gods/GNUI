@@ -122,6 +122,14 @@ theme.TextField = {
   end
 }
 
+theme.Separator = {
+  ---@param box GNUI.TextField
+  Default = function (box)
+    local spriteBG = GNUI.newNineslice(atlas,1,15,1,15)
+    box:setNineslice(spriteBG)
+  end
+}
+
 theme.Dialog = {
   ---@param dialog GNUI.Dialog
   Default = function (dialog)
