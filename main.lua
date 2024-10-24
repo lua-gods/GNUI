@@ -16,9 +16,10 @@ local api = {}
 ---@alias GNUI.any GNUI.Box|GNUI.Box|GNUI.Canvas
 
 local u = require("GNUI.utils")
+local config = require("GNUI.config")
 local s = require("GNUI.nineslice")
 local ca = require("GNUI.primitives.canvas")
-local co = require("GNUI.primitives.box")
+local bx = require("GNUI.primitives.box")
 
 
 ---Creates a new Box.  
@@ -26,7 +27,7 @@ local co = require("GNUI.primitives.box")
 ---@param parent GNUI.Box?
 ---@return GNUI.Box
 api.newBox = function (parent) 
-  local new = co.new()
+  local new = bx.new()
   if parent then parent:addChild(new) end
   return new
 end
@@ -92,11 +93,18 @@ function api.getScreenCanvas()
 end
 
 
+---Enables debug mode for the soon to be created boxes. will not enable debug mode on exiting boxes.
+function api.debugMode()
+  config.debug_mode = true
+end
+
+
 ---@param sound Minecraft.soundID
 ---@param pitch number?
 ---@param volume number?
 function api.playSound(sound,pitch,volume)
   sounds[sound]:pos(client:getCameraPos():add(client:getCameraDir())):pitch(pitch or 1):volume(volume or 1):attenuation(9999):play()
 end
+
 
 return api

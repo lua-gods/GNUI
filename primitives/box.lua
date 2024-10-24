@@ -1011,7 +1011,8 @@ function Box:updateSpriteTasks(forced_resize_sprites)
        ):setScale(self.AccumulatedScaleFactor)
     end
   end
-   if cfg.debug_mode then
+---@diagnostic disable-next-line: undefined-field
+   if cfg.debug_mode and self.debugBox then
    ---@diagnostic disable-next-line: undefined-field
    self.debugBox
    :setPos(
@@ -1310,7 +1311,7 @@ function Box:repositionText()
   for i = 1, #self.BakedText, 1 do
     
     local len = textLenghts[i]
-    if pos.x > size.x / scale - len and self.TextBehavior == "WRAP" then
+    if (pos.x > size.x / scale - len) and self.TextBehavior == "WRAP" or self.BakedText[i]:find("\\n") then
       lineWidth[#lineWidth+1] = {width=pos.x,poses=poses}
       poses = {}
       pos.x = 0
@@ -1368,7 +1369,7 @@ function Box:setText(text)
   --printTable(t,2)
   for i = 1, #ft, 1 do
     local bt = ft[i]
-    self.TextLengths[i] = client.getTextWidth("|"..bt.text.."|")-lengthTrim
+    self.TextLengths[i] = client.getTextWidth("|"..bt.text:gsub("\n","").."|")-lengthTrim
     self.BakedText[i] = toJson(bt)
   end
   self.TEXT_CHANGED:invoke(self.Text)
