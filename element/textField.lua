@@ -49,7 +49,9 @@ function TextField.new(parent,variant)
       events.CHAR_TYPED:remove(id)
       events.KEY_PRESS:remove(id)
       events.WORLD_RENDER:remove(id)
-      host:setChatText(chatInput)
+      if chatInput then
+        host:setChatText(chatInput)
+      end
     else
       chatInput = host:getChatText()
       new:setEditing(true)
