@@ -36,7 +36,7 @@ theme.Button = {
     local spriteHover = GNUI.newNineslice(atlas,19,1,25,7 ,3,3,3,3, 2,2,2,2)
     box.HoverBox:setNineslice(spriteHover):setAnchor(0,0,1,1):setCanCaptureCursor(false):setZMul(1.1)
     box.BUTTON_CHANGED:register(function (pressed,hovering)
-      box.HoverBox:setVisible(hovering)
+      box.HoverBox:setVisible(hovering):setZMul(10)
     end,"GNUI.Hover")
     box.HoverBox:setVisible(false)
   end,

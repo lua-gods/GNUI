@@ -60,9 +60,13 @@ function Slider.new(isVertical,min,max,step,value,parent,showNumber,variant)
     if lastEvent then
       local diff = math.abs(new.min-new.max)
       local pos = new:toLocal(lastEvent.pos) / new.Size * (1+1/diff)
-      pos.x = math.clamp(pos.x,0,1)
-      pos.y = math.clamp(pos.y,0,1)
-      new:setValue(math.floor(math.lerp(new.min,new.max,pos.x) / new.step + 1/diff) * new.step)
+      if new.isVertical then
+        pos.y = math.clamp(pos.y,0,1)
+        new:setValue(math.floor(math.lerp(new.min,new.max,pos.y) / new.step + 1/diff) * new.step)
+      else
+        pos.x = math.clamp(pos.x,0,1)
+        new:setValue(math.floor(math.lerp(new.min,new.max,pos.x) / new.step + 1/diff) * new.step)
+      end
     end
   end
   
@@ -149,7 +153,7 @@ end
 ---@return self
 function Slider:updateSliderBox()
   ---@cast self GNUI.Slider
-  local diff = math.min(math.abs(self.max - self.min),10) + 1
+  local diff = math.min(math.abs(self.max - self.min),5) + 1
   local mul = (diff-1) / (self.max - self.min)
   local a1,a2 = (self.value * mul)/diff,(self.value * mul+1)/diff
   if self.isVertical then self.sliderBox:setAnchor(0,a1,1,a2)

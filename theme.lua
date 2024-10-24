@@ -18,7 +18,7 @@ local Theme = {}
 local cache = {}
 
 ---Styles a given class using the theme script, the single lua file in the theme folder.
----@param object GNUI.Box
+---@param object any
 ---@param variant string|"none"|"Default"?
 function Theme.style(object,variant)
   local class

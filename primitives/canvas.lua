@@ -363,7 +363,7 @@ end
 local function parseInputEventOnElement(element,event)
   local statuses = element.INPUT:invoke(event)
   if element.isCursorHovering and event.state and event.key:find"$key.mouse" then
-   element.Canvas.PressedElements = {element}
+    element.Canvas.PressedElements = {element}
   end
   for j = 1, #statuses, 1 do
    if statuses[j] and statuses[j][1] then 
@@ -383,11 +383,13 @@ local function parseInputEventToChildren(element,event,position)
     position = position - element.ContainmentRect.xy
   end
   for i = #element.Children, 1, -1 do
-   local child = element.Children[i]
-   if child.Visible and child.canCaptureCursor and child:isPosInside(position) then
-    parseInputEventOnElement(child,event)
-    return parseInputEventToChildren(child,event,position)
-   end
+    local child = element.Children[i]
+    if child.Visible and child.canCaptureCursor and child:isPosInside(position) then
+      if not parseInputEventToChildren(child,event,position) then
+        parseInputEventOnElement(child,event)
+      end
+      return true
+    end
   end
   return false
 end
@@ -430,10 +432,12 @@ function Canvas:parseInputEvent(key,state,shift,ctrl,alt,char,strength)
       end
     end
   end
-  if state == 1 and key ~= "key.mouse.scroll" then -- QOL feature that allows boxes to recive a button being unpressed even when not hovered anymore.
-    self.PressedElements[key] = self.HoveredElement
-  elseif state == 0 then
-    self.PressedElements[key] = nil
+  if key ~= "key.mouse.scroll" then
+    if state ~= 0 then -- QOL feature that allows boxes to recive a button being unpressed even when not hovered anymore.
+      self.PressedElements[key] = self.HoveredElement
+    else
+      self.PressedElements[key] = nil
+    end
   end
   
   if not event.isHandled then
