@@ -498,6 +498,7 @@ end
 ---@param y number?
 ---@param w number?
 ---@param t number?
+---@return self
 function Box:setDimensions(x,y,w,t)
   ---@cast self GNUI.Box
   local new = utils.vec4(x,y,w or x,t or y)
