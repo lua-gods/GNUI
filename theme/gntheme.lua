@@ -135,8 +135,9 @@ theme.Dialog = {
   Default = function (dialog)
     local titlebar = GNUI.newNineslice(atlas,1,1,5,5 ,2,2,2,2)
     dialog.titlebar:setNineslice(titlebar):setTextOffset(4,4):setDefaultTextColor("#000000"):setText("Hello")
-    theme.Box.Background(dialog.clientArea)
-    dialog.clientArea:setAnchor(0,0,1,1):setDimensions(0,14,0,0)
+    local spritePressed = GNUI.newNineslice(atlas,1,7,3,9 ,2,2,2,2 ,4,0,0,0)
+    dialog.clientArea:setNineslice(spritePressed)
+    :setAnchor(0,0,1,1):setDimensions(0,17,0,0)
     dialog.titlebar:setAnchor(0,0,1,0):setDimensions(0,0,0,14)
   end
   
