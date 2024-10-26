@@ -71,12 +71,13 @@ function TextField.new(parent,variant)
           local ctrl = math.floor(modifiers / 2) % 2 == 1
           if key == 259 then -- backspace
           if ctrl then
-            local finalRemoved = (new.editingTextField:sub(0,new.pipePos-1):gsub("%s*%S+$", "") or "")
+            local finalRemoved = (new.editingTextField:sub(0,math.max(new.pipePos-1,0)):gsub("%s*%S+$", "") or "")
             local pp = new.pipePos
             new.pipePos = #finalRemoved
             new:setTextField(finalRemoved .. new.editingTextField:sub(pp+1,-1))
           else
-            new:setTextField(new.editingTextField:sub(1,-2))
+            new:setTextField(new.editingTextField:sub(0,math.max(new.pipePos-1,0))..new.editingTextField:sub(new.pipePos+1,-1))
+            new.pipePos = math.max(0, new.pipePos - 1)
           end
           elseif key == 257 then -- enter
             new:click()

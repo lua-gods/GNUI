@@ -1,8 +1,10 @@
 # Elements Tree
-aka dependency tree for elements
+- dependency tree for elements
 
 ```
 Box
+└─Canvas
 └─Button
   └─Slider
+  └─TextField
 ```
