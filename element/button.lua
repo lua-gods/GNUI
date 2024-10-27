@@ -3,9 +3,11 @@
  / / __/  |/ / The Button Class.
 / /_/ / /|  / The base class for all clickable buttons.
 \____/_/ |_/ Source: link]]
+
 ---@diagnostic disable: assign-type-mismatch
 local Box = require"GNUI.primitives.box"
-local eventLib = require"libraries.eventLib"
+local cfg = require"GNUI.config"
+local eventLib = cfg.event
 local Theme = require"GNUI.theme"
 
 local tree = {}

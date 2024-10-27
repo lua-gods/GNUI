@@ -5,7 +5,8 @@
 \____/_/ |_/ Source: link]]
 ---@diagnostic disable: assign-type-mismatch
 local Box = require"GNUI.primitives.box"
-local eventLib = require"libraries.eventLib"
+local cfg = require"GNUI.config"
+local eventLib = cfg.event
 local Theme = require"GNUI.theme"
 
 local Button = require"GNUI.element.button"
