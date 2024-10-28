@@ -240,6 +240,10 @@ local autoCanvases = {}
 
 -->====================[ Figura Input Handling Conections ]====================<--
 
+local function screenCheck()
+  return host:isCursorUnlocked() and not host:getScreen() or host:isChatOpen()
+end
+
 local _shift,_ctrl,_alt = false,false,false
 events.KEY_PRESS:register(function (key, state, modifiers)
     _shift = modifiers % 2 == 1
@@ -249,7 +253,7 @@ events.KEY_PRESS:register(function (key, state, modifiers)
   local char = chars[_shift and "shift" or "normal"][key] or chars.normal[key]
   if minecraft_keybind then
    for _, value in pairs(autoCanvases) do
-    if value.reciveInputs and value.Visible and value.canCaptureCursor and host:isCursorUnlocked() and not host:getScreen() then
+    if value.reciveInputs and value.Visible and value.canCaptureCursor and screenCheck() then
       value:parseInputEvent(minecraft_keybind, state,_shift,_ctrl,_alt,char)
       --if value.captureInputs then return true end
     end
@@ -262,7 +266,7 @@ events.MOUSE_MOVE:register(function (x, y)
   if not s or s == "net.minecraft.class_408" then
    local cursor_pos = client:getMousePos() / client:getGuiScale()
    for _, c in pairs(autoCanvases) do
-    if c.reciveInputs and c.Visible and not c.hasCustomCursorSetter and host:isCursorUnlocked() and not host:getScreen() then
+    if c.reciveInputs and c.Visible and not c.hasCustomCursorSetter and screenCheck() then
       c:setMousePos(cursor_pos.x, cursor_pos.y)
       if c.captureCursorMovement or c.captureInputs then return true end
     end
@@ -273,7 +277,7 @@ end)
 events.MOUSE_PRESS:register(function (button, state)
   if mousemap[button] then
    for _, c in pairs(autoCanvases) do
-    if c.reciveInputs and c.Visible and host:isCursorUnlocked() and not host:getScreen() then
+    if c.reciveInputs and c.Visible and screenCheck() then
       c:parseInputEvent(mousemap[button],state,_shift,_ctrl,_alt)
       if c.captureInputs then return true end
     end
@@ -283,7 +287,7 @@ end)
 
 events.MOUSE_SCROLL:register(function (dir) 
   for _, c in pairs(autoCanvases) do
-   if c.reciveInputs and c.Visible and host:isCursorUnlocked() and not host:getScreen() then
+   if c.reciveInputs and c.Visible and screenCheck() then
     c:parseInputEvent(mousemap[8],1,_shift,_ctrl,_alt,nil,dir)
    end
   end
