@@ -90,7 +90,7 @@ theme.Slider = {
     end
     if box.showNumber then
       box.VALUE_CHANGED:register(function ()
-        GNUI.playSound("minecraft:block.note_block.hat",2) -- click
+        GNUI.playSound("minecraft:block.note_block.hat",2,0.1) -- click
       end)
     end
     
