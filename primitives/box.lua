@@ -1370,7 +1370,8 @@ function Box:setText(text)
   --printTable(t,2)
   for i = 1, #ft, 1 do
     local bt = ft[i]
-    self.TextLengths[i] = client.getTextWidth("|"..bt.text:gsub("\n","").."|")-lengthTrim
+    self.TextLengths[i] = client.getTextWidth("|"..bt.text:gsub("\n",""):gsub("\t","##").."|")-lengthTrim
+    bt.text = bt.text:gsub("\t","")
     self.BakedText[i] = toJson(bt)
   end
   self.TEXT_CHANGED:invoke(self.Text)
