@@ -325,6 +325,11 @@ function Canvas.new(autoScreenInputs)
    autoCanvases[#autoCanvases+1] = new
   end
   setmetatable(new, Canvas)
+  new.VISIBILITY_CHANGED:register(function () -- clear stuff
+    new.PressedElements = {}
+    new.HoveredElement = nil
+    new.PassiveHoveredElement = nil
+  end)
   return new
 end
 
