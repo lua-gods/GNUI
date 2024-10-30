@@ -1,7 +1,7 @@
 ---@diagnostic disable: undefined-field
 --[[______  __
   / ____/ | / / By: GNamimates
- / / __/  |/ / GNUI vF3.0.1
+ / / __/  |/ / GNUI vF3.0.2
 / /_/ / /|  / A high level UI library for figura.
 \____/_/ |_/ Stable Release: https://github.com/lua-gods/GNUI, Unstable Pre-release: https://github.com/lua-gods/GNs-Avatar-3/blob/main/libraries/gnui.lua]]
 
