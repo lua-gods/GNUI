@@ -5,7 +5,7 @@
 / /_/ / /|  /
 \____/_/ |_/]]
 local default_texture = textures["1x1white"] or textures:newTexture("1x1white",1,1):setPixel(0,0,vec(1,1,1))
-local cfg = require("GNUI.config")
+local cfg = require(.....".config")
 local eventLib,utils = cfg.event, cfg.utils
 
 local update = {}
