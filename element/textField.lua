@@ -4,7 +4,7 @@
 / /_/ / /|  / an editable text box.
 \____/_/ |_/ Source: link]]
 ---@diagnostic disable: assign-type-mismatch
-local Box = require(.....".primitives.box") ---@type GNUI.Box
+local Box = require(....."/../primitives/box") ---@type GNUI.Box
 local cfg = require(.....".config") ---@type GNUI.Config
 local eventLib = cfg.event ---@type EventLibAPI
 local Theme = require(.....".theme")
