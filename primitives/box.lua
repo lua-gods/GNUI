@@ -8,7 +8,7 @@ textures:newTexture("gnui_debug_outline",6,6)
 :fill(0,0,6,6,vec(0,0,0,1))
 :fill(1,1,4,4,vec(1,1,1))
 :fill(2,2,2,2,vec(0,0,0,1))
-local sprite = require"GNUI.nineslice"
+local sprite = require(....."/../nineslice")
 
 local nextID = 0
 
