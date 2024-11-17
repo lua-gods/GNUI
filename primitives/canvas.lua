@@ -436,7 +436,7 @@ function Canvas:parseInputEvent(key,state,shift,ctrl,alt,char,strength)
   if not captured then
     parseInputEventToChildren(self,event,self.MousePosition)
     for _, e in pairs(self.PressedElements) do
-      if e ~= self.HoveredElement then
+      if e ~= self.HoveredElement and e.Visible and e.Canvas == self then
         parseInputEventOnElement(e,event)
       end
     end

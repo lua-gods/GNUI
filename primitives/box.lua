@@ -237,13 +237,10 @@ function Box:setVisible(visible)
   ---@cast self GNUI.Box
   if self.Visible ~= visible then
     self.Visible = visible
+    for _, child in pairs(self.Children) do
+      child:setVisible(visible)
+    end
     self.VISIBILITY_CHANGED:invoke(visible)
-    for key, child in pairs(self.Children) do
-      child:_updateVisibility()
-    end
-    if not self.Parent then
-      self:_updateVisibility()
-    end
   end
   return self
 end
@@ -684,6 +681,17 @@ end
 function Box:setAnchor(left,top,right,bottom)
   ---@cast self GNUI.Box
   self.Anchor = utils.vec4(left,top,right or left,bottom or top)
+  self:update()
+  return self
+end
+
+---Sets the anchor for all sides. to cover the whole parent box.
+---@generic self
+---@param self self
+---@return self
+function Box:setAnchorMax()
+  ---@cast self GNUI.Box
+  self.Anchor = vec(0,0,1,1)
   self:update()
   return self
 end
