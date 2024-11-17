@@ -17,10 +17,10 @@ internal_events_name = "__a",
 
 
 -->==========[ System ]==========<--
-utils = require("GNUI.utils"),
+utils = require(.....".utils"),
 
 -->==========[ External Libraries ]==========<--
-event = require("GNUI.eventLib"),
+event = require(.....".eventLib"),
 }
 
 return config
