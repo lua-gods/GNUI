@@ -23,7 +23,7 @@ local requirePath = .....".theme"
 
 -- load theme from theme folder
 for _, path in pairs(listFiles(requirePath)) do
-  if path ~= requirePath then
+  if #requirePath ~= #path then
     local style = require(path)
       mergeStyle(style)
     end
