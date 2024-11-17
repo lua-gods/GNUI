@@ -19,6 +19,16 @@ local function mergeStyle(style)
   end
 end
 
+-- load theme from theme folder
+for _, path in pairs(listFiles("GNUI.theme")) do
+  if path ~= "GNUI.theme" then
+    local style = require(path)
+      mergeStyle(style)
+    end
+end
+
+
+-- load `data/theme` folder
 if file:isDirectory("theme") then
   local styleFuns = {}
   for key, fileName in pairs(file:list("theme")) do
@@ -38,15 +48,6 @@ if file:isDirectory("theme") then
   end
   for _,style in pairs(styleFuns) do mergeStyle(style())end
 end
-
--- load theme from theme folder
-for _, path in pairs(listFiles("GNUI.theme")) do
-  if path ~= "GNUI.theme" then
-    local style = require(path)
-      mergeStyle(style)
-    end
-end
-
 
 ---@class GNUI.ThemeAPI
 local Theme = {}
