@@ -32,7 +32,7 @@ end
 if file:isDirectory("GNUI/theme") then
   local styleFuns = {}
   for key, fileName in pairs(file:list("GNUI/theme")) do
-    local path = "theme/" .. fileName
+    local path = "GNUI/theme/" .. fileName
     local type = fileName:match("[^%.]+$")
     local name = fileName:sub(1,-#type-2)
     if type == "lua" then
