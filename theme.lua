@@ -29,9 +29,9 @@ end
 
 
 -- load `data/theme` folder
-if file:isDirectory("theme") then
+if file:isDirectory("GNUI/theme") then
   local styleFuns = {}
-  for key, fileName in pairs(file:list("theme")) do
+  for key, fileName in pairs(file:list("GNUI/theme")) do
     local path = "theme/" .. fileName
     local type = fileName:match("[^%.]+$")
     local name = fileName:sub(1,-#type-2)
