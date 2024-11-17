@@ -9,7 +9,7 @@ local cfg = require(....."/../config") ---@type GNUI.Config
 local eventLib = cfg.event ---@type EventLibAPI
 local Theme = require(....."/../theme")
 
-local Button = require"GNUI.element.button"
+local Button = require(.....".button")
 
 
 ---@class GNUI.Slider : GNUI.Button
