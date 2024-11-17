@@ -5,11 +5,11 @@
 \____/_/ |_/ Source: link]]
 ---@diagnostic disable: assign-type-mismatch
 local Box = require(....."/../primitives/box") ---@type GNUI.Box
-local cfg = require(.....".config") ---@type GNUI.Config
+local cfg = require(....."/../config") ---@type GNUI.Config
 local eventLib = cfg.event ---@type EventLibAPI
-local Theme = require(.....".theme")
+local Theme = require(....."/../theme")
 
-local Button = require(.....".element.button")
+local Button = require(.....".button")
 
 
 ---@class GNUI.TextField : GNUI.Button
