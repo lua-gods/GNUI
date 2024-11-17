@@ -6,11 +6,47 @@
 
 ---@alias GNUI.Theme table<string,table<string|"default",fun(box:GNUI.Box)>>
 
-local themePath
-for _, path in pairs(listFiles("GNUI.theme")) do
-  if path ~= "GNUI.theme" then themePath = path break end
+local theme = {}
+
+-- load theme from data/theme folder
+
+local function mergeStyle(style)
+  for className, classData in pairs(style) do
+    theme[className] = theme[className] or {}
+    for styleName, styleFun in pairs(classData) do
+      theme[className][styleName] = styleFun
+    end
+  end
 end
-local theme = themePath and require(themePath) or {}
+
+if file:isDirectory("theme") then
+  local styleFuns = {}
+  for key, fileName in pairs(file:list("theme")) do
+    local path = "theme/" .. fileName
+    local type = fileName:match("[^%.]+$")
+    local name = fileName:sub(1,-#type-2)
+    if type == "lua" then
+      styleFuns[#styleFuns+1] = loadstring(file:readString(path))
+    elseif type == "png" then
+      local read = file:openReadStream(path)
+      local buff = data:createBuffer(read:available())
+      buff:readFromStream(read)
+      buff:setPosition(0)
+      local data = buff:readBase64(buff:available())
+      textures:read("GNUI.theme."..name,data)
+    end
+  end
+  for _,style in pairs(styleFuns) do mergeStyle(style())end
+end
+
+-- load theme from theme folder
+for _, path in pairs(listFiles("GNUI.theme")) do
+  if path ~= "GNUI.theme" then
+    local style = require(path)
+      mergeStyle(style)
+    end
+end
+
 
 ---@class GNUI.ThemeAPI
 local Theme = {}
@@ -30,6 +66,9 @@ function Theme.style(object,variant)
   end
   
   variant = variant or "Default"
+  if not theme[class] then
+    return object
+  end
   if theme[class].All then
     theme[class].All(object)
   end
