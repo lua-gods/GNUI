@@ -15,7 +15,6 @@ local api = {}
 
 ---@alias GNUI.any GNUI.Box|GNUI.Box|GNUI.Canvas
 
-local u = require(.....".utils") ---@type GNUI.UtilsAPI
 local config = require(.....".config") ---@type GNUI.Config
 local s = require(.....".nineslice") ---@type Nineslice
 local ca = require(.....".primitives.canvas") ---@type GNUI.Canvas

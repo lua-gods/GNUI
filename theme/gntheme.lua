@@ -16,8 +16,8 @@
 ---GNUI.Button        ->    Button
 ---GNUI.Button.Slider ->    Slider
 
-local GNUI = require "GNUI.main"
-local atlas = textures["GNUI.theme.gnuiTheme"]
+local GNUI = require "../main"
+local atlas = textures[... ..".theme.gnuiTheme"]
 
 ---@type GNUI.Theme
 local theme = {}
