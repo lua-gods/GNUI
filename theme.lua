@@ -19,9 +19,11 @@ local function mergeStyle(style)
   end
 end
 
+local requirePath = .....".theme"
+
 -- load theme from theme folder
-for _, path in pairs(listFiles(.....".theme")) do
-  if path ~= "GNUI.theme" then
+for _, path in pairs(listFiles(requirePath)) do
+  if path ~= requirePath then
     local style = require(path)
       mergeStyle(style)
     end
