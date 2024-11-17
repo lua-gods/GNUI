@@ -1,7 +1,8 @@
 ---@diagnostic disable: assign-type-mismatch, undefined-field, return-type-mismatch, inject-field
-local cfg = require("GNUI.config")
-local eventLib,utils = cfg.event, cfg.utils
-local Container = require("GNUI.primitives.box")
+local cfg = require(....."/../config") ---@type GNUI.Config
+local eventLib = cfg.event ---@type EventLibAPI ---@type EventLibAPI
+local utils = cfg.utils ---@type GNUI.UtilsAPI
+local Container = require(.....".box") ---@type GNUI.Box
 
 ---@class GNUI.InputEvent
 ---@field char string

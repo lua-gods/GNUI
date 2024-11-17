@@ -1,6 +1,7 @@
 ---@diagnostic disable: param-type-mismatch, inject-field
-local cfg = require"GNUI.config"
-local eventLib,utils = cfg.event, cfg.utils
+local cfg = require(....."/../config") ---@type GNUI.Config ---@type GNUI.Config
+local eventLib = cfg.event ---@type EventLibAPI ---@type EventLibAPI
+local utils = cfg.utils ---@type GNUI.UtilsAPI
 
 local debugTex = textures['gnui_debug_outline'] or 
 textures:newTexture("gnui_debug_outline",6,6)

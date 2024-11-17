@@ -1,3 +1,4 @@
+---@class GNUI.Config
 local config = {
 
 

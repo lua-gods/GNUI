@@ -1,7 +1,7 @@
 ---@diagnostic disable: undefined-field
 --[[______  __
   / ____/ | / / By: GNamimates
- / / __/  |/ / GNUI vF3.1.0
+ / / __/  |/ / GNUI vF3.2.0
 / /_/ / /|  / A high level UI library for figura.
 \____/_/ |_/ Stable Release: https://github.com/lua-gods/GNUI, Unstable Pre-release: https://github.com/lua-gods/GNs-Avatar-3/blob/main/libraries/gnui.lua]]
 
@@ -15,11 +15,11 @@ local api = {}
 
 ---@alias GNUI.any GNUI.Box|GNUI.Box|GNUI.Canvas
 
-local u = require("GNUI.utils")
-local config = require("GNUI.config")
-local s = require("GNUI.nineslice")
-local ca = require("GNUI.primitives.canvas")
-local bx = require("GNUI.primitives.box")
+local u = require(.....".utils") ---@type GNUI.UtilsAPI
+local config = require(.....".config") ---@type GNUI.Config
+local s = require(.....".nineslice") ---@type Nineslice
+local ca = require(.....".primitives.canvas") ---@type GNUI.Canvas
+local bx = require(.....".primitives.box") ---@type GNUI.Box
 
 
 ---Creates a new Box.  

@@ -44,6 +44,7 @@ if file:isDirectory("GNUI/theme") then
       buff:setPosition(0)
       local data = buff:readBase64(buff:available())
       textures:read("GNUI.theme."..name,data)
+      buff:close()
     end
   end
   for _,style in pairs(styleFuns) do mergeStyle(style())end

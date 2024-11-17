@@ -1,4 +1,5 @@
 -- FROM: auriafoxgirl (note: old library)
+---@class EventLibAPI
 local lib = {}
 
 ---@class EventLib
