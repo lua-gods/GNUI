@@ -49,7 +49,12 @@ if file:isDirectory("GNUI/theme") then
       buff:close()
     end
   end
-  for _,style in pairs(styleFuns) do mergeStyle(style())end
+  for name,style in pairs(styleFuns) do
+    local varag = {...}
+      varag[1] = varag[1] .. "/theme"
+      varag[2] = name
+      mergeStyle(style(table.unpack(varag)))
+    end
 end
 
 ---@class GNUI.ThemeAPI
