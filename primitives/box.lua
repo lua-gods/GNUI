@@ -1424,7 +1424,11 @@ end
 ---`0` <-> `1`, top <-> bottom  
 ---@param h number?
 ---@param v number?
+---@generic self
+---@param self self
+---@return self
 function Box:setTextAlign(h,v)
+  ---@cast self GNUI.Box
   self.TextAlign = vec(h or 0,v or 0)
   self:repositionText()
   return self
