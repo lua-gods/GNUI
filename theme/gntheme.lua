@@ -25,7 +25,7 @@ local theme = {}
 theme.Box = {
   Default = function (box)end,
   Background = function (box)
-    local spritePressed = GNUI.newNineslice(atlas,1,7,3,9 ,2,2,2,2)
+    local spritePressed = GNUI.newNineslice(atlas,23,8,27,12 ,2,2,2,2)
     box:setNineslice(spritePressed)
   end
 }
