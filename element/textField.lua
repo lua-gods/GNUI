@@ -88,19 +88,18 @@ function TextField.new(parent,variant)
             else
               new.pipePos = math.max(0, new.pipePos - 1)
             end
-            new:updateField()
           elseif key == 262 then -- right
             if ctrl then
               new.pipePos = new.pipePos + #(new.editingTextField:sub(new.pipePos+1,-1):gsub("^%S%s+", "") or "")
             else
               new.pipePos = math.min(#new.editingTextField, new.pipePos + 1)
             end
-            new:updateField()
           elseif key == 256 then -- escape
             cancel = true
             new:click()
           end
         end
+        new:updateField()
         return true
       end,id)
       events.WORLD_RENDER:register(function () host:setChatText("") end,id)
