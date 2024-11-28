@@ -8,6 +8,10 @@
 
 local theme = {}
 
+---@alias GNUI.Theme.Variants string : string
+---| "default"
+---| "none"
+
 -- load theme from data/theme folder
 
 local function mergeStyle(style)
