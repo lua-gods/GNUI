@@ -9,6 +9,8 @@ Box
 ├─Canvas
 ├─Button
 │ ├─Slider
-│ └─TextField
+│ ├─TextField
+│ └─GradientEdit
 └─GridStacker
+
 ```
