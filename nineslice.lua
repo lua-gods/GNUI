@@ -203,6 +203,24 @@ end
 
 
 
+
+---Sets the expansion.
+---@param left number?
+---@param top number?
+---@param right number|Vector2
+---@param bottom number|Vector2|Vector3
+---@return Nineslice
+function Nineslice:setExpand(left,top,right,bottom)
+  local expand = utils.vec4(
+  left or self.BorderExpand.x,
+  top or self.BorderExpand.y,
+  right or self.BorderExpand.z,
+  bottom or self.BorderExpand.w)
+  self.BorderExpand = expand
+  self.BORDER_EXPAND_CHANGED:invoke(self,self.BorderExpand)
+  return self
+end
+
 ---Sets the top expansion.
 ---@param units number?
 ---@return Nineslice
