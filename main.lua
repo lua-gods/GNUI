@@ -86,7 +86,6 @@ function api.getScreenCanvas()
       screenCanvas:setDimensions(0,0,windowSize.x,windowSize.y)
     end
    end)
-   screenCanvas:setDimensions(0,0,client:getScaledWindowSize().x,client:getScaledWindowSize().y)
   end
   return screenCanvas
 end
