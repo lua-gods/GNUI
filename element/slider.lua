@@ -9,8 +9,8 @@ local cfg = require("./../config") ---@type GNUI.Config
 local eventLib = cfg.event ---@type EventLibAPI
 local Theme = require("./../theme")
 
-local Button = require("./button")
-local TextField = require("./textField")
+local Button = require("./button") ---@type GNUI.Button
+local TextField = require("./textField") ---@type GNUI.TextField
 
 local DOUBLE_CLICK_TIME = 300
 
@@ -76,7 +76,18 @@ function Slider.new(isVertical,min,max,step,value,parent,showNumber,variant)
       if event.state == 1 then
         local clickTime = client:getSystemTime()
         if clickTime - lastClickTime < DOUBLE_CLICK_TIME then
-          print("clock")
+          new.numberBox:setVisible(false)
+          local numberField = TextField.new(new):setAnchor(0,0,1,1)
+          numberField.FIELD_CONFIRMED:register(function (out)
+            numberField:free()
+            if tonumber(out) then
+              new:setValue(tonumber(out))
+            end
+            new.numberBox:setVisible(true)
+          end)
+          numberField:press()
+          new:release()
+          return true
         end
         lastClickTime = clickTime
         new:press()
