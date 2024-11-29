@@ -1,5 +1,5 @@
 ---@diagnostic disable: param-type-mismatch, inject-field
-local cfg = require(....."/../config") ---@type GNUI.Config ---@type GNUI.Config
+local cfg = require("./../config") ---@type GNUI.Config ---@type GNUI.Config
 local eventLib = cfg.event ---@type EventLibAPI ---@type EventLibAPI
 local utils = cfg.utils ---@type GNUI.UtilsAPI
 
@@ -8,7 +8,7 @@ textures:newTexture("gnui_debug_outline",6,6)
 :fill(0,0,6,6,vec(0,0,0,1))
 :fill(1,1,4,4,vec(1,1,1))
 :fill(2,2,2,2,vec(0,0,0,1))
-local sprite = require(....."/../nineslice")
+local sprite = require("./../nineslice")
 
 local nextID = 0
 
