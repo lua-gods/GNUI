@@ -63,9 +63,9 @@ function Slider.new(isVertical,min,max,step,value,parent,showNumber,variant)
     local size = math.abs(new.min-new.max)
     local dir = event.relative / new.Size * (1+1/size)
     if new.isVertical then
-      new:setValue(math.floor((new.value + dir.y * size) * new.step + 0.5) / new.step)
+      new:setValue(math.floor((new.value + dir.y * size) / new.step + 0.5) * new.step)
     else
-      new:setValue(math.floor((new.value + dir.x * size) * new.step + 0.5) / new.step)
+      new:setValue(math.floor((new.value + dir.x * size) / new.step + 0.5) * new.step)
     end
   end
   
@@ -120,7 +120,7 @@ end
 function Slider:setValue(value)
   ---@cast self GNUI.Slider
   local lvalue = self.value
-  self.value = math.clamp(value,self.min,self.max)
+  self.value = math.clamp(math.floor(value / self.step + 0.5) * self.step,self.min,self.max)
   if self.value ~= lvalue then
     self.VALUE_CHANGED:invoke(self.value)
     self:updateSliderBox()
