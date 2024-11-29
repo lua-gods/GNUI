@@ -223,7 +223,7 @@ for key, value in pairs(mousemap) do mousemap[key] = "key.mouse." .. value end
 ---@field PASSIVE_HOVERING_ELEMENT_CHANGED EventLib # Just like the HOVERING_BOX_CHANGED, but will never be nil if there is nothing being hovered.
 ---
 ---@field PressedElements GNUI.any[]? # the last pressed element, used to unpress buttons that have been unhovered.
----@field MOUSE_POSITION_CHANGED EventLib # called when the mouse position changes
+---@field MOUSE_MOVED_GLOBAL EventLib # called when the mouse position changes
 ---@field reciveInputs boolean # EventLibs whether the canvas could capture input events
 ---@field captureCursorMovement boolean # true when the canvas should capture mouse movement, stopping the vanilla mouse movement, not the cursor itself
 ---@field captureInputs boolean # true when the canvas should capture the inputs
@@ -310,7 +310,7 @@ function Canvas.new(autoScreenInputs)
   local new = Container.new()---@type GNUI.Canvas
   new.MousePosition = vec(0,0)
   new.reciveInputs = true
-  new.MOUSE_POSITION_CHANGED = eventLib.new()
+  new.MOUSE_MOVED_GLOBAL = eventLib.new()
   new.INPUT = eventLib.new()
   new.UNHANDLED_INPUT = eventLib.new()
   new.HOVERING_ELEMENT_CHANGED = eventLib.new()
@@ -350,7 +350,7 @@ function Canvas:setMousePos(x,y)
    
    ---@type GNUI.InputEventMouseMotion
    local event = {relative = relative,pos = self.MousePosition}
-   self.MOUSE_POSITION_CHANGED:invoke(event)
+   self.MOUSE_MOVED_GLOBAL:invoke(event)
    if self.HoveredElement then
     self.HoveredElement.MOUSE_MOVED:invoke(event)
    end
@@ -393,6 +393,7 @@ local function parseInputEventOnElement(element,event,position,force)
           return true
          end
         end
+        return true
       end
     end
   end
@@ -409,7 +410,9 @@ function parseInputEventToChildren(element,event,position)
     position = position - element.ContainmentRect.xy
   end
   for i = #element.Children, 1, -1 do
-    parseInputEventOnElement(element.Children[i],event,position)
+    if parseInputEventOnElement(element.Children[i],event,position) then
+      return true
+    end
   end
   return false
 end
