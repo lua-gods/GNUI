@@ -34,9 +34,9 @@ theme.Button = {
   ---@param box GNUI.Button
   All = function (box)
     local spriteHover = GNUI.newNineslice(atlas,19,1,25,7 ,3,3,3,3, 2,2,2,2)
-    box.HoverBox:setNineslice(spriteHover):setAnchor(0,0,1,1):setCanCaptureCursor(false):setZMul(1.1)
+    box.HoverBox:setNineslice(spriteHover):setAnchor(0,0,1,1):setCanCaptureCursor(false):setZ(1.1)
     box.BUTTON_CHANGED:register(function (pressed,hovering)
-      box.HoverBox:setVisible(hovering):setZMul(10)
+      box.HoverBox:setVisible(hovering):setZ(10)
     end,"GNUI.Hover")
     box.HoverBox:setVisible(false)
   end,
@@ -59,6 +59,27 @@ theme.Button = {
           box:setNineslice(spriteNormal)
           :setTextOffset(0,0)
           :setChildrenOffset(0,-2)
+        end
+      end
+    end
+    box.BUTTON_CHANGED:register(update)
+    update(false,false)
+  end,
+  ---@param box GNUI.Button
+  Flat = function (box)
+    local spriteNormal = GNUI.newNineslice(atlas,9,13,11,15 ,1,1,1,1)
+    local spritePressed = GNUI.newNineslice(atlas,5,13,7,15 ,1,1,1,1)
+    
+    box:setDefaultTextColor("black"):setTextAlign(0.5,0.5)
+    local wasPressed = true
+    local function update(pressed,hovering)
+      if pressed ~= wasPressed then
+        wasPressed = pressed
+        if pressed then
+          box:setNineslice(spritePressed)
+          GNUI.playSound("minecraft:ui.button.click",1) -- click
+        else
+          box:setNineslice(spriteNormal)
         end
       end
     end
