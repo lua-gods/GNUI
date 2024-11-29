@@ -51,6 +51,7 @@ if host:isHost() and file:isDirectory("GNUI/theme") then
       local data = buff:readBase64(buff:available())
       textures:read("GNUI.theme."..name,data)
       buff:close()
+      read:close()
     end
   end
   for name,style in pairs(styleFuns) do
