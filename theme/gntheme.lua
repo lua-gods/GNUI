@@ -88,23 +88,7 @@ theme.Slider = {
         end
       end
     end
-    if box.showNumber then
-      box.VALUE_CHANGED:register(function ()
-        GNUI.playSound("minecraft:block.note_block.hat",2,0.1) -- click
-      end)
-    end
-    
-    box.VALUE_CHANGED:register(function ()
-      local diff = math.min(math.abs(box.max - box.min),10) + 1
-    local mul = (diff-1) / (box.max - box.min)
-    local a1,a2 = (box.value * mul)/diff,(box.value * mul+1)/diff
-      if a1<0.5 and a2>0.5 then
-        box.numberBox:setDefaultTextColor("black")
-      else
-        box.numberBox:setDefaultTextColor("white")
-      end
-    end)
-    box.numberBox:setDefaultTextColor("white")
+    box.numberBox:setDefaultTextColor("white"):setTextEffect("OUTLINE")
     
     box:setNineslice(spriteBG)
     box.BUTTON_CHANGED:register(update)

@@ -4,13 +4,15 @@
 / /_/ / /|  / a number range box.
 \____/_/ |_/ Source: link]]
 ---@diagnostic disable: assign-type-mismatch
-local Box = require(....."/../primitives/box") ---@type GNUI.Box
-local cfg = require(....."/../config") ---@type GNUI.Config
+local Box = require("./../primitives/box") ---@type GNUI.Box
+local cfg = require("./../config") ---@type GNUI.Config
 local eventLib = cfg.event ---@type EventLibAPI
-local Theme = require(....."/../theme")
+local Theme = require("./../theme")
 
-local Button = require(.....".button")
+local Button = require("./button")
+local TextField = require("./textField")
 
+local DOUBLE_CLICK_TIME = 300
 
 ---@class GNUI.Slider : GNUI.Button
 ---@field isVertical boolean
@@ -56,27 +58,28 @@ function Slider.new(isVertical,min,max,step,value,parent,showNumber,variant)
   new.VALUE_CHANGED:register(function () new:updateSliderBox() end)
   new:updateSliderBox()
   
-  local lastEvent -- workaround to getting the current mouse pos outside the mouse moved event
-  local function updateEvent()
-    if lastEvent then
-      local diff = math.abs(new.min-new.max)
-      local pos = new:toLocal(lastEvent.pos) / new.Size * (1+1/diff)
-      if new.isVertical then
-        pos.y = math.clamp(pos.y,0,1)
-        new:setValue(math.floor(math.lerp(new.min,new.max,pos.y) / new.step + 1/diff) * new.step)
-      else
-        pos.x = math.clamp(pos.x,0,1)
-        new:setValue(math.floor(math.lerp(new.min,new.max,pos.x) / new.step + 1/diff) * new.step)
-      end
+  ---@param event GNUI.InputEventMouseMotion
+  local function updateEvent(event)
+    local size = math.abs(new.min-new.max)
+    local dir = event.relative / new.Size * (1+1/size)
+    if new.isVertical then
+      new:setValue(math.floor((new.value + dir.y * size) * new.step + 0.5) / new.step)
+    else
+      new:setValue(math.floor((new.value + dir.x * size) * new.step + 0.5) / new.step)
     end
   end
   
+  local lastClickTime = 0
   ---@param event GNUI.InputEvent
   new.INPUT:register(function (event)
     if event.key == new.keybind then
       if event.state == 1 then
+        local clickTime = client:getSystemTime()
+        if clickTime - lastClickTime < DOUBLE_CLICK_TIME then
+          print("clock")
+        end
+        lastClickTime = clickTime
         new:press()
-        updateEvent()
         return true
       else
         new:release()
@@ -90,9 +93,8 @@ function Slider.new(isVertical,min,max,step,value,parent,showNumber,variant)
   
   ---@param event GNUI.InputEventMouseMotion
   new.MOUSE_MOVED:register(function (event)
-    lastEvent = event
     if new.isPressed then
-      updateEvent()
+      updateEvent(event)
     end
   end,"GNUI.Input")
   Theme.style(new,variant)
@@ -154,7 +156,7 @@ end
 ---@return self
 function Slider:updateSliderBox()
   ---@cast self GNUI.Slider
-  local diff = math.min(math.abs(self.max - self.min),5) + 1
+  local diff = math.min(math.abs(self.max - self.min),20) + 1
   local mul = (diff-1) / (self.max - self.min)
   local l = self.value - self.min
   local a1,a2 = (l * mul)/diff,(l * mul+1)/diff
