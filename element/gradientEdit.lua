@@ -110,7 +110,7 @@ function GradientEdit:rebuildGradientDisplay()
       end)
       ---@param event GNUI.InputEvent
       slider.INPUT:register(function (event)
-         if event.key == "key.mouse.right" and event.state == 1 then
+         if event.key == "key.mouse.middle" and event.state == 1 then
             if #self.gradient.positions > 2 then
                self.gradient:removePoint(o)
                self:rebuildGradientDisplay()

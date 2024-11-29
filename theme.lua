@@ -35,7 +35,7 @@ end
 
 
 -- load `data/theme` folder
-if file:isDirectory("GNUI/theme") then
+if host:isHost() and file:isDirectory("GNUI/theme") then
   local styleFuns = {}
   for key, fileName in pairs(file:list("GNUI/theme")) do
     local path = "GNUI/theme/" .. fileName
