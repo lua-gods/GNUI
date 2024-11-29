@@ -167,6 +167,7 @@ function Box.new(parent)
     
     -->====================[ Inputs ]====================<--
     INPUT = eventLib.new(),
+    INPUT_CHILDREN = eventLib.new(),
     canCaptureCursor = true,
     MOUSE_MOVED = eventLib.new(),
     MOUSE_PRESSENCE_CHANGED = eventLib.new(),
@@ -581,7 +582,7 @@ end
 ---@generic self
 ---@param self self
 ---@return self
-function Box:setZMul(mul)
+function Box:setZ(mul)
   ---@cast self GNUI.Box
   self.Z = mul
   self:update()
@@ -1342,13 +1343,6 @@ function Box:repositionText()
       tasks[j]:setPos(
       -(size.x*align.x+p.x-line.width*align.x)-o.x,
       -((size.y-#lineWidth*10*scale)*align.y-p.y)-o.y,-0.1)
-    end
-  end
-
-  if self.TextLimitsHeight then
-    local height = #lineWidth*10*scale
-    if height ~= self.SystemMinimumSize.y then
-      self:setSystemMinimumSize(self.SystemMinimumSize.x,height)
     end
   end
 end
