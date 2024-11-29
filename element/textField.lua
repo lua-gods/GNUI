@@ -132,7 +132,11 @@ end
 ---@return self
 function TextField:setTextField(text)
   ---@cast self GNUI.TextField
-  self.editingTextField = text
+  if self.isEditing then
+    self.editingTextField = text
+  else
+    self.textField = text
+  end
   self:updateField()
   return self
 end
@@ -159,6 +163,7 @@ function TextField:setEditing(isEditing,dontSave)
     self.isEditing = isEditing
     if isEditing then
       self.editingTextField = self.textField
+      self.pipePos = #self.editingTextField
     else
       if not dontSave then
         self.textField = self.editingTextField
