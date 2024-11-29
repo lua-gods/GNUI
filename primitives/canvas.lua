@@ -350,7 +350,6 @@ function Canvas:setMousePos(x,y)
    
    ---@type GNUI.InputEventMouseMotion
    local event = {relative = relative,pos = self.MousePosition}
-   self.INPUT:invoke(event)
    self.MOUSE_POSITION_CHANGED:invoke(event)
    if self.HoveredElement then
     self.HoveredElement.MOUSE_MOVED:invoke(event)
@@ -366,40 +365,51 @@ function Canvas:setMousePos(x,y)
   return self
 end
 
+local parseInputEventToChildren
+
 --- The function that handles the INPUT event in all boxes.
 ---@param element GNUI.any
 ---@param event GNUI.InputEvent
----@return boolean
-local function parseInputEventOnElement(element,event)
-  local statuses = element.INPUT:invoke(event)
-  if element.isCursorHovering and event.state and event.key:find"$key.mouse" then
-    element.Canvas.PressedElements = {element}
-  end
-  for j = 1, #statuses, 1 do
-   if statuses[j] and statuses[j][1] then 
-    event.isHandled = true
-    return true
-   end
+local function parseInputEventOnElement(element,event,position,force)
+  if element.Visible and element.canCaptureCursor then
+    
+    local statuses = element.INPUT_CHILDREN:invoke(event)
+    for j = 1, #statuses, 1 do
+      if statuses[j] and statuses[j][1] then 
+        event.isHandled = true
+        return true
+      end
+     end
+    
+    if element:isPosInside(position) or force then
+      if not parseInputEventToChildren(element,event,position) then
+        statuses = element.INPUT:invoke(event)
+        if element.isCursorHovering and event.state and event.key:find"$key.mouse" then
+          element.Canvas.PressedElements = {element}
+        end
+        for j = 1, #statuses, 1 do
+         if statuses[j] and statuses[j][1] then 
+          event.isHandled = true
+          return true
+         end
+        end
+      end
+    end
   end
   return false
 end
+
 
 ---propagates the INPUT event to children, if the cursor is on top of them.  
 ---if you want a box to always recive input, register a function from the canvas itself, instead of the box.
 ---@param element GNUI.any
 ---@param event GNUI.InputEvent
-local function parseInputEventToChildren(element,event,position)
+function parseInputEventToChildren(element,event,position)
   if element.Parent then
     position = position - element.ContainmentRect.xy
   end
   for i = #element.Children, 1, -1 do
-    local child = element.Children[i]
-    if child.Visible and child.canCaptureCursor and child:isPosInside(position) then
-      if not parseInputEventToChildren(child,event,position) then
-        parseInputEventOnElement(child,event)
-      end
-      return true
-    end
+    parseInputEventOnElement(element.Children[i],event,position)
   end
   return false
 end
@@ -437,8 +447,8 @@ function Canvas:parseInputEvent(key,state,shift,ctrl,alt,char,strength)
   if not captured then
     parseInputEventToChildren(self,event,self.MousePosition)
     for _, e in pairs(self.PressedElements) do
-      if e ~= self.HoveredElement and e.Visible and e.Canvas == self then
-        parseInputEventOnElement(e,event)
+      if e ~= self.HoveredElement and e.Canvas == self then
+        parseInputEventOnElement(e,event,self.MousePosition,true)
       end
     end
   end
@@ -446,6 +456,9 @@ function Canvas:parseInputEvent(key,state,shift,ctrl,alt,char,strength)
     if state ~= 0 then -- QOL feature that allows boxes to recive a button being unpressed even when not hovered anymore.
       self.PressedElements[key] = self.HoveredElement
     else
+      if self.PressedElements[key] then
+        self.PressedElements[key].MOUSE_MOVED:invoke({relative = vec(0,0),pos = self.MousePosition})
+      end
       self.PressedElements[key] = nil
     end
   end
