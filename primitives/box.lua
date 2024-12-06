@@ -1364,7 +1364,7 @@ function Box:setText(text)
   ---@cast self GNUI.Box
   self.Text = text
   if type(text) ~= "table" then
-    text = {{text=tostring(text)}}
+    text = {{text=tostring(text):gsub("\t","    ")}}
   end
   local t = flattenJsonText(text)
   if not t[1] then t = {t} end -- convert to array
@@ -1377,12 +1377,11 @@ function Box:setText(text)
   self.BakedTextTable = {}
   self.TextLengths = {}
   --local ft = fractureComponents(t,"[\x00-\x7F\xC2-\xF4][\x80-\xBF]*")
-  local ft = fractureComponents(t,"%s*%S+%s*")
+  local ft = fractureComponents(t,"[^%S\n]*%S*[^%S\n]*\n?")
   --printTable(t,2)
   for i = 1, #ft, 1 do
     local bt = ft[i]
-    self.TextLengths[i] = client.getTextWidth("|"..bt.text:gsub("\n",""):gsub("\t","##").."|")-lengthTrim
-    bt.text = bt.text:gsub("\t","")
+    self.TextLengths[i] = client.getTextWidth("|"..bt.text:gsub("\n","").."|")-lengthTrim
     self.BakedTextTable[i] = bt
     self.BakedText[i] = toJson(bt)
   end

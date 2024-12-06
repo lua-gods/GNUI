@@ -107,6 +107,8 @@ function TextField.new(parent,isMultiline,variant)
 					elseif key == 256 then -- escape
 						cancel = true
 						new:click()
+					elseif key == 258 then
+						new:appendTextField("\t")
 					end
 				end
 				new:updateField()
