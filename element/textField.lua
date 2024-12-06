@@ -1,5 +1,5 @@
 --[[______   __
-	/ ____/ | / / by: GNamimates, Discord: "@gn8.", Youtube: @GNamimates
+  / ____/ | / / by: GNamimates, Discord: "@gn8.", Youtube: @GNamimates
  / / __/  |/ / The TextField Class.
 / /_/ / /|  / an editable text box.
 \____/_/ |_/ Source: link]]
