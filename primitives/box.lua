@@ -1320,14 +1320,19 @@ function Box:repositionText()
   local lineWidth = {}
   local poses = {}
   
+  local forceNextLine = false
   for i = 1, #self.BakedText, 1 do
-    
     local len = textLenghts[i]
-    if (pos.x > size.x / scale - len) and (self.TextBehavior == "WRAP") or self.BakedText[i]:find("\\n") then
-      lineWidth[#lineWidth+1] = {width=pos.x,poses=poses}
-      poses = {}
-      pos.x = 0
-      pos.y = pos.y - 10 * scale
+    if (self.TextBehavior == "WRAP") or forceNextLine  then
+      if (pos.x > size.x / scale - len) or forceNextLine then
+        lineWidth[#lineWidth+1] = {width=pos.x,poses=poses}
+        poses = {}
+        pos.x = 0
+        pos.y = pos.y - 10 * scale
+      end
+    end
+    if self.BakedText[i]:find("\\n") then
+      forceNextLine = true
     end
     poses[#poses+1] = pos:copy()
     pos.x = pos.x + len*scale
