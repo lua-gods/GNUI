@@ -29,7 +29,7 @@ theme.Box = {
     box:setNineslice(spritePressed)
   end
 }
-
+-->========================================[ Button ]=========================================<--
 theme.Button = {
   ---@param box GNUI.Button
   All = function (box)
@@ -87,7 +87,7 @@ theme.Button = {
     update(false,false)
   end
 }
-
+-->========================================[ Slider ]=========================================<--
 theme.Slider = {
   ---@param box GNUI.Slider
   Default = function (box)
@@ -116,17 +116,19 @@ theme.Slider = {
     update(false)
   end
 }
-
+-->========================================[ Text Field ]=========================================<--
 theme.TextField = {
   ---@param box GNUI.TextField
   Default = function (box)
     local spriteBG = GNUI.newNineslice(atlas,13,9,17,13, 2,2,2,2)
     box:setNineslice(spriteBG)
-    :setTextAlign(0,0.5)
-    :setTextOffset(3,1)
+    box.Label:setDimensions(3,3,-3,-3)
+    if box.isMultiLine then box.Label:setTextAlign(0,0)
+    else box.Label:setTextAlign(0,0.5)
+    end
   end
 }
-
+-->========================================[ Separator ]=========================================<--
 theme.Separator = {
   ---@param box GNUI.TextField
   Default = function (box)
@@ -134,7 +136,7 @@ theme.Separator = {
     box:setNineslice(spriteBG)
   end
 }
-
+-->========================================[ Dialog ]=========================================<--
 theme.Dialog = {
   ---@param dialog GNUI.Dialog
   Default = function (dialog)
