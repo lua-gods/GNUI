@@ -122,4 +122,17 @@ function Button:release()
   return self
 end
 
+---Sets whether the button is pressed, only works if the button is a toggle.
+---@generic self
+---@param self self
+---@return self
+function Button:setPressed(pressed)
+  ---@cast self GNUI.Button
+  if self.isToggle and self.isPressed ~= pressed then
+    self:press()
+  end
+  return self
+end
+
+
 return Button
