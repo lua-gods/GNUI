@@ -1326,6 +1326,7 @@ function Box:repositionText()
     if (self.TextBehavior == "WRAP") or forceNextLine  then
       if (pos.x > size.x / scale - len) or forceNextLine then
         lineWidth[#lineWidth+1] = {width=pos.x,poses=poses}
+        forceNextLine = false
         poses = {}
         pos.x = 0
         pos.y = pos.y - 10 * scale

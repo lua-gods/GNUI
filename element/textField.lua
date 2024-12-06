@@ -94,7 +94,7 @@ function TextField.new(parent,isMultiline,variant)
 					end
 					elseif key == 263 then -- left
 						if ctrl then
-							new.pipePos = #(new.editingTextField:sub(0,new.pipePos):gsub("%s%S+$", "") or "") 
+							new.pipePos = #(new.editingTextField:sub(0,new.pipePos):gsub("([^%S\n]*%S+)\n?$", "") or "")
 						else
 							new.pipePos = math.max(0, new.pipePos - 1)
 						end
@@ -105,7 +105,9 @@ function TextField.new(parent,isMultiline,variant)
 							new.pipePos = math.min(#new.editingTextField, new.pipePos + 1)
 						end
 					elseif key == 256 then -- escape
-						cancel = true
+						if not new.isMultiLine then
+							cancel = true
+						end
 						new:click()
 					elseif key == 258 then
 						new:appendTextField("\t")
