@@ -583,7 +583,7 @@ end
 ---@generic self
 ---@param self self
 ---@return self
-function Box:setZ(mul)
+function Box:setZMul(mul)
   ---@cast self GNUI.Box
   self.Z = mul
   self:update()
