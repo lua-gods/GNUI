@@ -42,28 +42,33 @@ theme.Button = {
   end,
   ---@param box GNUI.Button
   Default = function (box)
+    box.TextOffset = vec(0,2)
+    box.HoverBox:setDimensions(0,-2,0,-2)
     local spriteNormal = GNUI.newNineslice(atlas,7,1,11,7 ,2,2,2,4, 2)
     local spritePressed = GNUI.newNineslice(atlas,13,3,17,7 ,2,2,2,2)
     
     box:setDefaultTextColor("black"):setTextAlign(0.5,0.5)
     local wasPressed = true
-    local function update(pressed,hovering)
-      if pressed ~= wasPressed then
+    local function update(pressed,hovering,forced)
+      if pressed ~= wasPressed or forced then
         wasPressed = pressed
         if pressed then
           box:setNineslice(spritePressed)
-          :setTextOffset(0,2)
           :setChildrenOffset(0,0)
-          GNUI.playSound("minecraft:ui.button.click",1) -- click
+          :setTextOffset(box.TextOffset + vec(0,2))
+          :setChildrenOffset(0,2)
+          if not forced then
+            GNUI.playSound("minecraft:ui.button.click",1) -- click
+          end
         else
           box:setNineslice(spriteNormal)
-          :setTextOffset(0,0)
-          :setChildrenOffset(0,-2)
+          :setTextOffset(box.TextOffset - vec(0,2))
+          :setChildrenOffset(0,0)
         end
       end
     end
     box.BUTTON_CHANGED:register(update)
-    update(false,false)
+    update(false,false,true)
   end,
   ---@param box GNUI.Button
   Flat = function (box)
