@@ -65,6 +65,7 @@ local nextID = 0
 ---@field TextEffect GNUI.TextEffect       # The effect to be applied to the text.
 ---@field FontScale number                 # The scale of the text.
 ---@field BakedText string[]               # The baked text to be displayed.
+---@field BakedTextTable Minecraft.RawJSONText.Component[]  # The baked text to be displayed but in a table format.
 ---@field DefaultTextColor string          # The color to be used when the text color is not specified.
 ---@field TextAlign Vector2                # The alignment of the text within the box.
 ---@field TextBehavior GNUI.TextBehavior   # Tells the text what to do when out of bounds.
@@ -1322,7 +1323,7 @@ function Box:repositionText()
   for i = 1, #self.BakedText, 1 do
     
     local len = textLenghts[i]
-    if (pos.x > size.x / scale - len) and self.TextBehavior == "WRAP" or self.BakedText[i]:find("\\n") then
+    if (pos.x > size.x / scale - len) and (self.TextBehavior == "WRAP") or self.BakedText[i]:find("\\n") then
       lineWidth[#lineWidth+1] = {width=pos.x,poses=poses}
       poses = {}
       pos.x = 0
@@ -1368,13 +1369,16 @@ function Box:setText(text)
     end
   end
   self.BakedText = {}
+  self.BakedTextTable = {}
   self.TextLengths = {}
-  local ft = fractureComponents(t,"[\x00-\x7F\xC2-\xF4][\x80-\xBF]*")
+  --local ft = fractureComponents(t,"[\x00-\x7F\xC2-\xF4][\x80-\xBF]*")
+  local ft = fractureComponents(t,"%s*%S+%s*")
   --printTable(t,2)
   for i = 1, #ft, 1 do
     local bt = ft[i]
     self.TextLengths[i] = client.getTextWidth("|"..bt.text:gsub("\n",""):gsub("\t","##").."|")-lengthTrim
     bt.text = bt.text:gsub("\t","")
+    self.BakedTextTable[i] = bt
     self.BakedText[i] = toJson(bt)
   end
   self.TEXT_CHANGED:invoke(self.Text)
