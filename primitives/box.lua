@@ -1329,7 +1329,7 @@ function Box:repositionText()
   for i = 1, #self.BakedText, 1 do
     local len = textLenghts[i]
     if (self.TextBehavior == "WRAP") or forceNextLine  then
-      if (pos.x > size.x / scale - len) or forceNextLine then
+      if (pos.x > size.x-len*scale) or forceNextLine then
         lineWidth[#lineWidth+1] = {width=pos.x,poses=poses}
         forceNextLine = false
         poses = {}
