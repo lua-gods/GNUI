@@ -155,7 +155,7 @@ function Box.new(parent)
     TextEffect = "NONE",
     DefaultColor = "#FFFFFF",
     TextHandling = true,
-    TextBehavior = "NONE",
+    TextBehavior = "WRAP",
     TEXT_CHANGED = eventLib.new(),
     TextLimitsHeight = true,
     TextPart = textModel,
@@ -387,7 +387,11 @@ end
 
 ---Sets the Child Index of the element.
 ---@param i any
+---@generic self
+---@param self self
+---@return self
 function Box:setChildIndex(i)
+  ---@cast self GNUI.Box
   if self.Parent then
     i = math.clamp(i, 1, #self.Parent.Children)
     table.remove(self.Parent.Children, self.ChildIndex)
@@ -395,6 +399,7 @@ function Box:setChildIndex(i)
     self.Parent:updateChildrenIndex()
     self.Parent:update()
   end
+  return self
 end
 
 ---Frees all the data of the element. all thats left to do is to forget it ever existed.
