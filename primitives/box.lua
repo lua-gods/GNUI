@@ -240,9 +240,6 @@ function Box:setVisible(visible)
   ---@cast self GNUI.Box
   if self.Visible ~= visible then
     self.Visible = visible
-    for _, child in pairs(self.Children) do
-      child:setVisible(visible)
-    end
     self.VISIBILITY_CHANGED:invoke(visible)
   end
   return self
