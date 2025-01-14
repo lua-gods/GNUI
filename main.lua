@@ -15,10 +15,10 @@ local api = {}
 
 ---@alias GNUI.any GNUI.Box|GNUI.Box|GNUI.Canvas
 
-local config = require(.....".config") ---@type GNUI.Config
-local s = require(.....".nineslice") ---@type Nineslice
-local ca = require(.....".primitives.canvas") ---@type GNUI.Canvas
-local bx = require(.....".primitives.box") ---@type GNUI.Box
+local config = require("./config") ---@type GNUI.Config
+local s = require("./nineslice") ---@type Nineslice
+local ca = require("./primitives.canvas") ---@type GNUI.Canvas
+local bx = require("./primitives.box") ---@type GNUI.Box
 
 
 ---Creates a new Box.  
