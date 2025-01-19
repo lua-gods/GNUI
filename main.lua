@@ -97,12 +97,15 @@ function api.debugMode()
 end
 
 
+if host:isHost() then
 ---@param sound Minecraft.soundID
 ---@param pitch number?
 ---@param volume number?
 function api.playSound(sound,pitch,volume)
-  sounds[sound]:pos(client:getCameraPos():add(client:getCameraDir())):pitch(pitch or 1):volume(volume or 1):attenuation(9999):play()
+		sounds[sound]:pos(client:getCameraPos():add(client:getCameraDir())):pitch(pitch or 1):volume(volume or 1):attenuation(9999):play()
+	end
+else
+	api.playSound = function (sound,pitch,volume)end
 end
-
 
 return api
