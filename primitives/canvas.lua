@@ -247,50 +247,50 @@ end
 
 local _shift,_ctrl,_alt = false,false,false
 events.KEY_PRESS:register(function (key, state, modifiers)
-    _shift = modifiers % 2 == 1
-    _ctrl = math.floor(modifiers / 2) % 2 == 1
-    _alt = math.floor(modifiers / 4) % 2 == 1
+	 _shift = modifiers % 2 == 1
+	 _ctrl = math.floor(modifiers / 2) % 2 == 1
+	 _alt = math.floor(modifiers / 4) % 2 == 1
   local minecraft_keybind = keymap[key]
   local char = chars[_shift and "shift" or "normal"][key] or chars.normal[key]
   if minecraft_keybind then
-   for _, value in pairs(autoCanvases) do
-    if value.reciveInputs and value.Visible and value.canCaptureCursor and screenCheck() then
-      value:parseInputEvent(minecraft_keybind, state,_shift,_ctrl,_alt,char)
-      --if value.captureInputs then return true end
-    end
-   end
+	for _, value in pairs(autoCanvases) do
+	 if value.reciveInputs and value.Visible and value.canCaptureCursor and screenCheck() then
+		value:parseInputEvent(minecraft_keybind, state,_shift,_ctrl,_alt,char)
+		--if value.captureInputs then return true end
+	 end
+	end
   end
 end)
 
 events.MOUSE_MOVE:register(function (x, y)
   local s = host:getScreen()
   if not s or s == "net.minecraft.class_408" then
-   local cursor_pos = client:getMousePos() / client:getGuiScale()
-   for _, c in pairs(autoCanvases) do
-    if c.reciveInputs and c.Visible and not c.hasCustomCursorSetter and screenCheck() then
-      c:setMousePos(cursor_pos.x, cursor_pos.y)
-      if c.captureCursorMovement or c.captureInputs then return true end
-    end
-    end
+	local cursor_pos = client:getMousePos() / client:getGuiScale()
+	for _, c in pairs(autoCanvases) do
+	 if c.reciveInputs and c.Visible and not c.hasCustomCursorSetter and screenCheck() then
+		c:setMousePos(cursor_pos.x, cursor_pos.y)
+		if c.captureCursorMovement or c.captureInputs then return true end
+	 end
+	 end
   end
 end)
 
 events.MOUSE_PRESS:register(function (button, state)
   if mousemap[button] then
-   for _, c in pairs(autoCanvases) do
-    if c.reciveInputs and c.Visible and screenCheck() then
-      c:parseInputEvent(mousemap[button],state,_shift,_ctrl,_alt)
-      if c.captureInputs then return true end
-    end
-   end
+	for _, c in pairs(autoCanvases) do
+	 if c.reciveInputs and c.Visible and screenCheck() then
+		c:parseInputEvent(mousemap[button],state,_shift,_ctrl,_alt)
+		if c.captureInputs then return true end
+	 end
+	end
   end
 end)
 
 events.MOUSE_SCROLL:register(function (dir) 
   for _, c in pairs(autoCanvases) do
-   if c.reciveInputs and c.Visible and screenCheck() then
-    c:parseInputEvent(mousemap[8],1,_shift,_ctrl,_alt,nil,dir)
-   end
+	if c.reciveInputs and c.Visible and screenCheck() then
+	 c:parseInputEvent(mousemap[8],1,_shift,_ctrl,_alt,nil,dir)
+	end
   end
 end)
 
@@ -319,17 +319,17 @@ function Canvas.new(autoScreenInputs)
   new.PressedElements = {}
   
   WORLD_RENDER:register(function ()
-   new:_propagateUpdateToChildren()
+	new:_propagateUpdateToChildren()
   end,"GNUI_root_box."..new.id)
   
   if autoScreenInputs then
-   autoCanvases[#autoCanvases+1] = new
+	autoCanvases[#autoCanvases+1] = new
   end
   setmetatable(new, Canvas)
   new.VISIBILITY_CHANGED:register(function () -- clear stuff
-    new.PressedElements = {}
-    new.HoveredElement = nil
-    new.PassiveHoveredElement = nil
+	 new.PressedElements = {}
+	 new.HoveredElement = nil
+	 new.PassiveHoveredElement = nil
   end)
   return new
 end
@@ -346,21 +346,21 @@ function Canvas:setMousePos(x,y)
   local mpos = utils.vec2(x,y)
   local relative = mpos - self.MousePosition
   if relative.x ~= 0 or relative.y ~= 0 then  
-   self.MousePosition = mpos
-   
-   ---@type GNUI.InputEventMouseMotion
-   local event = {relative = relative,pos = self.MousePosition}
-   self.MOUSE_MOVED_GLOBAL:invoke(event)
-   if self.HoveredElement then
-    self.HoveredElement.MOUSE_MOVED:invoke(event)
-   end
-   
-   for _, e in pairs(self.PressedElements) do
-     if e ~= self.HoveredElement then
-        e.MOUSE_MOVED:invoke(event)
-     end
-   end
-   self:pos2HoveringChild(self.MousePosition)
+	self.MousePosition = mpos
+	
+	---@type GNUI.InputEventMouseMotion
+	local event = {relative = relative,pos = self.MousePosition}
+	self.MOUSE_MOVED_GLOBAL:invoke(event)
+	if self.HoveredElement then
+	 self.HoveredElement.MOUSE_MOVED:invoke(event)
+	end
+	
+	for _, e in pairs(self.PressedElements) do
+	  if e ~= self.HoveredElement then
+		  e.MOUSE_MOVED:invoke(event)
+	  end
+	end
+	self:pos2HoveringChild(self.MousePosition)
   end
   return self
 end
@@ -371,33 +371,34 @@ local parseInputEventToChildren
 ---@param element GNUI.any
 ---@param event GNUI.InputEvent
 local function parseInputEventOnElement(element,event,position,force)
-  if element.Visible and element.canCaptureCursor then
-    
-    local statuses = element.INPUT_CHILDREN:invoke(event)
-    for j = 1, #statuses, 1 do
-      if statuses[j] and statuses[j][1] then 
-        event.isHandled = true
-        return true
-      end
-     end
-    
-    if element:isPosInside(position) or force then
-      if not parseInputEventToChildren(element,event,position) then
-        statuses = element.INPUT:invoke(event)
-        if element.isCursorHovering and event.state and event.key:find"$key.mouse" then
-          element.Canvas.PressedElements = {element}
-        end
-        for j = 1, #statuses, 1 do
-         if statuses[j] and statuses[j][1] then 
-          event.isHandled = true
-          return true
-         end
-        end
-        return true
-      end
-    end
-  end
-  return false
+	if event.isHandled then return end
+  	if element.Visible and element.canCaptureCursor then
+	
+		local statuses = element.INPUT_CHILDREN:invoke(event)
+		for j = 1, #statuses, 1 do
+		 	if statuses[j] and statuses[j][1] then 
+				event.isHandled = true
+				return true
+			end
+		end
+	
+		if element:isPosInside(position) or force then
+			if not parseInputEventToChildren(element,event,position) then
+				statuses = element.INPUT:invoke(event)
+				for j = 1, #statuses, 1 do
+					if statuses[j] and statuses[j][1] then 
+						event.isHandled = true
+						return true
+					end
+				end
+				if element.isCursorHovering and event.state and event.key:find"$key.mouse" then
+					element.Canvas.PressedElements = {element}
+				end
+				return true
+			end
+		end
+	end
+	return false
 end
 
 
@@ -407,12 +408,12 @@ end
 ---@param event GNUI.InputEvent
 function parseInputEventToChildren(element,event,position)
   if element.Parent then
-    position = position - element.ContainmentRect.xy
+	 position = position - element.ContainmentRect.xy
   end
   for i = #element.Children, 1, -1 do
-    if parseInputEventOnElement(element.Children[i],event,position) then
-      return true
-    end
+	 if parseInputEventOnElement(element.Children[i],event,position) then
+		return true
+	 end
   end
   return false
 end
@@ -430,44 +431,44 @@ end
 function Canvas:parseInputEvent(key,state,shift,ctrl,alt,char,strength)
   ---@type GNUI.InputEvent
   local event = {
-   char = char,
-   key = key,
-   state = state,
-   ctrl = ctrl or false,
-   alt = alt or false,
-   shift = shift or false,
-   isHandled = false,
-   strength = strength or 1
+	char = char,
+	key = key,
+	state = state,
+	ctrl = ctrl or false,
+	alt = alt or false,
+	shift = shift or false,
+	isHandled = false,
+	strength = strength or 1
   }
   local captured = false -- if somehow the canvas itself captured the inputs
   local statuses = self.INPUT:invoke(event)
   for i = 1, #statuses, 1 do
-   if statuses[i] and statuses[i][1] then
-    captured = true
-    break
-   end
+	if statuses[i] and statuses[i][1] then
+	 captured = true
+	 break
+	end
   end
   if not captured then
-    parseInputEventToChildren(self,event,self.MousePosition)
-    for _, e in pairs(self.PressedElements) do
-      if e ~= self.HoveredElement and e.Canvas == self then
-        parseInputEventOnElement(e,event,self.MousePosition,true)
-      end
-    end
+	 parseInputEventToChildren(self,event,self.MousePosition)
+	 for _, e in pairs(self.PressedElements) do
+		if e ~= self.HoveredElement and e.Canvas == self then
+		  parseInputEventOnElement(e,event,self.MousePosition,true)
+		end
+	 end
   end
   if key ~= "key.mouse.scroll" then
-    if state ~= 0 then -- QOL feature that allows boxes to recive a button being unpressed even when not hovered anymore.
-      self.PressedElements[key] = self.HoveredElement
-    else
-      if self.PressedElements[key] then
-        self.PressedElements[key].MOUSE_MOVED:invoke({relative = vec(0,0),pos = self.MousePosition})
-      end
-      self.PressedElements[key] = nil
-    end
+	 if state ~= 0 then -- QOL feature that allows boxes to recive a button being unpressed even when not hovered anymore.
+		self.PressedElements[key] = self.HoveredElement
+	 else
+		if self.PressedElements[key] then
+		  self.PressedElements[key].MOUSE_MOVED:invoke({relative = vec(0,0),pos = self.MousePosition})
+		end
+		self.PressedElements[key] = nil
+	 end
   end
   
   if not event.isHandled then
-   self.UNHANDLED_INPUT:invoke(event)
+	self.UNHANDLED_INPUT:invoke(event)
   end
   return self
 end
@@ -478,15 +479,15 @@ end
 ---@param pos Vector2
 function Canvas:getChildFromPos(pos)
   if self.Parent then
-    pos = pos - self.ContainmentRect.xy
+	 pos = pos - self.ContainmentRect.xy
   end
   if self.Visible and self.canCaptureCursor then
-   for i = #self.Children, 1, -1 do
-    local child = self.Children[i]
-    if child.Visible and child.canCaptureCursor and child:isPosInside(pos) then
-      return Canvas.getChildFromPos(child,pos)
-    end
-   end
+	for i = #self.Children, 1, -1 do
+	 local child = self.Children[i]
+	 if child.Visible and child.canCaptureCursor and child:isPosInside(pos) then
+		return Canvas.getChildFromPos(child,pos)
+	 end
+	end
   end
   return self
 end
@@ -505,17 +506,17 @@ end
 ---@return GNUI.Canvas
 function Canvas:setHoveringChild(box)
   if box ~= self.HoveredElement then  
-    if self.HoveredElement then
-      self.HoveredElement:setIsCursorHovering(false)
-      local l = self.PassiveHoveredElement
-      self.PassiveHoveredElement = box
-      self.PASSIVE_HOVERING_ELEMENT_CHANGED:invoke(box,l)
-    end
-    if box then
-      box:setIsCursorHovering(true)
-    end
-    self.HoveredElement = box
-    self.HOVERING_ELEMENT_CHANGED:invoke(box,self.PassiveHoveredElement)
+	 if self.HoveredElement then
+		self.HoveredElement:setIsCursorHovering(false)
+		local l = self.PassiveHoveredElement
+		self.PassiveHoveredElement = box
+		self.PASSIVE_HOVERING_ELEMENT_CHANGED:invoke(box,l)
+	 end
+	 if box then
+		box:setIsCursorHovering(true)
+	 end
+	 self.HoveredElement = box
+	 self.HOVERING_ELEMENT_CHANGED:invoke(box,self.PassiveHoveredElement)
   end
   return self
 end

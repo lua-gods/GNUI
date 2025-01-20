@@ -47,18 +47,19 @@ function Button.new(parent,variant)
   new.HoverBox = hoverBox
   
   new.MOUSE_PRESSENCE_CHANGED:register(function (isHovering)
-    new.BUTTON_CHANGED:invoke(new.isPressed,new.isCursorHovering)
+	 new.BUTTON_CHANGED:invoke(new.isPressed,new.isCursorHovering)
   end)
   
   ---@param event GNUI.InputEvent
   new.INPUT:register(function (event)
-    if event.key == new.keybind then
-      if event.state == 1 then
-        new:press()
-      else
-        new:release()
-      end
-    end
+	if event.key == new.keybind then
+		if event.state == 1 then
+			new:press()
+		else
+			new:release()
+		end
+		return true
+	 end
   end,"GNUI.Input")
   Theme.style(new,variant)
   return new
@@ -83,14 +84,14 @@ end
 function Button:press()
   ---@cast self GNUI.Button
   if self.isToggle then
-    self.isPressed = not self.isPressed
+	 self.isPressed = not self.isPressed
   else
-    self.isPressed = true
+	 self.isPressed = true
   end
   
   if self.isPressed then self.BUTTON_DOWN:invoke()
   else self.PRESSED:invoke()
-    self.BUTTON_UP:invoke()
+	 self.BUTTON_UP:invoke()
   end
   
   self.BUTTON_CHANGED:invoke(self.isPressed,self.isCursorHovering)
@@ -114,10 +115,10 @@ end
 function Button:release()
   ---@cast self GNUI.Button
   if not self.isToggle and self.isPressed then
-    self.isPressed = false
-    self.BUTTON_UP:invoke()
-    self.PRESSED:invoke()
-    self.BUTTON_CHANGED:invoke(self.isPressed,self.isCursorHovering)
+	 self.isPressed = false
+	 self.BUTTON_UP:invoke()
+	 self.PRESSED:invoke()
+	 self.BUTTON_CHANGED:invoke(self.isPressed,self.isCursorHovering)
   end
   return self
 end
@@ -129,7 +130,7 @@ end
 function Button:setPressed(pressed)
   ---@cast self GNUI.Button
   if self.isToggle and self.isPressed ~= pressed then
-    self:press()
+	 self:press()
   end
   return self
 end
