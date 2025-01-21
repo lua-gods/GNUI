@@ -1,5 +1,5 @@
 --[[______   __
-  / ____/ | / / by: GNamimates, Discord: "@gn8.", Youtube: @GNamimates
+  / ____/ | / / By: GNamimates | https://gnon.top | Discord: @gn8.
  / / __/  |/ / The GridStacker Class.
 / /_/ / /|  / A type of stacker that aranges its children onto a grid.
 \____/_/ |_/ Source: link]]

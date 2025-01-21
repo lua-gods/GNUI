@@ -1,5 +1,5 @@
 --[[______   __
-  / ____/ | / / by: GNamimates, Discord: "@gn8.", Youtube: @GNamimates
+  / ____/ | / / By: GNamimates | https://gnon.top | Discord: @gn8.
  / / __/  |/ / Theme Class Handler
 / /_/ / /|  / the script that manages how every class looks.
 \____/_/ |_/ Source: link]]

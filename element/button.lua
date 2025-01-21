@@ -1,5 +1,5 @@
 --[[______   __
-  / ____/ | / / by: GNamimates, Discord: "@gn8.", Youtube: @GNamimates
+  / ____/ | / / By: GNamimates | https://gnon.top | Discord: @gn8.
  / / __/  |/ / The Button Class.
 / /_/ / /|  / The base class for all clickable buttons.
 \____/_/ |_/ Source: link]]
