@@ -322,6 +322,7 @@ function Canvas.new(autoScreenInputs)
 	new:_propagateUpdateToChildren()
   end,"GNUI_root_box."..new.id)
   
+  new.ModelPart:setLight(15,15)
   if autoScreenInputs then
 	autoCanvases[#autoCanvases+1] = new
   end
