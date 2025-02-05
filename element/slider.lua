@@ -59,7 +59,7 @@ function Slider.new(parent,config,variant)
 		self.isVertical = true
 	end
 	self.showNumber = config.showNumber or false
-	if not (config.showNumber or true) then self.numberBox:setVisible(false) end
+	if not (config.showNumber) then self.numberBox:setVisible(false) end
 	
 	self.VALUE_CHANGED = eventLib.new()
 	
