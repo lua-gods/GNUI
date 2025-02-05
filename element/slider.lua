@@ -1,5 +1,5 @@
 --[[______   __
-  / ____/ | / / By: GNamimates | https://gnon.top | Discord: @gn8.
+	/ ____/ | / / By: GNamimates | https://gnon.top | Discord: @gn8.
  / / __/  |/ / The Slider Class.
 / /_/ / /|  / a number range box.
 \____/_/ |_/ Source: link]]
@@ -13,6 +13,16 @@ local Button = require("./button") ---@type GNUI.Button
 local TextField = require("./textField") ---@type GNUI.TextField
 
 local DOUBLE_CLICK_TIME = 300
+
+
+local function snap(value,step)
+	if step > 0.01 and false then
+		return math.floor(value / step + 0.5) * step
+	else
+		return value
+	end
+end
+
 
 ---@class GNUI.Slider : GNUI.Button
 ---@field isVertical boolean
@@ -28,88 +38,81 @@ local Slider = {}
 Slider.__index = function (t,i) return rawget(t,i) or Slider[i] or Button[i] or Box[i] end
 Slider.__type = "GNUI.Slider"
 
-
----@param isVertical boolean
----@param min number
----@param max number
----@param step number
----@param value number
----@param parent GNUI.Box?
----@param showNumber boolean?
+---@param config {isVertical: boolean?,min: number?,max: number?,step: number,value: number?,showNumber: boolean?}
 ---@param variant string|"none"|"default"?
 ---@return GNUI.Slider
-function Slider.new(isVertical,min,max,step,value,parent,showNumber,variant)
-  ---@type GNUI.Slider
-  local new = setmetatable(Button.new(parent,"none"),Slider)
-  
-  new.min = min
-  new.max = max
-  new.step = step
-  new.value = value
-  new.keybind = "key.mouse.left"
-  new.sliderBox = Box.new(new):setCanCaptureCursor(false)
-  new.numberBox = Box.new(new):setAnchor(0,0,1,1):setCanCaptureCursor(false)
-  new.isVertical = isVertical or false
-  new.showNumber = showNumber or true
-  if not (showNumber or true) then new.numberBox:setVisible(false) end
-  
-  new.VALUE_CHANGED = eventLib.new()
-  
-  new.VALUE_CHANGED:register(function () new:updateSliderBox() end)
-  new:updateSliderBox()
-  
-  ---@param event GNUI.InputEventMouseMotion
-  local function updateEvent(event)
-    local size = math.abs(new.min-new.max)
-    local dir = event.relative / new.Size * (1+1/size)
-    if new.isVertical then
-      new:setValue(math.floor((new.value + dir.y * size) / new.step + 0.5) * new.step)
-    else
-      new:setValue(math.floor((new.value + dir.x * size) / new.step + 0.5) * new.step)
-    end
-  end
-  
-  local lastClickTime = 0
-  ---@param event GNUI.InputEvent
-  new.INPUT:register(function (event)
-    if event.key == new.keybind then
-      if event.state == 1 then
-        local clickTime = client:getSystemTime()
-        if clickTime - lastClickTime < DOUBLE_CLICK_TIME then
-          new.numberBox:setVisible(false)
-          local numberField = TextField.new(new):setAnchor(0,0,1,1)
-          numberField.FIELD_CONFIRMED:register(function (out)
-            numberField:free()
-            if tonumber(out) then
-              new:setValue(tonumber(out))
-            end
-            new.numberBox:setVisible(true)
-          end)
-          numberField:press()
-          new:release()
-          return true
-        end
-        lastClickTime = clickTime
-        new:press()
-        return true
-      else
-        new:release()
-      end
-    elseif event.key == "key.mouse.scroll" then
-      local dir = event.strength > 0 and 1 or -1
-      new:setValue(new.value + new.step * dir)
-      return true
-    end
-  end,"GNUI.Input")
-  
-  ---@param event GNUI.InputEventMouseMotion
-  new.MOUSE_MOVED:register(function (event)
-    if new.isPressed then
-      updateEvent(event)
-    end
-  end,"GNUI.Input")
-  Theme.style(new,variant)
-  return new
+function Slider.new(parent,config,variant)
+	config = config or {}
+	---@type GNUI.Slider
+	local self = setmetatable(Button.new(parent,"none"),Slider)
+	
+	self.min = config.min or 0
+	self.max = config.max or 1
+	self.step = config.step or 0
+	self.value = config.value or self.min
+	self.keybind = "key.mouse.left"
+	self.sliderBox = Box.new(self):setCanCaptureCursor(false)
+	self.numberBox = Box.new(self):setAnchor(0,0,1,1):setCanCaptureCursor(false)
+	if config.isVertical then
+		self.isVertical = config.isVertical
+	else
+		self.isVertical = true
+	end
+	self.showNumber = config.showNumber or false
+	if not (config.showNumber or true) then self.numberBox:setVisible(false) end
+	
+	self.VALUE_CHANGED = eventLib.new()
+	
+	self.VALUE_CHANGED:register(function () self:updateSliderBox() end)
+	self:updateSliderBox()
+	
+	local lastClickTime = 0
+	---@param event GNUI.InputEvent
+	self.INPUT:register(function (event)
+		if event.key == self.keybind then
+			if event.state == 1 then
+				local clickTime = client:getSystemTime()
+				if clickTime - lastClickTime < DOUBLE_CLICK_TIME then
+					self.numberBox:setVisible(false)
+					local numberField = TextField.new(self):setAnchor(0,0,1,1)
+					numberField.FIELD_CONFIRMED:register(function (out)
+						numberField:free()
+						if tonumber(out) then
+							self:setValue(tonumber(out))
+						end
+						self.numberBox:setVisible(true)
+					end)
+					numberField:press()
+					self:release()
+					return true
+				end
+				lastClickTime = clickTime
+				self:press()
+				return true
+			else
+				self:release()
+			end
+		elseif event.key == "key.mouse.scroll" then
+			local dir = event.strength > 0 and 1 or -1
+			self:setValue(self.value - math.max(self.step,0.1) * dir)
+			return true
+		end
+	end,"GNUI.Input")
+	
+	---@param event GNUI.InputEventMouseMotion
+	self.MOUSE_MOVED:register(function (event)
+		if self.isPressed then
+				local pos = self:toLocal(event.pos)/self:getSize()
+				local gsize = self.cache.grabber_size or 0
+				if self.isVertical then
+					self:setValue(math.map(pos.y,gsize,1-gsize,self.min,self.max))
+				else
+					self:setValue(math.map(pos.x,gsize,1-gsize,self.min,self.max))
+				end
+		end
+	end,"GNUI.Input")
+	Theme.style(self,variant)
+	return self
 end
 
 ---Sets the value of the slider.
@@ -118,14 +121,14 @@ end
 ---@param self self
 ---@return self
 function Slider:setValue(value)
-  ---@cast self GNUI.Slider
-  local lvalue = self.value
-  self.value = math.clamp(math.floor(value / self.step + 0.5) * self.step,self.min,self.max)
-  if self.value ~= lvalue then
-    self.VALUE_CHANGED:invoke(self.value)
-    self:updateSliderBox()
-  end
-  return self
+	---@cast self GNUI.Slider
+	local lvalue = self.value
+	self.value = math.clamp(snap(value,self.step),self.min,self.max)
+	if self.value ~= lvalue then
+		self.VALUE_CHANGED:invoke(self.value)
+		self:updateSliderBox()
+	end
+	return self
 end
 
 ---Sets the minimum value of the slider.
@@ -134,9 +137,9 @@ end
 ---@param self self
 ---@return self
 function Slider:setMin(min)
-  ---@cast self GNUI.Slider
-  self.min = min
-  return self
+	---@cast self GNUI.Slider
+	self.min = min
+	return self
 end
 
 ---Sets the maximum value of the slider.
@@ -145,9 +148,9 @@ end
 ---@param self self
 ---@return self
 function Slider:setMax(max)
-  ---@cast self GNUI.Slider
-  self.max = max
-  return self
+	---@cast self GNUI.Slider
+	self.max = max
+	return self
 end
 
 ---Sets the step size of the slider.
@@ -156,9 +159,9 @@ end
 ---@param self self
 ---@return self
 function Slider:setStep(step)
-  ---@cast self GNUI.Slider
-  self.step = step
-  return self
+	---@cast self GNUI.Slider
+	self.step = step
+	return self
 end
 
 ---Updates the displayed slider box.
@@ -166,16 +169,17 @@ end
 ---@param self self
 ---@return self
 function Slider:updateSliderBox()
-  ---@cast self GNUI.Slider
-  local diff = math.min(math.abs(self.max - self.min),20) + 1
-  local mul = (diff-1) / (self.max - self.min)
-  local l = self.value - self.min
-  local a1,a2 = (l * mul)/diff,(l * mul+1)/diff
-  if self.isVertical then self.sliderBox:setAnchor(0,a1,1,a2)
-  else self.sliderBox:setAnchor(a1,0,a2,1)
-  end
-  self.numberBox:setText(self.value)
-  return self
+	---@cast self GNUI.Slider
+	local diff = math.min(math.abs(self.max - self.min),20) + 1
+	local mul = (diff-1) / (self.max - self.min)
+	local l = self.value - self.min
+	local a1,a2 = (l * mul)/diff,(l * mul+1)/diff
+	self.cache.grabber_size = (a2 - a1) / 2
+	if self.isVertical then self.sliderBox:setAnchor(0,a1,1,a2)
+	else self.sliderBox:setAnchor(a1,0,a2,1)
+	end
+	self.numberBox:setText(self.value)
+	return self
 end
 
 return Slider
