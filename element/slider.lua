@@ -53,7 +53,7 @@ function Slider.new(parent,config,variant)
 	self.keybind = "key.mouse.left"
 	self.sliderBox = Box.new(self):setCanCaptureCursor(false)
 	self.numberBox = Box.new(self):setAnchor(0,0,1,1):setCanCaptureCursor(false)
-	if config.isVertical then
+	if type(config.isVertical) == "boolean" then
 		self.isVertical = config.isVertical
 	else
 		self.isVertical = true
