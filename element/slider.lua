@@ -26,6 +26,7 @@ end
 
 ---@class GNUI.Slider : GNUI.Button
 ---@field isVertical boolean
+---@field loop boolean
 ---@field min number
 ---@field max number
 ---@field step number
@@ -38,7 +39,7 @@ local Slider = {}
 Slider.__index = function (t,i) return rawget(t,i) or Slider[i] or Button[i] or Box[i] end
 Slider.__type = "GNUI.Slider"
 
----@param config {isVertical: boolean?,min: number?,max: number?,step: number,value: number?,showNumber: boolean?}
+---@param config {isVertical: boolean?,min: number?,max: number?,step: number,value: number?,showNumber: boolean?, loop: boolean}
 ---@param variant string|"none"|"default"?
 ---@return GNUI.Slider
 function Slider.new(parent,config,variant)
@@ -50,6 +51,7 @@ function Slider.new(parent,config,variant)
 	self.max = config.max or 1
 	self.step = config.step or 0
 	self.value = config.value or self.min
+	self.loop = config.loop or false
 	self.keybind = "key.mouse.left"
 	self.sliderBox = Box.new(self):setCanCaptureCursor(false)
 	self.numberBox = Box.new(self):setAnchor(0,0,1,1):setCanCaptureCursor(false)
@@ -123,7 +125,8 @@ end
 function Slider:setValue(value)
 	---@cast self GNUI.Slider
 	local lvalue = self.value
-	self.value = math.clamp(snap(value,self.step),self.min,self.max)
+	local finalValue = snap(value,self.step)
+	self.value = self.loop and ((finalValue - self.min) % (self.max - self.min) + self.min) or math.clamp(finalValue,self.min,self.max)
 	if self.value ~= lvalue then
 		self.VALUE_CHANGED:invoke(self.value)
 		self:updateSliderBox()
