@@ -16,7 +16,7 @@ local DOUBLE_CLICK_TIME = 300
 
 
 local function snap(value,step)
-	if step > 0.01 and false then
+	if step > 0.01 then
 		return math.floor(value / step + 0.5) * step
 	else
 		return value
