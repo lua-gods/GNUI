@@ -3,7 +3,8 @@
 rewritten atleast 4 times based on people's complaints about the library being too complicated to use. at its current state, expect it to be really easy to use at this point. trust me bro
 
 # How to use
-- no wiki yet
+- you can read the wiki for a quick start here
+[[Wiki]](https://github.com/lua-gods/GNUI/wiki)
 
 # How to install
 ## Git Method
