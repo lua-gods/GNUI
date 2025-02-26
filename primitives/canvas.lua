@@ -2,7 +2,7 @@
 local cfg = require("./../config") ---@type GNUI.Config
 local eventLib = cfg.event ---@type EventLibAPI ---@type EventLibAPI
 local utils = cfg.utils ---@type GNUI.UtilsAPI
-local Container = require(.....".box") ---@type GNUI.Box
+local Container = require(... .. ".box") ---@type GNUI.Box
 
 ---@class GNUI.InputEvent
 ---@field char string
@@ -17,7 +17,6 @@ local Container = require(.....".box") ---@type GNUI.Box
 ---@class GNUI.InputEventMouseMotion
 ---@field pos Vector2 # local position 
 ---@field relative Vector2 # the change of position since last set
-
 
 ---A valid key code for use in keybinds.
 ---
@@ -157,60 +156,21 @@ local Container = require(.....".box") ---@type GNUI.Box
 ---| "key.mouse.8"        # `Mouse 8`
 ---| "key.mouse.scroll"        # `Mouse 8`
 
-
-local keymap = {[32]="space",[39]="apostrophe",[44]="comma",[46]="period",[47]="slash",[48]="0",[49]="1",[50]="2",[51]="3",[52]="4",[53]="5",[54]="6",
-[55]="7",[56]="8",[57]="9",[59]="semicolon",[61]="equal",[65]="a",[66]="b",[67]="c",[68]="d",[69]="e",[70]="f",[71]="g",[72]="h",[73]="i",[74]="j",
-[75]="k",[76]="l",[77]="m",[78]="n",[79]="o",[80]="p",[81]="q",[82]="r",[83]="s",[84]="t",[85]="u",[86]="v",[87]="w",[88]="x",[89]="y",[90]="z",
-[91]="left.bracket",[92]="left.backslash",[93]="right.bracket",[96]="grave.accent",[161]="world.1",[162]="world.2",[256]="escape",[257]="enter",
-[258]="tab",[259]="backspace",[260]="insert",[261]="delete",[262]="right",[263]="left",[264]="down",[265]="up",[266]="page.up",[267]="page.down",
-[268]="home",[269]="end",[280]="caps.lock",[281]="scroll.lock",[282]="number.lock",[283]="print.screen",[284]="pause",[290]="f1",[291]="f2",[292]="f3",
-[293]="f4",[294]="f5",[295]="f6",[296]="f7",[297]="f8",[298]="f9",[299]="f10",[300]="f11",[301]="f12",[302]="f13",[303]="f14",[304]="f15",[305]="f16",
-[306]="f17",[307]="f18",[308]="f19",[309]="f20",[310]="f21",[311]="f22",[312]="f23",[313]="f24",[314]="f25",[320]="keypad.0",[321]="keypad.1",[322]="keypad.2",
-[323]="keypad.3",[324]="keypad.4",[325]="keypad.5",[326]="keypad.6",[327]="keypad.7",[328]="keypad.8",[329]="keypad.9",[330]="keypad.decimal",[331]="keypad.divide",
-[332]="keypad.multiply",[333]="keypad.subtract",[334]="keypad.add",[335]="keypad.enter",[336]="keypad.equal",[340]="left.shift",[341]="left.control",
-[342]="left.alt",[344]="right.shift",[345]="right.control",[346]="right.alt",[348]="menu"
-}
-
-local chars = {
-  normal={
-[32]=" ",[39]="'",[44]=",",[45]="-",[46]=".",[47]="/",
-[48]="0",[49]="1",[50]="2",[51]="3",[52]="4",[53]="5",
-[54]="6",[55]="7",[56]="8",[57]="9",[59]=";",[61]="=",
-[65]="a",[66]="b",[67]="c",[68]="d",[69]="e",[70]="f",
-[71]="g",[72]="h",[73]="i",[74]="j",[75]="k",[76]="l",
-[77]="m",[78]="n",[79]="o",[80]="p",[81]="q",[82]="r",
-[83]="s",[84]="t",[85]="u",[86]="v",[87]="w",[88]="x",
-[89]="y",[90]="z",[91]="[",[92]="\\",[93]="]",
-[320]="0",[321]="1",[322]="2",[323]="3",[324]="4",
-[325]="5",[326]="6",[327]="7",[328]="8",[329]="9",
-[330]=".",[331]="/",[332]="*",[333]="-",[334]="+",
-[336]="=",
-  },
-
-  shift = {
-[39]=":",[44]="<",[45]="_",[46]=">",[47]="?",
-[48]=")",[49]="!",[50]="@",[51]="#",[52]="$",[53]="%",
-[54]="^",[55]="&",[56]="*",[57]="(",[59]=":",[61]="+",
-[65]="A",[66]="B",[67]="C",[68]="D",[69]="E",[70]="F",
-[71]="G",[72]="H",[73]="I",[74]="J",[75]="K",[76]="L",
-[77]="M",[78]="N",[79]="O",[80]="P",[81]="Q",[82]="R",
-[83]="S",[84]="T",[85]="U",[86]="V",[87]="W",[88]="X",
-[89]="Y",[90]="Z",[91]="{",[92]="|",[93]="}",[320]=")",
-[321]="!",[322]="@",[323]="#",[324]="$",[325]="%",
-[326]="^",[327]="&",[328]="*",[329]="(",[330]=":",[331]="+",
-[332]="_",[333]="-",[334]="+",[336]="+",
-  }
-}
+local keymap = client.getEnum("keybinds")
 
 for key, value in pairs(keymap) do keymap[key] = "key.keyboard." .. value end
 
 local mousemap = {
-  [0]="left",[1]="right",
-  [2]="middle",[3]="4",
-  [4]="5",[5]="6",[6]="7",
-  [7]="8",
-  -- anyhting after this is made up for GNUI
-  [8] = "scroll",
+	[0] = "left",
+	[1] = "right",
+	[2] = "middle",
+	[3] = "4",
+	[4] = "5",
+	[5] = "6",
+	[6] = "7",
+	[7] = "8",
+	-- anyhting after this is made up for GNUI
+	[8] = "scroll"
 }
 
 for key, value in pairs(mousemap) do mousemap[key] = "key.mouse." .. value end
@@ -231,110 +191,104 @@ for key, value in pairs(mousemap) do mousemap[key] = "key.mouse." .. value end
 ---@field INPUT EventLib # serves as the handler for all inputs within the boundaries of the canvas. called with the first argument being an input event
 ---@field UNHANDLED_INPUT EventLib # triggers when an input is not handled by the children of the canvas.
 local Canvas = {}
-Canvas.__index = function (t,i)
-  return rawget(t,i) or Canvas[i] or Container[i]
-end
+Canvas.__index = function(t, i) return rawget(t, i) or Canvas[i] or Container[i] end
 Canvas.__type = "GNUI.Element.Container.Canvas"
 
 ---@type GNUI.Canvas[]
 local autoCanvases = {}
 
--->====================[ Figura Input Handling Conections ]====================<--
+-- >====================[ Figura Input Handling Conections ]====================<--
 
 local function screenCheck()
-  return host:isCursorUnlocked() and not host:getScreen() or host:isChatOpen()
+	return host:isCursorUnlocked() and not host:getScreen() or host:isChatOpen()
 end
 
-local _shift,_ctrl,_alt = false,false,false
-events.KEY_PRESS:register(function (key, state, modifiers)
-	 _shift = modifiers % 2 == 1
-	 _ctrl = math.floor(modifiers / 2) % 2 == 1
-	 _alt = math.floor(modifiers / 4) % 2 == 1
-  local minecraft_keybind = keymap[key]
-  local char = chars[_shift and "shift" or "normal"][key] or chars.normal[key]
-  if minecraft_keybind then
-	for _, value in pairs(autoCanvases) do
-	 if value.reciveInputs and value.Visible and value.canCaptureCursor and screenCheck() then
-		value:parseInputEvent(minecraft_keybind, state,_shift,_ctrl,_alt,char)
-		--if value.captureInputs then return true end
-	 end
+local _char = ""
+events.CHAR_TYPED:register(function(char, modifiers, codepoint) char = char end)
+
+local _shift, _ctrl, _alt = false, false, false
+events.KEY_PRESS:register(function(key, state, modifiers)
+
+	_shift = modifiers % 2 == 1
+	_ctrl = math.floor(modifiers / 2) % 2 == 1
+	_alt = math.floor(modifiers / 4) % 2 == 1
+	local minecraft_keybind = keymap[key]
+	if minecraft_keybind then
+		for _, value in pairs(autoCanvases) do
+			if value.reciveInputs and value.Visible and value.canCaptureCursor and screenCheck() then
+				value:parseInputEvent(minecraft_keybind, state, _shift, _ctrl, _alt, _char)
+				-- if value.captureInputs then return true end
+			end
+		end
 	end
-  end
 end)
 
-events.MOUSE_MOVE:register(function (x, y)
-  local s = host:getScreen()
-  if not s or s == "net.minecraft.class_408" then
-	local cursor_pos = client:getMousePos() / client:getGuiScale()
+events.MOUSE_MOVE:register(function(x, y)
+	local s = host:getScreen()
+	if not s or s == "net.minecraft.class_408" then
+		local cursor_pos = client:getMousePos() / client:getGuiScale()
+		for _, c in pairs(autoCanvases) do
+			if c.reciveInputs and c.Visible and not c.hasCustomCursorSetter and screenCheck() then
+				c:setMousePos(cursor_pos.x, cursor_pos.y)
+				if c.captureCursorMovement or c.captureInputs then return true end
+			end
+		end
+	end
+end)
+
+events.MOUSE_PRESS:register(function(button, state)
+	if mousemap[button] then
+		for _, c in pairs(autoCanvases) do
+			if c.reciveInputs and c.Visible and screenCheck() then
+				c:parseInputEvent(mousemap[button], state, _shift, _ctrl, _alt)
+				if c.captureInputs then return true end
+			end
+		end
+	end
+end)
+
+events.MOUSE_SCROLL:register(function(dir)
 	for _, c in pairs(autoCanvases) do
-	 if c.reciveInputs and c.Visible and not c.hasCustomCursorSetter and screenCheck() then
-		c:setMousePos(cursor_pos.x, cursor_pos.y)
-		if c.captureCursorMovement or c.captureInputs then return true end
-	 end
-	 end
-  end
-end)
-
-events.MOUSE_PRESS:register(function (button, state)
-  if mousemap[button] then
-	for _, c in pairs(autoCanvases) do
-	 if c.reciveInputs and c.Visible and screenCheck() then
-		c:parseInputEvent(mousemap[button],state,_shift,_ctrl,_alt)
-		if c.captureInputs then return true end
-	 end
+		if c.reciveInputs and c.Visible and screenCheck() then
+			c:parseInputEvent(mousemap[8], 1, _shift, _ctrl, _alt, nil, dir)
+		end
 	end
-  end
-end)
-
-events.MOUSE_SCROLL:register(function (dir) 
-  for _, c in pairs(autoCanvases) do
-	if c.reciveInputs and c.Visible and screenCheck() then
-	 c:parseInputEvent(mousemap[8],1,_shift,_ctrl,_alt,nil,dir)
-	end
-  end
 end)
 
 --- Work around to having too many world render events
 local WORLD_RENDER = eventLib.new()
-events.WORLD_RENDER:register(function (delta)
-  WORLD_RENDER:invoke()
-end,"GNUI")
+events.WORLD_RENDER:register(function(delta) WORLD_RENDER:invoke() end, "GNUI")
 
--->====================[ Canvas Class ]====================<--
+-- >====================[ Canvas Class ]====================<--
 
 ---Creates a new canvas.
 ---if autoScreenInputs is true, the canvas will capture input events
 ---@param autoScreenInputs boolean? # if true, the canvas will capture input events
 ---@return GNUI.Canvas
 function Canvas.new(autoScreenInputs)
-  local new = Container.new()---@type GNUI.Canvas
-  new.MousePosition = vec(0,0)
-  new.reciveInputs = true
-  new.MOUSE_MOVED_GLOBAL = eventLib.new()
-  new.INPUT = eventLib.new()
-  new.UNHANDLED_INPUT = eventLib.new()
-  new.HOVERING_ELEMENT_CHANGED = eventLib.new()
-  new.hasCustomCursorSetter = not autoScreenInputs
-  new.PASSIVE_HOVERING_ELEMENT_CHANGED = eventLib.new()
-  new.PressedElements = {}
-  
-  WORLD_RENDER:register(function ()
-	new:_propagateUpdateToChildren()
-  end,"GNUI_root_box."..new.id)
-  
-  new.ModelPart:setLight(15,15)
-  if autoScreenInputs then
-	autoCanvases[#autoCanvases+1] = new
-  end
-  setmetatable(new, Canvas)
-  new.VISIBILITY_CHANGED:register(function () -- clear stuff
-	 new.PressedElements = {}
-	 new.HoveredElement = nil
-	 new.PassiveHoveredElement = nil
-  end)
-  return new
-end
+	local new = Container.new() ---@type GNUI.Canvas
+	new.MousePosition = vec(0, 0)
+	new.reciveInputs = true
+	new.MOUSE_MOVED_GLOBAL = eventLib.new()
+	new.INPUT = eventLib.new()
+	new.UNHANDLED_INPUT = eventLib.new()
+	new.HOVERING_ELEMENT_CHANGED = eventLib.new()
+	new.hasCustomCursorSetter = not autoScreenInputs
+	new.PASSIVE_HOVERING_ELEMENT_CHANGED = eventLib.new()
+	new.PressedElements = {}
 
+	WORLD_RENDER:register(function() new:_propagateUpdateToChildren() end, "GNUI_root_box." .. new.id)
+
+	new.ModelPart:setLight(15, 15)
+	if autoScreenInputs then autoCanvases[#autoCanvases + 1] = new end
+	setmetatable(new, Canvas)
+	new.VISIBILITY_CHANGED:register(function() -- clear stuff
+		new.PressedElements = {}
+		new.HoveredElement = nil
+		new.PassiveHoveredElement = nil
+	end)
+	return new
+end
 
 ---Sets the Mouse position relative to the canvas. meaning in canvas local space.
 ---@param x number|Vector2
@@ -342,28 +296,24 @@ end
 ---@generic self
 ---@param self self
 ---@return self
-function Canvas:setMousePos(x,y)
-  ---@cast self GNUI.Canvas
-  local mpos = utils.vec2(x,y)
-  local relative = mpos - self.MousePosition
-  if relative.x ~= 0 or relative.y ~= 0 then  
-	self.MousePosition = mpos
-	
-	---@type GNUI.InputEventMouseMotion
-	local event = {relative = relative,pos = self.MousePosition}
-	self.MOUSE_MOVED_GLOBAL:invoke(event)
-	if self.HoveredElement then
-	 self.HoveredElement.MOUSE_MOVED:invoke(event)
+function Canvas:setMousePos(x, y)
+	---@cast self GNUI.Canvas
+	local mpos = utils.vec2(x, y)
+	local relative = mpos - self.MousePosition
+	if relative.x ~= 0 or relative.y ~= 0 then
+		self.MousePosition = mpos
+
+		---@type GNUI.InputEventMouseMotion
+		local event = {relative = relative, pos = self.MousePosition}
+		self.MOUSE_MOVED_GLOBAL:invoke(event)
+		if self.HoveredElement then self.HoveredElement.MOUSE_MOVED:invoke(event) end
+
+		for _, e in pairs(self.PressedElements) do
+			if e ~= self.HoveredElement then e.MOUSE_MOVED:invoke(event) end
+		end
+		self:pos2HoveringChild(self.MousePosition)
 	end
-	
-	for _, e in pairs(self.PressedElements) do
-	  if e ~= self.HoveredElement then
-		  e.MOUSE_MOVED:invoke(event)
-	  end
-	end
-	self:pos2HoveringChild(self.MousePosition)
-  end
-  return self
+	return self
 end
 
 local parseInputEventToChildren
@@ -371,28 +321,28 @@ local parseInputEventToChildren
 --- The function that handles the INPUT event in all boxes.
 ---@param element GNUI.any
 ---@param event GNUI.InputEvent
-local function parseInputEventOnElement(element,event,position,force)
+local function parseInputEventOnElement(element, event, position, force)
 	if event.isHandled then return end
-  	if element.Visible and element.canCaptureCursor then
-	
+	if element.Visible and element.canCaptureCursor then
+
 		local statuses = element.INPUT_CHILDREN:invoke(event)
 		for j = 1, #statuses, 1 do
-		 	if statuses[j] and statuses[j][1] then 
+			if statuses[j] and statuses[j][1] then
 				event.isHandled = true
 				return true
 			end
 		end
-	
+
 		if element:isPosInside(position) or force then
-			if not parseInputEventToChildren(element,event,position) then
+			if not parseInputEventToChildren(element, event, position) then
 				statuses = element.INPUT:invoke(event)
 				for j = 1, #statuses, 1 do
-					if statuses[j] and statuses[j][1] then 
+					if statuses[j] and statuses[j][1] then
 						event.isHandled = true
 						return true
 					end
 				end
-				if element.isCursorHovering and event.state and event.key:find"$key.mouse" then
+				if element.isCursorHovering and event.state and event.key:find "$key.mouse" then
 					element.Canvas.PressedElements = {element}
 				end
 				return true
@@ -402,24 +352,17 @@ local function parseInputEventOnElement(element,event,position,force)
 	return false
 end
 
-
 ---propagates the INPUT event to children, if the cursor is on top of them.  
 ---if you want a box to always recive input, register a function from the canvas itself, instead of the box.
 ---@param element GNUI.any
 ---@param event GNUI.InputEvent
-function parseInputEventToChildren(element,event,position)
-  if element.Parent then
-	 position = position - element.ContainmentRect.xy
-  end
-  for i = #element.Children, 1, -1 do
-	 if parseInputEventOnElement(element.Children[i],event,position) then
-		return true
-	 end
-  end
-  return false
+function parseInputEventToChildren(element, event, position)
+	if element.Parent then position = position - element.ContainmentRect.xy end
+	for i = #element.Children, 1, -1 do
+		if parseInputEventOnElement(element.Children[i], event, position) then return true end
+	end
+	return false
 end
-
-
 
 ---Simulates a boolean key event into the canvas.
 ---@param key GNUI.keyCode
@@ -429,107 +372,96 @@ end
 ---@param shift boolean?
 ---@param strength number?
 ---@param char string?
-function Canvas:parseInputEvent(key,state,shift,ctrl,alt,char,strength)
-  ---@type GNUI.InputEvent
-  local event = {
-	char = char,
-	key = key,
-	state = state,
-	ctrl = ctrl or false,
-	alt = alt or false,
-	shift = shift or false,
-	isHandled = false,
-	strength = strength or 1
-  }
-  local captured = false -- if somehow the canvas itself captured the inputs
-  local statuses = self.INPUT:invoke(event)
-  for i = 1, #statuses, 1 do
-	if statuses[i] and statuses[i][1] then
-	 captured = true
-	 break
+function Canvas:parseInputEvent(key, state, shift, ctrl, alt, char, strength)
+	---@type GNUI.InputEvent
+	local event = {
+		char = char,
+		key = key,
+		state = state,
+		ctrl = ctrl or false,
+		alt = alt or false,
+		shift = shift or false,
+		isHandled = false,
+		strength = strength or 1
+	}
+	local captured = false -- if somehow the canvas itself captured the inputs
+	local statuses = self.INPUT:invoke(event)
+	for i = 1, #statuses, 1 do
+		if statuses[i] and statuses[i][1] then
+			captured = true
+			break
+		end
 	end
-  end
-  if not captured then
-	 parseInputEventToChildren(self,event,self.MousePosition)
-	 for _, e in pairs(self.PressedElements) do
-		if e ~= self.HoveredElement and e.Canvas == self then
-		  parseInputEventOnElement(e,event,self.MousePosition,true)
+	if not captured then
+		parseInputEventToChildren(self, event, self.MousePosition)
+		for _, e in pairs(self.PressedElements) do
+			if e ~= self.HoveredElement and e.Canvas == self then
+				parseInputEventOnElement(e, event, self.MousePosition, true)
+			end
 		end
-	 end
-  end
-  if key ~= "key.mouse.scroll" then
-	 if state ~= 0 then -- QOL feature that allows boxes to recive a button being unpressed even when not hovered anymore.
-		self.PressedElements[key] = self.HoveredElement
-	 else
-		if self.PressedElements[key] then
-		  self.PressedElements[key].MOUSE_MOVED:invoke({relative = vec(0,0),pos = self.MousePosition})
+	end
+	if key ~= "key.mouse.scroll" then
+		if state ~= 0 then -- QOL feature that allows boxes to recive a button being unpressed even when not hovered anymore.
+			self.PressedElements[key] = self.HoveredElement
+		else
+			if self.PressedElements[key] then
+				self.PressedElements[key].MOUSE_MOVED:invoke({relative = vec(0, 0), pos = self.MousePosition})
+			end
+			self.PressedElements[key] = nil
 		end
-		self.PressedElements[key] = nil
-	 end
-  end
-  
-  if not event.isHandled then
-	self.UNHANDLED_INPUT:invoke(event)
-  end
-  return self
+	end
+
+	if not event.isHandled then self.UNHANDLED_INPUT:invoke(event) end
+	return self
 end
 
--->====================[ Child Hovering ]====================<--
+-- >====================[ Child Hovering ]====================<--
 
 ---Returns the child that the point at the given position is on top of.
 ---@param pos Vector2
 function Canvas:getChildFromPos(pos)
-  if self.Parent then
-	 pos = pos - self.ContainmentRect.xy
-  end
-  if self.Visible and self.canCaptureCursor then
-	for i = #self.Children, 1, -1 do
-	 local child = self.Children[i]
-	 if child.Visible and child.canCaptureCursor and child:isPosInside(pos) then
-		return Canvas.getChildFromPos(child,pos)
-	 end
+	if self.Parent then pos = pos - self.ContainmentRect.xy end
+	if self.Visible and self.canCaptureCursor then
+		for i = #self.Children, 1, -1 do
+			local child = self.Children[i]
+			if child.Visible and child.canCaptureCursor and child:isPosInside(pos) then
+				return Canvas.getChildFromPos(child, pos)
+			end
+		end
 	end
-  end
-  return self
+	return self
 end
-
 
 ---Sets the child that the point at the given position is on top of.
 ---@param pos Vector2
 function Canvas:pos2HoveringChild(pos)
-  self:setHoveringChild(self:getChildFromPos(pos))
-  return self
+	self:setHoveringChild(self:getChildFromPos(pos))
+	return self
 end
-
 
 ---Sets the child being hovered.
 ---@param box GNUI.Box
 ---@return GNUI.Canvas
 function Canvas:setHoveringChild(box)
-  if box ~= self.HoveredElement then  
-	 if self.HoveredElement then
-		self.HoveredElement:setIsCursorHovering(false)
-		local l = self.PassiveHoveredElement
-		self.PassiveHoveredElement = box
-		self.PASSIVE_HOVERING_ELEMENT_CHANGED:invoke(box,l)
-	 end
-	 if box then
-		box:setIsCursorHovering(true)
-	 end
-	 self.HoveredElement = box
-	 self.HOVERING_ELEMENT_CHANGED:invoke(box,self.PassiveHoveredElement)
-  end
-  return self
+	if box ~= self.HoveredElement then
+		if self.HoveredElement then
+			self.HoveredElement:setIsCursorHovering(false)
+			local l = self.PassiveHoveredElement
+			self.PassiveHoveredElement = box
+			self.PASSIVE_HOVERING_ELEMENT_CHANGED:invoke(box, l)
+		end
+		if box then box:setIsCursorHovering(true) end
+		self.HoveredElement = box
+		self.HOVERING_ELEMENT_CHANGED:invoke(box, self.PassiveHoveredElement)
+	end
+	return self
 end
-
 
 ---Returns which element the mouse cursor is on top of.
 ---@return GNUI.any
-function Canvas:getHoveredElement()
-  return self.HoveredElement
-end
+function Canvas:getHoveredElement() return self.HoveredElement end
 
--->====================[ Flags ]====================<--
+-- >====================[ Flags ]====================<--
 
 ---Sets whether the canvas should capture the mouse movement, making it not possible to move the mouse outside of the canvas.
 ---@param toggle boolean
@@ -537,9 +469,9 @@ end
 ---@param self self
 ---@return self
 function Canvas:setCaptureMouseMovement(toggle)
----@cast self GNUI.Canvas
-  self.captureCursorMovement = toggle
-  return self
+	---@cast self GNUI.Canvas
+	self.captureCursorMovement = toggle
+	return self
 end
 
 ---Sets whether the canvas should capture input from the user.
@@ -548,9 +480,9 @@ end
 ---@param self self
 ---@return self
 function Canvas:setCaptureInputs(toggle)
----@cast self GNUI.Canvas
-  self.captureInputs = toggle
-  return self
+	---@cast self GNUI.Canvas
+	self.captureInputs = toggle
+	return self
 end
 
 return Canvas
