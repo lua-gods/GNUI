@@ -34,7 +34,7 @@ end
 ---@field sliderBox GNUI.Box
 ---@field numberBox GNUI.Box
 ---@field showNumber boolean
----@field VALUE_CHANGED EventLib
+---@field VALUE_CHANGED EventLibAPI
 local Slider = {}
 Slider.__index = function (t,i) return rawget(t,i) or Slider[i] or Button[i] or Box[i] end
 Slider.__type = "GNUI.Slider"

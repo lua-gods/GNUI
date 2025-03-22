@@ -19,10 +19,10 @@ local tree = {}
 ---
 ---@field HoverBox GNUI.Box
 ---
----@field BUTTON_CHANGED EventLib
----@field PRESSED EventLib
----@field BUTTON_DOWN EventLib
----@field BUTTON_UP EventLib
+---@field BUTTON_CHANGED EventLibAPI
+---@field PRESSED EventLibAPI
+---@field BUTTON_DOWN EventLibAPI
+---@field BUTTON_UP EventLibAPI
 local Button = {}
 Button.__index = function (t,i) return rawget(t,i) or Button[i] or Box[i] end
 Button.__type = "GNUI.Button"

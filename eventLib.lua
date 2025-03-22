@@ -1,31 +1,31 @@
 
 ---@class EventLibAPI
-local EventLib = {}
-EventLib.__index = EventLib
+local EventLibAPI = {}
+EventLibAPI.__index = EventLibAPI
 
-function EventLib.new()
-	return setmetatable({}, EventLib)
+function EventLibAPI.new()
+	return setmetatable({}, EventLibAPI)
 end
 
-EventLib.newEvent = EventLib.new
+EventLibAPI.newEvent = EventLibAPI.new
 
-function EventLib:register(func, name)
+function EventLibAPI:register(func, name)
 	self[name or func] = func
 end
 
-function EventLib:clear()
+function EventLibAPI:clear()
 	for key in pairs(self) do self[key] = nil end
 end
 
-function EventLib:remove(name)
+function EventLibAPI:remove(name)
 	self[name] = nil
 end
 
-function EventLib:getRegisteredCount() return #self end
+function EventLibAPI:getRegisteredCount() return #self end
 
-function EventLib:__len() return #self end
+function EventLibAPI:__len() return #self end
 
-function EventLib:__call(...)
+function EventLibAPI:__call(...)
 	local flush = {}
 	for _, func in pairs(self) do
 		flush[#flush+1] = {func(...)}
@@ -34,14 +34,14 @@ function EventLib:__call(...)
 end
 
 ---@type fun(self: EventLibAPI, ...: any): any[]
-EventLib.invoke = EventLib.__call
+EventLibAPI.invoke = EventLibAPI.__call
 
-function EventLib.__index(t, i)
-	return rawget(t,i)or rawget(t,i:upper()) or EventLib[i]
+function EventLibAPI.__index(t, i)
+	return rawget(t,i)or rawget(t,i:upper()) or EventLibAPI[i]
 end
 
-function EventLib.__newindex(t, i, v)
+function EventLibAPI.__newindex(t, i, v)
 	rawset(t,type(i) == "string" and t[i:upper()] or i,v)
 end
 
-return EventLib
+return EventLibAPI

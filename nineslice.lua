@@ -12,14 +12,14 @@ local update = {}
 
 ---@class Nineslice # a representation of a sprite / 9-slice sprite in GNUI
 ---@field Texture Texture # the texture of the sprite
----@field TEXTURE_CHANGED EventLib
+---@field TEXTURE_CHANGED EventLibAPI
 ---@field Modelpart ModelPart? # the `ModelPart` used to handle where to display debug features and the sprite.
----@field MODELPART_CHANGED EventLib
+---@field MODELPART_CHANGED EventLibAPI
 ---@field UV Vector4 # the UV of the texture in the sprite, in the form (x,y,z,w) with each unit is a pixel
 ---
 ---@field Position Vector2 # the position of the sprite.
 ---@field Size Vector2 # the size of the sprite.
----@field DIMENSIONS_CHANGED EventLib
+---@field DIMENSIONS_CHANGED EventLibAPI
 ---
 ---@field Color Vector3 # The tint applied to the sprite.
 ---@field Alpha number # The opacity of the sprite.
@@ -29,10 +29,10 @@ local update = {}
 ---@field RenderType ModelPart.renderType # the render type of the sprite.
 ---
 ---@field BorderThickness Vector4 # the thickness of the border in the form (left, top, right, bottom)
----@field BORDER_THICKNESS_CHANGED EventLib
+---@field BORDER_THICKNESS_CHANGED EventLibAPI
 ---
 ---@field BorderExpand Vector4 # the expansion of the border in the form (left, top, right, bottom)
----@field BORDER_EXPAND_CHANGED EventLib
+---@field BORDER_EXPAND_CHANGED EventLibAPI
 ---
 ---@field ExcludeMiddle boolean # if true, the middle of the sprite will not be rendered
 ---@field DepthOffset number # the depth offset of the sprite

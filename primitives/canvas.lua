@@ -179,17 +179,17 @@ for key, value in pairs(mousemap) do mousemap[key] = "key.mouse." .. value end
 ---@field MousePosition Vector2 # the position of the mouse
 ---@field HoveredElement GNUI.any? # the element the mouse is currently hovering over
 ---@field PassiveHoveredElement GNUI.Box? # the last hovering element.
----@field HOVERING_ELEMENT_CHANGED EventLib # triggered when the hovering element changes
----@field PASSIVE_HOVERING_ELEMENT_CHANGED EventLib # Just like the HOVERING_BOX_CHANGED, but will never be nil if there is nothing being hovered.
+---@field HOVERING_ELEMENT_CHANGED EventLibAPI # triggered when the hovering element changes
+---@field PASSIVE_HOVERING_ELEMENT_CHANGED EventLibAPI # Just like the HOVERING_BOX_CHANGED, but will never be nil if there is nothing being hovered.
 ---
 ---@field PressedElements GNUI.any[]? # the last pressed element, used to unpress buttons that have been unhovered.
----@field MOUSE_MOVED_GLOBAL EventLib # called when the mouse position changes
+---@field MOUSE_MOVED_GLOBAL EventLibAPI # called when the mouse position changes
 ---@field reciveInputs boolean # EventLibs whether the canvas could capture input events
 ---@field captureCursorMovement boolean # true when the canvas should capture mouse movement, stopping the vanilla mouse movement, not the cursor itself
 ---@field captureInputs boolean # true when the canvas should capture the inputs
 ---@field hasCustomCursorSetter boolean # true when the setCursor is called, while false, the canvas will use the screen cursor.
----@field INPUT EventLib # serves as the handler for all inputs within the boundaries of the canvas. called with the first argument being an input event
----@field UNHANDLED_INPUT EventLib # triggers when an input is not handled by the children of the canvas.
+---@field INPUT EventLibAPI # serves as the handler for all inputs within the boundaries of the canvas. called with the first argument being an input event
+---@field UNHANDLED_INPUT EventLibAPI # triggers when an input is not handled by the children of the canvas.
 local Canvas = {}
 Canvas.__index = function(t, i) return rawget(t, i) or Canvas[i] or Container[i] end
 Canvas.__type = "GNUI.Element.Container.Canvas"

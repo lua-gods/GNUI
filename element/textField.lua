@@ -19,8 +19,8 @@ local Button = require(.....".button")
 ---@field pipePos integer
 ---@field Label GNUI.Box
 ---@field isMultiLine boolean
----@field FIELD_CONFIRMED EventLib
----@field FIELD_CHANGED EventLib
+---@field FIELD_CONFIRMED EventLibAPI
+---@field FIELD_CHANGED EventLibAPI
 local TextField = {}
 TextField.__index = function (t,i) return rawget(t,i) or TextField[i] or Button[i] or Box[i] end
 TextField.__type = "GNUI.TextField"
