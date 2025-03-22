@@ -1,5 +1,5 @@
 
----@class EventLib
+---@class EventLibAPI
 local EventLib = {}
 EventLib.__index = EventLib
 
@@ -33,7 +33,7 @@ function EventLib:__call(...)
 	return flush
 end
 
----@type fun(self: EventLib, ...: any): any[]
+---@type fun(self: EventLibAPI, ...: any): any[]
 EventLib.invoke = EventLib.__call
 
 function EventLib.__index(t, i)
