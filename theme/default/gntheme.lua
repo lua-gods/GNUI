@@ -1,3 +1,4 @@
+---@diagnostic disable: undefined-doc-name, undefined-field
 --[[______   __
 	/ ____/ | / / By: GNamimates | https://gnon.top | Discord: @gn8.
  / / __/  |/ / Theme File
