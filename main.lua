@@ -95,7 +95,7 @@ end
 function api.debugMode()
   config.debug_mode = true
 end
-
+api.showBoundingBoxes = api.debugMode
 
 if host:isHost() then
 ---@param sound Minecraft.soundID
