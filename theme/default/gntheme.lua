@@ -23,6 +23,8 @@ local atlas = textures[(...):gsub("/",".") ..".gnuiTheme"]
 ---@type GNUI.Theme
 local theme = {}
 
+-->========================================[ Box ]=========================================<--
+
 theme.Box = {
 	Default = function (box)end,
 	Background = function (box)
@@ -45,8 +47,8 @@ theme.Button = {
 	Default = function (box)
 		box.TextOffset = vec(0,2)
 		box.HoverBox:setDimensions(0,-2,0,-2)
-		local spriteNormal = GNUI.newNineslice(atlas,7,1,11,7 ,2,2,2,4, 2)
-		local spritePressed = GNUI.newNineslice(atlas,13,3,17,7 ,2,2,2,2)
+		local spriteNormal = GNUI.newNineslice(atlas,7,1,11,6 ,2,2,2,3, 2)
+		local spritePressed = GNUI.newNineslice(atlas,13,2,17,6 ,2,2,2,2)
 		
 		box:setDefaultTextColor("black"):setTextAlign(0.5,0.5)
 		local wasPressed = true
@@ -141,19 +143,6 @@ theme.Separator = {
 		local spriteBG = GNUI.newNineslice(atlas,1,15,1,15)
 		box:setNineslice(spriteBG)
 	end
-}
--->========================================[ Dialog ]=========================================<--
-theme.Dialog = {
-	---@param dialog GNUI.Dialog
-	Default = function (dialog)
-		local titlebar = GNUI.newNineslice(atlas,1,1,5,5 ,2,2,2,2)
-		dialog.titlebar:setNineslice(titlebar):setTextOffset(4,4):setDefaultTextColor("#000000"):setText("Hello")
-		local spritePressed = GNUI.newNineslice(atlas,1,7,3,9 ,2,2,2,2 ,4,0,0,0)
-		dialog.clientArea:setNineslice(spritePressed)
-		:setAnchor(0,0,1,1):setDimensions(0,17,0,0)
-		dialog.titlebar:setAnchor(0,0,1,0):setDimensions(0,0,0,14)
-	end
-	
 }
 
 return theme
