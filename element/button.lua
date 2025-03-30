@@ -29,7 +29,7 @@ Button.__type = "GNUI.Button"
 
 
 ---@param parent GNUI.Box?
----@param variant string|"none"|"default"?
+---@param variant string|"None"|"Default"?
 ---@return GNUI.Button
 function Button.new(parent,variant)
   
