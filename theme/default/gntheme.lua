@@ -30,6 +30,10 @@ theme.Box = {
 	Background = function (box)
 		local spritePressed = GNUI.newNineslice(atlas,23,8,27,12 ,2,2,2,2)
 		box:setNineslice(spritePressed)
+	end,
+	Solid = function (box)
+		local spritePressed = GNUI.newNineslice(atlas,2,12,2,12)
+		box:setNineslice(spritePressed)
 	end
 }
 -->========================================[ Button ]=========================================<--
