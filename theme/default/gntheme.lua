@@ -107,6 +107,31 @@ theme.Button = {
 		box.BUTTON_CHANGED:register(update)
 		update(false,false,true)
 	end,
+	Tertiary = function (box)
+		box.TextOffset = vec(0,2)
+		box.HoverBox:setDimensions(0,-2,0,-2)
+		local spriteNormal = GNUI.newNineslice(atlas,29,11,31,13 ,1,1,1,1)
+		local spritePressed = GNUI.newNineslice(atlas,29,15,31,17 ,1,1,1,1)
+		
+		box:setDefaultTextColor("white"):setTextAlign(0.5,0.5)
+		:setTextEffect("SHADOW")
+		local wasPressed = true
+		local function update(pressed,hovering,forced)
+			if pressed ~= wasPressed or forced then
+				wasPressed = pressed
+				if pressed then
+					box:setNineslice(spritePressed)
+					if not forced then
+						GNUI.playSound("minecraft:ui.button.click",1) -- click
+					end
+				else
+					box:setNineslice(spriteNormal)
+				end
+			end
+		end
+		box.BUTTON_CHANGED:register(update)
+		update(false,false,true)
+	end,
 	---@param box GNUI.Button
 	Flat = function (box)
 		local spriteNormal = GNUI.newNineslice(atlas,9,13,11,15 ,1,1,1,1)
