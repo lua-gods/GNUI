@@ -17,7 +17,7 @@
 ---GNUI.Button        ->    Button
 ---GNUI.Button.Slider ->    Slider
 
-local GNUI = require "../../main"
+local GNUI = require "../../main" ---@module "library.GNUI.main"
 local atlas = textures[(...):gsub("/",".") ..".gnuiTheme"]
 
 ---@type GNUI.Theme
@@ -51,10 +51,40 @@ theme.Button = {
 	Default = function (box)
 		box.TextOffset = vec(0,2)
 		box.HoverBox:setDimensions(0,-2,0,-2)
-		local spriteNormal = GNUI.newNineslice(atlas,7,1,11,6 ,2,2,2,3, 2)
+		local spriteNormal = GNUI.newNineslice(atlas,7,1,11,7 ,2,2,2,4, 2)
 		local spritePressed = GNUI.newNineslice(atlas,13,2,17,6 ,2,2,2,2)
 		
 		box:setDefaultTextColor("black"):setTextAlign(0.5,0.5)
+		local wasPressed = true
+		local function update(pressed,hovering,forced)
+			if pressed ~= wasPressed or forced then
+				wasPressed = pressed
+				if pressed then
+					box:setNineslice(spritePressed)
+					:setChildrenOffset(0,0)
+					:setTextOffset(box.TextOffset + vec(0,2))
+					:setChildrenOffset(0,2)
+					if not forced then
+						GNUI.playSound("minecraft:ui.button.click",1) -- click
+					end
+				else
+					box:setNineslice(spriteNormal)
+					:setTextOffset(box.TextOffset - vec(0,2))
+					:setChildrenOffset(0,0)
+				end
+			end
+		end
+		box.BUTTON_CHANGED:register(update)
+		update(false,false,true)
+	end,
+	Secondary = function (box)
+		box.TextOffset = vec(0,2)
+		box.HoverBox:setDimensions(0,-2,0,-2)
+		local spriteNormal = GNUI.newNineslice(atlas,13,15,17,21 ,2,2,2,4, 2)
+		local spritePressed = GNUI.newNineslice(atlas,19,17,23,21 ,2,2,2,2)
+		
+		box:setDefaultTextColor("white"):setTextAlign(0.5,0.5)
+		:setTextEffect("SHADOW")
 		local wasPressed = true
 		local function update(pressed,hovering,forced)
 			if pressed ~= wasPressed or forced then
