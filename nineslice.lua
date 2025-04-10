@@ -552,13 +552,13 @@ function Nineslice:updateRenderTasks()
   end
 end
 
-events.WORLD_RENDER:register(function ()
+function Nineslice.updateAll()
 	if #update > 0 then
-	  	for i = 1, #update, 1 do
-			update[i]:updateRenderTasks()
-			update[i]._queue_update = nil
-	  	end
-	  	update = {}
-	end
-end,"100:GNUI_priority-last")
+		for i = 1, #update, 1 do
+		 update[i]:updateRenderTasks()
+		 update[i]._queue_update = nil
+		end
+		update = {}
+ 	end
+end
 return Nineslice

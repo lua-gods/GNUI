@@ -2,7 +2,8 @@
 local cfg = require("./../config") ---@type GNUI.Config
 local eventLib = cfg.event ---@type EventLibAPI ---@type EventLibAPI
 local utils = cfg.utils ---@type GNUI.UtilsAPI
-local Container = require(... .. ".box") ---@type GNUI.Box
+local Container = require("./box") ---@type GNUI.Box
+local Nineslice = require("./../nineslice") ---@type Nineslice
 
 ---@class GNUI.InputEvent
 ---@field char string
@@ -257,7 +258,7 @@ end)
 
 --- Work around to having too many world render events
 local WORLD_RENDER = eventLib.new()
-events.WORLD_RENDER:register(function(delta) WORLD_RENDER:invoke() end, "GNUI")
+events.WORLD_RENDER:register(function(delta) WORLD_RENDER:invoke() Nineslice.updateAll() end, "GNUI")
 
 -- >====================[ Canvas Class ]====================<--
 
