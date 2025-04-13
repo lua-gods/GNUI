@@ -34,12 +34,13 @@ end
 ---@field sliderBox GNUI.Box
 ---@field numberBox GNUI.Box
 ---@field showNumber boolean
+---@field allowInput boolean
 ---@field VALUE_CHANGED EventLibAPI
 local Slider = {}
 Slider.__index = function (t,i) return rawget(t,i) or Slider[i] or Button[i] or Box[i] end
 Slider.__type = "GNUI.Slider"
 
----@param config {isVertical: boolean?,min: number?,max: number?,step: number,value: number?,showNumber: boolean?, loop: boolean}
+---@param config {isVertical: boolean?,min: number?,max: number?,step: number,value: number?,showNumber: boolean?, loop: boolean, allowInput: boolean}
 ---@param variant string|"none"|"default"?
 ---@return GNUI.Slider
 function Slider.new(parent,config,variant)
@@ -60,6 +61,13 @@ function Slider.new(parent,config,variant)
 	else
 		self.isVertical = true
 	end
+	
+	if type(config.allowInput) == "boolean" then
+		self.allowInput = config.allowInput
+	else
+		self.allowInput = true
+	end
+	
 	self.showNumber = config.showNumber or false
 	if not (config.showNumber) then self.numberBox:setVisible(false) end
 	
@@ -74,7 +82,7 @@ function Slider.new(parent,config,variant)
 		if event.key == self.keybind then
 			if event.state == 1 then
 				local clickTime = client:getSystemTime()
-				if clickTime - lastClickTime < DOUBLE_CLICK_TIME then
+				if self.allowInput and clickTime - lastClickTime < DOUBLE_CLICK_TIME then
 					self.numberBox:setVisible(false)
 					local numberField = TextField.new(self):setAnchor(0,0,1,1)
 					numberField.FIELD_CONFIRMED:register(function (out)
@@ -182,6 +190,20 @@ function Slider:updateSliderBox()
 	else self.sliderBox:setAnchor(a1,0,a2,1)
 	end
 	self.numberBox:setText(self.value)
+	return self
+end
+
+
+---Sets the font scale for this slider's elements.
+---@param scale number
+---@generic self
+---@param self self
+---@return self
+function Slider:setFontScale(scale)
+	---@cast self GNUI.Slider
+	scale = scale or 1
+	self.numberBox:setFontScale(scale)
+	self.sliderBox:setFontScale(scale)
 	return self
 end
 
