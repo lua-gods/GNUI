@@ -574,8 +574,8 @@ function Box:isPosInside(x,y)
   ---@cast self GNUI.Box
   local pos = utils.vec2(x,y)
   return (
-     pos.x > self.ContainmentRect.x
-   and pos.y > self.ContainmentRect.y
+     pos.x > self.ContainmentRect.x / self.ScaleFactor
+   and pos.y > self.ContainmentRect.y / self.ScaleFactor
    and pos.x < self.ContainmentRect.z / self.ScaleFactor 
    and pos.y < self.ContainmentRect.w / self.ScaleFactor)
 end
