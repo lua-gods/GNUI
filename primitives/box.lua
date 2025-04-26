@@ -845,7 +845,7 @@ function Box:toGlobal(x,y)
   while parent do
    i = i + 1
    if i > 100 then break end
-   pos = pos + parent.ContainmentRect.xy
+   pos = pos + parent.ContainmentRect.xy / self.ScaleFactor
    parent = parent.Parent
   end
   return pos
