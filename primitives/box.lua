@@ -845,11 +845,11 @@ function Box:toGlobal(x,y)
   while parent do
    i = i + 1
    if i > 100 then break end
-   pos = pos + parent.ContainmentRect.xy / self.ScaleFactor
+   pos = pos + parent.ContainmentRect.xy/parent.ScaleFactor
    parent = parent.Parent
   end
   return pos
-end
+end 
 
 
 ---returns the local position of the given global position.
