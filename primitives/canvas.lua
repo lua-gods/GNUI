@@ -224,18 +224,22 @@ events.KEY_PRESS:register(function(key, state, modifiers)
 	end
 end)
 
-events.MOUSE_MOVE:register(function(x, y)
-	local s = host:getScreen()
-	if not s or s == "net.minecraft.class_408" then
-		local cursor_pos = client:getMousePos() / client:getGuiScale()
-		for _, c in pairs(autoCanvases) do
-			if c.reciveInputs and c.Visible and not c.hasCustomCursorSetter and screenCheck() then
-				c:setMousePos(cursor_pos.x, cursor_pos.y)
-				if c.captureCursorMovement or c.captureInputs then return true end
+if host:isHost() then
+	events.WORLD_RENDER:register(function ()
+		local s = host:getScreen()
+		if not s or s == "net.minecraft.class_408" then
+			local cursor_pos = client:getMousePos() / client:getGuiScale()
+			for _, c in pairs(autoCanvases) do
+				if c.reciveInputs and c.Visible and not c.hasCustomCursorSetter and screenCheck() then
+					c:setMousePos(cursor_pos.x, cursor_pos.y)
+					if c.captureCursorMovement or c.captureInputs then return true end
+				else
+					c:setMousePos(-math.huge,-math.huge)
+				end
 			end
 		end
-	end
-end)
+	end)
+end
 
 events.MOUSE_PRESS:register(function(button, state)
 	if mousemap[button] then
@@ -301,7 +305,7 @@ function Canvas:setMousePos(x, y)
 	---@cast self GNUI.Canvas
 	local mpos = utils.vec2(x, y)
 	local relative = mpos - self.MousePosition
-	if relative.x ~= 0 or relative.y ~= 0 then
+	if true then -- relative.x ~= 0 or relative.y ~= 0 
 		self.MousePosition = mpos
 
 		---@type GNUI.InputEventMouseMotion
