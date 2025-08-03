@@ -19,6 +19,10 @@ local tree = {}
 ---
 ---@field HoverBox GNUI.Box
 ---
+---@field SpriteNormal GNUI.Sprite
+---@field SpritePressed GNUI.Sprite
+---@field SpriteNormalHover GNUI.Sprite
+---
 ---@field BUTTON_CHANGED EventLibAPI
 ---@field PRESSED EventLibAPI
 ---@field BUTTON_DOWN EventLibAPI

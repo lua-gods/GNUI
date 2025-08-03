@@ -76,7 +76,7 @@ local nextID = 0
 ---@field TextLimitsHeight boolean         # If true, the text will clamp to the height of the box
 --- ============================ RENDERING ============================
 ---@field ModelPart ModelPart              # The `ModelPart` used to handle where to display debug features and the sprite.
----@field Nineslice Nineslice              # the sprite that will be used for displaying textures.
+---@field Nineslice GNUI.Sprite              # the sprite that will be used for displaying textures.
 ---@field SPRITE_CHANGED EventLibAPI          # Triggered when the sprite object set to this box has changed.
 ---@field Color Vector3                    # The tint applied to the sprite.
 --- ============================ INPUTS ============================
@@ -456,7 +456,7 @@ end
 ---Note: if the sprite given is already in use, it will overtake it.
 ---@generic self
 ---@param self self
----@param nineslice Nineslice?
+---@param nineslice GNUI.Sprite?
 ---@return self
 function Box:setNineslice(nineslice)
   ---@cast self self

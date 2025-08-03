@@ -1,9 +1,9 @@
 ---@diagnostic disable: undefined-field
 --[[______  __
   / ____/ | / / By: GNamimates
- / / __/  |/ / GNUI vF3.4.3
+ / / __/  |/ / GNUI vF4.0.0
 / /_/ / /|  / A high level UI library for figura.
-\____/_/ |_/ Stable Release: https://github.com/lua-gods/GNUI, Unstable Pre-release: https://github.com/lua-gods/GNs-Avatar-3/blob/main/libraries/gnui.lua]]
+\____/_/ |_/ Stable Release: https://github.com/lua-gods/GNUI
 
 --[[ NOTES
 Everything is in one file to make sure it is possible to load this script from a config file, 
@@ -16,7 +16,7 @@ local api = {}
 ---@alias GNUI.any GNUI.Box|GNUI.Box|GNUI.Canvas
 
 local config = require("./config") ---@type GNUI.Config
-local s = require("./nineslice") ---@type Nineslice
+local s = require("./nineslice") ---@type GNUI.Sprite
 local ca = require("./primitives.canvas") ---@type GNUI.Canvas
 local bx = require("./primitives.box") ---@type GNUI.Box
 
@@ -50,7 +50,7 @@ api.newCanvas = function (autoInputs)return ca.new(autoInputs) end
 ---@param expandRight number?
 ---@param expandBottom number?
 ---@param expandLeft number?
----@return Nineslice
+---@return GNUI.Sprite
 api.newNineslice = function (texture,UVx1,UVy1,UVx2,UVy2,borderLeft,borderTop,borderRight,borderBottom,expandTop,expandRight,expandBottom,expandLeft)
   local new = s.new()
   if texture then new:setTexture(texture) end
