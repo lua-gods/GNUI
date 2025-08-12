@@ -1,43 +1,50 @@
 ---@diagnostic disable: param-type-mismatch
---[[______	__
-	/ ____/ | / / by: GNamimates | Discord: "@gn8." | Youtube: @GNamimates
- / / __/	|/ / Sprite Library, specifically made for GNUI.
-/ /_/ / /|	/
-\____/_/ |_/]]
+--[[______   __
+  / ____/ | / /  by: GNanimates / https://gnon.top / Discord: @gn68s
+ / / __/  |/ / name: Sprite Library,
+/ /_/ / /|  /  desc: specifically made for GNUI.
+\____/_/ |_/ source: link ]]
 local default_texture = textures["1x1white"] or textures:newTexture("1x1white",1,1):setPixel(0,0,vec(1,1,1))
 local cfg = require(.....".config")
 local eventLib,utils = cfg.event, cfg.utils
 
 local update = {}
 
----@class GNUI.Sprite # a representation of a sprite / 9-slice sprite in GNUI
----@field Texture Texture # the texture of the sprite
+---@class GNUI.Sprite                       # a representation of a sprite / 9-slice sprite in GNUI
+---@field Texture Texture                   # the texture of the sprite
 ---@field TEXTURE_CHANGED EventLibAPI
----@field Modelpart ModelPart? # the `ModelPart` used to handle where to display debug features and the sprite.
+---@field Modelpart ModelPart?              # the `ModelPart` used to handle where to display debug features and the sprite.
 ---@field MODELPART_CHANGED EventLibAPI
----@field UV Vector4 # the UV of the texture in the sprite, in the form (x,y,z,w) with each unit is a pixel
+---@field UV Vector4                        # the UV of the texture in the sprite, in the form (x,y,z,w) with each unit is a pixel
 ---
----@field Position Vector2 # the position of the sprite.
----@field Size Vector2 # the size of the sprite.
+---@field Position Vector2                  # the position of the sprite.
+---@field Size Vector2                      # the size of the sprite.
 ---@field DIMENSIONS_CHANGED EventLibAPI
 ---
----@field Color Vector3 # The tint applied to the sprite.
----@field Alpha number # The opacity of the sprite.
----@field Scale number # The scale of the borders of a 9-slice.
+---@field Color Vector3                     # The tint applied to the sprite.
+---@field Alpha number                      # The opacity of the sprite.
+---@field Scale number                      # The scale of the borders of a 9-slice.
 ---
 ---@field RenderTasks table<any,SpriteTask> # a list of sprite tasks used by the sprite
----@field RenderType ModelPart.renderType # the render type of the sprite.
+---@field RenderType ModelPart.renderType   # the render type of the sprite.
 ---
----@field BorderThickness Vector4 # the thickness of the border in the form (left, top, right, bottom)
+---@field BorderThickness Vector4           # the thickness of the border in the form (left, top, right, bottom)
 ---@field BORDER_THICKNESS_CHANGED EventLibAPI
 ---
----@field BorderExpand Vector4 # the expansion of the border in the form (left, top, right, bottom)
+---@field BorderExpand Vector4              # the expansion of the border in the form (left, top, right, bottom)
 ---@field BORDER_EXPAND_CHANGED EventLibAPI
 ---
----@field ExcludeMiddle boolean # if true, the middle of the sprite will not be rendered
----@field DepthOffset number # the depth offset of the sprite
----@field Visible boolean # if true, the sprite will be rendered
----@field id integer # a unique integer for the sprite
+---@field ExcludeMiddle boolean             # if true, the middle of the sprite will not be rendered
+---@field DepthOffset number                # the depth offset of the sprite
+---@field Visible boolean                   # if true, the sprite will be rendered
+---@field id integer                        # a unique integer for the sprite
+---
+---@field TextOffset Vector2?               # Specifies how much to offset the text from its final position.
+---@field TextEffect GNUI.TextEffect?       # The effect to be applied to the text.
+---@field FontScale number?                 # The scale of the text.
+---@field DefaultTextColor string?          # The color to be used when the text color is not specified.
+---@field TextAlign Vector2?                # The alignment of the text within the box.
+---@field TextBehavior GNUI.TextBehavior?   # Tells the text what to do when out of bounds.
 ---@field package _queue_update boolean
 local Sprite = {}
 Sprite.__index = Sprite
@@ -52,24 +59,38 @@ function Sprite.new(obj)
 	new.Texture = obj.Texture or default_texture
 	new.TEXTURE_CHANGED = eventLib.new()
 	new.MODELPART_CHANGED = eventLib.new()
-	new.Position = obj.Position or vec(0,0)
-	new.DepthOffset = 0
 	new.UV = obj.UV or vec(0,0,1,1)
+	
+	new.Position = obj.Position or vec(0,0)
 	new.Size = obj.Size or vec(0,0)
-	new.Alpha = obj.Alpha or 1
-	new.Color = obj.Color or vec(1,1,1)
-	new.Scale = obj.Scale or 1
 	new.DIMENSIONS_CHANGED = eventLib.new()
+	
+	new.Color = obj.Color or vec(1,1,1)
+	new.Alpha = obj.Alpha or 1
+	new.Scale = obj.Scale or 1
+	
 	new.RenderTasks = {}
 	new.RenderType = obj.RenderType or "CUTOUT"
+	
 	new.BorderThickness = obj.BorderThickness or vec(0,0,0,0)
-	new.BorderExpand = obj.BorderExpand or vec(0,0,0,0)
 	new.BORDER_THICKNESS_CHANGED = eventLib.new()
+	
+	new.BorderExpand = obj.BorderExpand or vec(0,0,0,0)
 	new.BORDER_EXPAND_CHANGED = eventLib.new()
+	
 	new.ExcludeMiddle = obj.ExcludeMiddle or false
+	new.DepthOffset = 0
 	new.Visible = true
 	new.id = sprite_next_free
 	sprite_next_free = sprite_next_free + 1
+	
+	new.TextOffset = obj.TextOffset
+	new.TextEffect = obj.TextEffect
+	new.FontScale = obj.FontScale
+	new.DefaultTextColor = obj.DefaultTextColor
+	new.TextAlign = obj.TextAlign
+	new.TextBehavior = obj.TextBehavior
+	
 	
 	new.TEXTURE_CHANGED:register(function ()
 		new:deleteRenderTasks()
@@ -555,10 +576,91 @@ end
 function Sprite.updateAll()
 	if #update > 0 then
 		for i = 1, #update, 1 do
-		 update[i]:updateRenderTasks()
-		 update[i]._queue_update = nil
+			update[i]:updateRenderTasks()
+			update[i]._queue_update = nil
 		end
 		update = {}
  	end
 end
+
+
+
+---Sets the scale of the text being displayed.
+---@param scale number
+---@generic self
+---@param self self
+---@return self
+function Sprite:setFontScale(scale)
+	---@cast self GNUI.Box
+	self.FontScale = scale
+	return self
+end
+
+---Sets the default text color
+---@param color Vector3|string
+---@generic self
+---@param self self
+---@return self
+function Sprite:setDefaultTextColor(color)
+	---@cast self GNUI.Box
+	if type(color):find("Vector") then
+		self.DefaultTextColor = "#" .. vectors.rgbToHex(color)
+	else
+		---@diagnostic disable-next-line: assign-type-mismatch
+		self.DefaultTextColor = color
+	end
+	if self.Text then
+		self:setText(self.Text)
+	end
+	return self
+end
+
+---Tells where to anchor the text at.
+---`0` <-> `1`, left <-> right
+---`0` <-> `1`, top <-> bottom
+---@param h number?
+---@param v number?
+---@generic self
+---@param self self
+---@return self
+function Sprite:setTextAlign(h, v)
+	---@cast self GNUI.Box
+	self.TextAlign = vec(h or 0, v or 0)
+	return self
+end
+
+---Sets the flag if the text should wrap around when out of bounds.
+---@param behavior GNUI.TextBehavior
+---@generic self
+---@param self self
+---@return self
+function Sprite:setTextBehavior(behavior)
+	---@cast self GNUI.Box
+	self.TextBehavior = behavior or "NONE"
+	return self
+end
+
+---@generic self
+---@param self self
+---@return self
+---@param effect GNUI.TextEffect
+function Sprite:setTextEffect(effect)
+	---@cast self GNUI.Box
+	self.TextEffect = effect
+	return self
+end
+
+---Sets the offset of the text.
+---@param x number|Vector2
+---@param y number?
+---@generic self
+---@param self self
+---@return self
+function Sprite:setTextOffset(x, y)
+	---@cast self GNUI.Box
+	self.TextOffset = utils.vec2(x, y)
+	return self
+end
+
+
 return Sprite

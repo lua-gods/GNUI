@@ -2,8 +2,8 @@
 local cfg = require("./../config") ---@type GNUI.Config
 local eventLib = cfg.event ---@type EventLibAPI ---@type EventLibAPI
 local utils = cfg.utils ---@type GNUI.UtilsAPI
-local Container = require("./box") ---@type GNUI.Box
-local Nineslice = require("./../nineslice") ---@type GNUI.Sprite
+local Box = require("./box") ---@type GNUI.Box
+local Sprite = require("./../sprite") ---@type GNUI.Sprite
 
 ---@class GNUI.InputEvent
 ---@field char string
@@ -192,7 +192,7 @@ for key, value in pairs(mousemap) do mousemap[key] = "key.mouse." .. value end
 ---@field INPUT EventLibAPI # serves as the handler for all inputs within the boundaries of the canvas. called with the first argument being an input event
 ---@field UNHANDLED_INPUT EventLibAPI # triggers when an input is not handled by the children of the canvas.
 local Canvas = {}
-Canvas.__index = function(t, i) return rawget(t, i) or Canvas[i] or Container[i] end
+Canvas.__index = function(t, i) return rawget(t, i) or Canvas[i] or Box[i] end
 Canvas.__type = "GNUI.Element.Container.Canvas"
 
 ---@type GNUI.Canvas[]
@@ -262,7 +262,7 @@ end)
 
 --- Work around to having too many world render events
 local WORLD_RENDER = eventLib.new()
-events.WORLD_RENDER:register(function(delta) WORLD_RENDER:invoke() Nineslice.updateAll() end, "GNUI")
+events.WORLD_RENDER:register(function(delta) WORLD_RENDER:invoke() Sprite.updateAll() end, "GNUI")
 
 -- >====================[ Canvas Class ]====================<--
 
@@ -271,7 +271,7 @@ events.WORLD_RENDER:register(function(delta) WORLD_RENDER:invoke() Nineslice.upd
 ---@param autoScreenInputs boolean? # if true, the canvas will capture input events
 ---@return GNUI.Canvas
 function Canvas.new(autoScreenInputs)
-	local new = Container.new() ---@type GNUI.Canvas
+	local new = Box.new() ---@type GNUI.Canvas
 	new.MousePosition = vec(0, 0)
 	new.reciveInputs = true
 	new.MOUSE_MOVED_GLOBAL = eventLib.new()

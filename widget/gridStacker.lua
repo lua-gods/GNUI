@@ -4,7 +4,7 @@
 / /_/ / /|  / A type of stacker that aranges its children onto a grid.
 \____/_/ |_/ Source: link]]
 ---@diagnostic disable: assign-type-mismatch
-local Box = require("./../primitives/box") ---@type GNUI.Box
+local Box = require("lib.GNUI.prims.box") ---@type GNUI.Box
 local cfg = require("./../config") ---@type GNUI.Config
 local utils = cfg.utils ---@type GNUI.UtilsAPI
 local eventLib = cfg.event ---@type EventLibAPI
