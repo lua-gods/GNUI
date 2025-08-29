@@ -17,10 +17,10 @@ internal_events_name = "__a",
 
 
 -->==========[ System ]==========<--
-utils = require(.....".utils"),
+utils = require("./utils"),
 
 -->==========[ External Libraries ]==========<--
-event = require(.....".eventLib"),
+event = require("./../event"),
 }
 
 return config
