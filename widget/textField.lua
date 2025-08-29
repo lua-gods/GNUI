@@ -4,11 +4,13 @@
 / /_/ / /|  / an editable text box.
 \____/_/ |_/ Source: link]]
 ---@diagnostic disable: assign-type-mismatch
-local Box = require("./../primitives/box") ---@type GNUI.Box
+local Box = require("./../prims/box") ---@type GNUI.Box
 local cfg = require("./../config") ---@type GNUI.Config
-local eventLib = cfg.event ---@type EventLibAPI
+local Event = cfg.event ---@type Event
+local Theme = require("./../theme") ---@type GNUI.ThemeAPI
 
-local Button = require(.....".button")
+
+local Button = require("./button") ---@type GNUI.ButtonAPI
 
 
 ---@class GNUI.TextField : GNUI.Button
@@ -16,34 +18,34 @@ local Button = require(.....".button")
 ---@field editingTextField string
 ---@field isEditing boolean
 ---@field pipePos integer
----@field Label GNUI.Box
 ---@field isMultiLine boolean
----@field FIELD_CONFIRMED EventLibAPI
----@field FIELD_CHANGED EventLibAPI
+---@field FIELD_CONFIRMED Event
+---@field FIELD_CHANGED Event
 local TextField = {}
-TextField.__index = function (t,i) return rawget(t,i) or TextField[i] or Button[i] or Box[i] end
+TextField.__index = function (t,i) return rawget(t,i) or TextField[i] or Button.__metamethods[i] or Box[i] end
 TextField.__type = "GNUI.TextField"
 
 
 ---@param parent GNUI.Box?
----@param variant string|"none"|"default"?
+---@param variant GNUI.Theme.Variants?
 ---@param isMultiline boolean?
 ---@return GNUI.TextField
 function TextField.new(parent,isMultiline,variant)
 	---@type GNUI.TextField
-	local new = setmetatable(Button.new(parent,"none"),TextField)
+	local new = setmetatable(Button.new(parent,"None"),TextField)
 	new.textField = ""
 	new.editingTextField = ""
 	new.isEditing = false
 	new.pipePos = 0
 	new.isMultiLine = isMultiline or false
-	new.FIELD_CONFIRMED = eventLib.new()
-	new.FIELD_CHANGED = eventLib.new()
-	new.Label = Box.new(new)
-	:setAnchor(0,0,1,1)
-	:setCanCaptureCursor(false)
+	new.FIELD_CONFIRMED = Event.new()
+	new.FIELD_CHANGED = Event.new()
 	
 	local id = "GNUI.TextField"..new.id
+	
+	new.spriteNormal = Theme.apply(new, "normal", variant)
+	new.spritePressed = Theme.apply(new, "pressed", variant)
+	new.spriteHover = Theme.apply(new, "hover", variant)
 	
 	local pressCanvas
 	local chatInput = ""
@@ -118,7 +120,7 @@ function TextField.new(parent,isMultiline,variant)
 			events.WORLD_RENDER:register(function () host:setChatText("") end,id)
 		end
 	end)
-	Theme.style(new,variant)
+	new:setSprite(new.spriteNormal)
 	return new
 end
 
@@ -129,10 +131,10 @@ end
 function TextField:updateField()
 	---@cast self GNUI.TextField
 	if self.isEditing then
-		self.Label:setText(self.editingTextField:sub(0,self.pipePos) .. "|" .. self.editingTextField:sub(self.pipePos+1,-1))
+		self:setText(self.editingTextField:sub(0,self.pipePos) .. "|" .. self.editingTextField:sub(self.pipePos+1,-1))
 		self.FIELD_CHANGED:invoke(self.editingTextField)
 	else
-		self.Label:setText(self.textField)
+		self:setText(self.textField)
 		self.FIELD_CHANGED:invoke(self.textField)
 	end
 	return self
@@ -177,7 +179,9 @@ function TextField:setEditing(isEditing,dontSave)
 		if isEditing then
 			self.editingTextField = self.textField
 			self.pipePos = #self.editingTextField
+			self:setSprite(self.spritePressed)
 		else
+			self:setSprite(self.spriteNormal)
 			if not dontSave then
 				self.textField = self.editingTextField
 				self.FIELD_CONFIRMED:invoke(self.textField)

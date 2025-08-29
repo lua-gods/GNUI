@@ -6,20 +6,21 @@
 \____/_/ |_/ source: link ]]
 local default_texture = textures["1x1white"] or textures:newTexture("1x1white",1,1):setPixel(0,0,vec(1,1,1))
 local cfg = require(.....".config")
-local eventLib,utils = cfg.event, cfg.utils
+local event,utils = cfg.event, cfg.utils
 
 local update = {}
 
 ---@class GNUI.Sprite                       # a representation of a sprite / 9-slice sprite in GNUI
 ---@field Texture Texture                   # the texture of the sprite
----@field TEXTURE_CHANGED EventLibAPI
+---@field TEXTURE_CHANGED Event
+---@field parentBox GNUI.Box
 ---@field Modelpart ModelPart?              # the `ModelPart` used to handle where to display debug features and the sprite.
----@field MODELPART_CHANGED EventLibAPI
+---@field MODELPART_CHANGED Event
 ---@field UV Vector4                        # the UV of the texture in the sprite, in the form (x,y,z,w) with each unit is a pixel
 ---
 ---@field Position Vector2                  # the position of the sprite.
 ---@field Size Vector2                      # the size of the sprite.
----@field DIMENSIONS_CHANGED EventLibAPI
+---@field DIMENSIONS_CHANGED Event
 ---
 ---@field Color Vector3                     # The tint applied to the sprite.
 ---@field Alpha number                      # The opacity of the sprite.
@@ -29,10 +30,10 @@ local update = {}
 ---@field RenderType ModelPart.renderType   # the render type of the sprite.
 ---
 ---@field BorderThickness Vector4           # the thickness of the border in the form (left, top, right, bottom)
----@field BORDER_THICKNESS_CHANGED EventLibAPI
+---@field BORDER_THICKNESS_CHANGED Event
 ---
 ---@field BorderExpand Vector4              # the expansion of the border in the form (left, top, right, bottom)
----@field BORDER_EXPAND_CHANGED EventLibAPI
+---@field BORDER_EXPAND_CHANGED Event
 ---
 ---@field ExcludeMiddle boolean             # if true, the middle of the sprite will not be rendered
 ---@field DepthOffset number                # the depth offset of the sprite
@@ -45,6 +46,7 @@ local update = {}
 ---@field DefaultTextColor string?          # The color to be used when the text color is not specified.
 ---@field TextAlign Vector2?                # The alignment of the text within the box.
 ---@field TextBehavior GNUI.TextBehavior?   # Tells the text what to do when out of bounds.
+---@field TextMargin Vector4?               # The margin of the text on all sides.
 ---@field package _queue_update boolean
 local Sprite = {}
 Sprite.__index = Sprite
@@ -57,13 +59,13 @@ function Sprite.new(obj)
 	local new = {}
 	setmetatable(new,Sprite)
 	new.Texture = obj.Texture or default_texture
-	new.TEXTURE_CHANGED = eventLib.new()
-	new.MODELPART_CHANGED = eventLib.new()
+	new.TEXTURE_CHANGED = event.new()
+	new.MODELPART_CHANGED = event.new()
 	new.UV = obj.UV or vec(0,0,1,1)
 	
 	new.Position = obj.Position or vec(0,0)
 	new.Size = obj.Size or vec(0,0)
-	new.DIMENSIONS_CHANGED = eventLib.new()
+	new.DIMENSIONS_CHANGED = event.new()
 	
 	new.Color = obj.Color or vec(1,1,1)
 	new.Alpha = obj.Alpha or 1
@@ -73,10 +75,10 @@ function Sprite.new(obj)
 	new.RenderType = obj.RenderType or "CUTOUT"
 	
 	new.BorderThickness = obj.BorderThickness or vec(0,0,0,0)
-	new.BORDER_THICKNESS_CHANGED = eventLib.new()
+	new.BORDER_THICKNESS_CHANGED = event.new()
 	
 	new.BorderExpand = obj.BorderExpand or vec(0,0,0,0)
-	new.BORDER_EXPAND_CHANGED = eventLib.new()
+	new.BORDER_EXPAND_CHANGED = event.new()
 	
 	new.ExcludeMiddle = obj.ExcludeMiddle or false
 	new.DepthOffset = 0
@@ -110,11 +112,27 @@ function Sprite.new(obj)
 end
 
 ---Sets the modelpart to parent to.
+---@deprecated
 ---@param part ModelPart?
 ---@return GNUI.Sprite
 function Sprite:setModelpart(part)
 	self:deleteRenderTasks()
 	self.Modelpart = part
+	
+	if self.Modelpart then
+		self:buildRenderTasks()
+	end
+	self.MODELPART_CHANGED:invoke(self.Modelpart)
+	return self
+end
+
+
+---@param box GNUI.Box?
+---@return GNUI.Sprite
+function Sprite:setBox(box)
+	self.parentBox = box
+	self:deleteRenderTasks()
+	self.Modelpart = box and box.ModelPart or nil
 	
 	if self.Modelpart then
 		self:buildRenderTasks()
@@ -662,5 +680,15 @@ function Sprite:setTextOffset(x, y)
 	return self
 end
 
+---Sets the padding for all sides.
+---@param left number?
+---@param top number?
+---@param right number?
+---@param bottom number?
+---@return GNUI.Sprite
+function Sprite:setTextMargin(left,top,right,bottom)
+	self.TextMargin = utils.vec4(left,top,right or left,bottom or top)
+	return self
+end
 
 return Sprite

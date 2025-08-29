@@ -157,24 +157,19 @@ theme.Slider = {
 		update(false)
 	end
 }
--->========================================[ Text Field ]=========================================<--
+--[────────────────────────────────────────-< Text Field >-────────────────────────────────────────]--
 theme.TextField = {
-	---@param box GNUI.TextField
-	Default = function (box)
-		local spriteBG = GNUI.newSprite(atlas,13,9,17,13, 2,2,2,2)
-		box:setNineslice(spriteBG)
-		box.Label:setDimensions(3,3,-3,-3)
-		if box.isMultiLine then box.Label:setTextAlign(0,0)
-		else box.Label:setTextAlign(0,0.5)
-		end
-	end
+	default = {
+		normal = GNUI.newSprite(atlas,13,9,17,13, 2,2,2,2):setTextMargin(4,4,4,4),
+		pressed = GNUI.newSprite(atlas,13,9,17,13, 2,2,2,2):setTextMargin(4,4,4,4),
+	}
 }
 -->========================================[ Separator ]=========================================<--
 theme.Separator = {
 	---@param box GNUI.TextField
 	Default = function (box)
 		local spriteBG = GNUI.newSprite(atlas,1,15,1,15)
-		box:setNineslice(spriteBG)
+		box:setSprite(spriteBG)
 	end
 }
 

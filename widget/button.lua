@@ -7,7 +7,7 @@
 ---@diagnostic disable: assign-type-mismatch
 local Box = require("lib.GNUI.prims.box") ---@type GNUI.Box
 local cfg = require("./../config") ---@type GNUI.Config
-local Event = cfg.event ---@type EventLibAPI ---@type EventLibAPI
+local Event = cfg.event ---@type Event
 local Theme = require("./../theme") ---@type GNUI.ThemeAPI
 
 ---@class GNUI.ButtonAPI
@@ -19,21 +19,21 @@ local ButtonAPI = {}
 ---@field isToggle boolean
 ---@field keybind GNUI.keyCode
 ---
----@field SpriteNormal GNUI.Sprite
----@field SpritePressed GNUI.Sprite
----@field SpriteHover GNUI.Sprite
+---@field spriteNormal GNUI.Sprite
+---@field spritePressed GNUI.Sprite
+---@field spriteHover GNUI.Sprite
 ---
----@field BUTTON_CHANGED EventLibAPI
----@field PRESSED EventLibAPI
----@field BUTTON_DOWN EventLibAPI
----@field BUTTON_UP EventLibAPI
+---@field BUTTON_CHANGED Event
+---@field PRESSED Event
+---@field BUTTON_DOWN Event
+---@field BUTTON_UP Event
 local Button = {}
 Button.__index = function(t, i) return rawget(t, i) or Button[i] or Box[i] end
 Button.__type = "GNUI.Button"
-
+ButtonAPI.__metamethods = Button
 
 ---@param parent GNUI.Box?
----@param variant string|"None"|"Default"?
+---@param variant GNUI.Theme.Variants?
 ---@return GNUI.Button
 function ButtonAPI.new(parent, variant)
 	---@type GNUI.Button
@@ -62,26 +62,21 @@ function ButtonAPI.new(parent, variant)
 		end
 	end, "GNUI.Input")
 
-	box.SpriteNormal = Theme.apply(box, "normal", variant)
-	box.SpritePressed = Theme.apply(box, "pressed", variant)
-	box.SpriteHover = Theme.apply(box, "hover", variant)
+	box.spriteNormal = Theme.apply(box, "normal", variant)
+	box.spritePressed = Theme.apply(box, "pressed", variant)
+	box.spriteHover = Theme.apply(box, "hover", variant)
 	
 	local wasPressed = true
 	local function update(pressed, hovering, forced)
 		if pressed ~= wasPressed or forced then
 			wasPressed = pressed
 			if pressed then
-				box:setNineslice(box.SpritePressed or box.SpriteNormal)
-					--:setChildrenOffset(0, 0)
-					--:setTextOffset(new.TextOffset + vec(0, 2))
-					--:setChildrenOffset(0, 2)
+				box:setSprite(box.spritePressed or box.spriteNormal)
 				if not forced then
 					playUISound("minecraft:ui.button.click", 1) -- click
 				end
 			else
-				box:setNineslice(box.SpriteNormal)
-					--:setTextOffset(new.TextOffset - vec(0, 2))
-					--:setChildrenOffset(0, 0)
+				box:setSprite(box.spriteNormal)
 			end
 		end
 	end

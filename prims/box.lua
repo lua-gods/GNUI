@@ -1,6 +1,6 @@
 ---@diagnostic disable: param-type-mismatch, inject-field
 local cfg = require("./../config") ---@type GNUI.Config ---@type GNUI.Config
-local eventLib = cfg.event ---@type EventLibAPI ---@type EventLibAPI
+local eventLib = cfg.event ---@type Event
 local utils = cfg.utils ---@type GNUI.UtilsAPI
 
 
@@ -36,25 +36,25 @@ local nextID = 0
 ---@field Parent GNUI.any                  # the element's parents.
 ---@field Children table<any,GNUI.any>     # A list of the element's children.
 ---@field ChildIndex integer               # the element's place order on its parent.
----@field VISIBILITY_CHANGED EventLibAPI      # on change of visibility.
----@field CHILDREN_ADDED EventLibAPI          # when a child is added. first parameter is the child added.
----@field CHILDREN_REMOVED EventLibAPI        # when a child is removed. first parameter is the child removed.
----@field CHILDREN_CHANGED EventLibAPI        # when the children list is changed.
+---@field VISIBILITY_CHANGED Event         # on change of visibility.
+---@field CHILDREN_ADDED Event             # when a child is added. first parameter is the child added.
+---@field CHILDREN_REMOVED Event           # when a child is removed. first parameter is the child removed.
+---@field CHILDREN_CHANGED Event           # when the children list is changed.
 ---@field PARENT_CHANGED table             # when the parent changes.
 ---@field isFreed boolean                  # true when the element is being freed.
----@field ON_FREE EventLibAPI                 # when the element is wiped from history.
+---@field ON_FREE Event                    # when the element is wiped from history.
 --- ============================ POSITIONING ============================
 ---@field Dimensions Vector4               # Determins the offset of each side from the final output
----@field DIMENSIONS_CHANGED EventLibAPI      # Triggered when the final box dimensions has changed.
+---@field DIMENSIONS_CHANGED Event         # Triggered when the final box dimensions has changed.
 ---
 ---@field ContainmentRect Vector4          # The final output dimensions with anchors applied. incredibly handy piece of data.
 ---@field Z number                         # Offsets the box forward(+) or backward(-) if Z fighting is occuring, also affects its children.
 ---@field ZSquish number                   # Multiplies how much the modelpart is positioned in the Z axis
 ---@field Size Vector2                     # The size of the container.
----@field SIZE_CHANGED EventLibAPI            # Triggered when the size of the final box dimensions is different from the last tick.
+---@field SIZE_CHANGED Event               # Triggered when the size of the final box dimensions is different from the last tick.
 ---
 ---@field Anchor Vector4                   # Determins where to attach to its parent, (`0`-`1`, left-right, up-down)
----@field ANCHOR_CHANGED EventLibAPI          # Triggered when the anchors applied to the box is changed.
+---@field ANCHOR_CHANGED Event             # Triggered when the anchors applied to the box is changed.
 ---
 ---@field CustomMinimumSize Vector2        # Minimum size that the box will use.
 ---@field SystemMinimumSize Vector2        # The minimum size that the box can use, set by the box itself.
@@ -70,39 +70,40 @@ local nextID = 0
 ---@field FontScale number                 # The scale of the text.
 ---@field BakedText string[]               # The baked text to be displayed.
 ---@field BakedTextTable Minecraft.RawJSONText.Component[]  # The baked text to be displayed but in a table format.
----@field DefaultTextColor string          # The color to be used when the text color is not specified.
+---@field DefaultTextColor string?         # The color to be used when the text color is not specified.
 ---@field TextAlign Vector2                # The alignment of the text within the box.
 ---@field TextBehavior GNUI.TextBehavior   # Tells the text what to do when out of bounds.
----@field TEXT_CHANGED EventLibAPI            # Triggered when the text is changed.
+---@field TEXT_CHANGED Event               # Triggered when the text is changed.
 ---@field TextLengths integer[]            # The length of each separated text
 ---@field TextPart ModelPart               # The `ModelPart` used to display text.
 ---@field TextTasks TextTask[]             # A list of tasks to be executed when the text is changed.
 ---@field TextLimitsHeight boolean         # If true, the text will clamp to the height of the box
+---@field TextMargin Vector4?               # The margin of the text on all sides.
 --- ============================ RENDERING ============================
 ---@field ModelPart ModelPart              # The `ModelPart` used to handle where to display debug features and the sprite.
----@field Nineslice GNUI.Sprite              # the sprite that will be used for displaying textures.
----@field SPRITE_CHANGED EventLibAPI          # Triggered when the sprite object set to this box has changed.
+---@field sprite GNUI.Sprite               # the sprite that will be used for displaying textures.
+---@field SPRITE_CHANGED Event             # Triggered when the sprite object set to this box has changed.
 ---@field Color Vector3                    # The tint applied to the sprite.
 --- ============================ INPUTS ============================
 ---@field CursorHovering boolean           # True when the cursor is hovering over the container, compared with the parent container.
----@field INPUT EventLibAPI                   # Serves as the handler for all inputs within the boundaries of the container.
+---@field INPUT Event                      # Serves as the handler for all inputs within the boundaries of the container.
 ---@field canCaptureCursor boolean         # True when the box can capture the cursor. from its parent
----@field MOUSE_MOVED EventLibAPI             # Triggered when the mouse position changes within this container.  `GNUI.InputEventMouseMotion` being the first agument, containing data about the event.
----@field MOUSE_PRESSENCE_CHANGED EventLibAPI # Triggered when the state of the mouse to box interaction changes, arguments include: (hovering: boolean, pressed: boolean)
----@field MOUSE_ENTERED EventLibAPI           # Triggered once the cursor is hovering over the container
----@field MOUSE_EXITED EventLibAPI            # Triggered once the cursor leaves the confinement of this container.
+---@field MOUSE_MOVED Event                # Triggered when the mouse position changes within this container.  `GNUI.InputEventMouseMotion` being the first agument, containing data about the event.
+---@field MOUSE_PRESSENCE_CHANGED Event    # Triggered when the state of the mouse to box interaction changes, arguments include: (hovering: boolean, pressed: boolean)
+---@field MOUSE_ENTERED Event              # Triggered once the cursor is hovering over the container
+---@field MOUSE_EXITED Event               # Triggered once the cursor leaves the confinement of this container.
 ---@field isCursorHovering boolean         # `true` when the cursor is hovering over the container.
 ---
 --- ============================ CLIPPING ============================
 ---@field ClipOnParent boolean      # when `true`, the box will go invisible once touching outside the parent container.
----@field isClipping boolean       # `true` when the box is touching outside the parent's container.
+---@field isClipping boolean        # `true` when the box is touching outside the parent's container.
 ---
 --- ============================ MISC ============================
 ---@field cache table          # Contains data to optimize the process.
 ---
 --- ============================ CANVAS ============================
 ---@field Canvas GNUI.Canvas       # The canvas that the box is attached to.
----@field CANVAS_CHANGED EventLibAPI     # Triggered when the canvas that the box is attached to has changed. first argument is the new, second is the old one.
+---@field CANVAS_CHANGED Event     # Triggered when the canvas that the box is attached to has changed. first argument is the new, second is the old one.
 local Box = {}
 Box.__index = function(t, i)
 	return rawget(t, "_parent_class") and rawget(t._parent_class, i) or rawget(t, i) or Box[i]
@@ -158,7 +159,6 @@ function Box.new(parent)
 		FontScale = 1,
 		TextEffect = "NONE",
 		--DefaultColor = "#FFFFFF",
-		TextHandling = true,
 		TextBehavior = "WRAP",
 		TEXT_CHANGED = eventLib.new(),
 		TextLimitsHeight = true,
@@ -264,7 +264,7 @@ function Box:setColor(r, g, b)
 		r, g, b = vectors.hexToRGB(r):unpack()
 	end
 	self.Color = utils.vec3(r, g, b)
-	self:setNineslice(self.Nineslice)
+	self:setSprite(self.sprite)
 	return self
 end
 
@@ -462,18 +462,18 @@ end
 ---Note: if the sprite given is already in use, it will overtake it.
 ---@generic self
 ---@param self self
----@param nineslice GNUI.Sprite?
+---@param sprite GNUI.Sprite?
 ---@return self
-function Box:setNineslice(nineslice)
+function Box:setSprite(sprite)
 	---@cast self GNUI.Box
-	if self.Nineslice then
-		self.Nineslice:setModelpart()
+	if self.sprite then
+		self.sprite:setBox()
 	end
-	if nineslice then
-		self.Nineslice = nineslice
-		nineslice:setModelpart(self.ModelPart)
+	if sprite then
+		self.sprite = sprite
+		sprite:setBox(self)
 		if self.Color then
-			nineslice:setColor(self.Color)
+			sprite:setColor(self.Color)
 		end
 		self:updateSpriteTasks(true)
 		self.SPRITE_CHANGED:invoke()
@@ -1016,8 +1016,8 @@ function Box:updateSpriteTasks(forced_resize_sprites)
 				 -containment_rect.y * unscaleSelf,
 				 -(child_weight) * cfg.clipping_margin * self.Z * self.ZSquish
 			 ):setVisible(true)
-		if self.Nineslice and (self.cache.size_changed or forced_resize_sprites) then
-			self.Nineslice
+		if self.sprite and (self.cache.size_changed or forced_resize_sprites) then
+			self.sprite
 				 :setSize(
 					 (containment_rect.z - containment_rect.x) * unscaleSelf,
 					 (containment_rect.w - containment_rect.y) * unscaleSelf
@@ -1300,7 +1300,7 @@ function Box:rebuildTextTasks()
 		tasks[i] = part:newText(i):setText(self.BakedText[i]):setScale(fs, fs, fs)
 	end
 
-	local te = self.TextEffect or self.Nineslice and self.Nineslice.TextEffect
+	local te = self.TextEffect or self.sprite and self.sprite.TextEffect
 
 	if te == "SHADOW" then
 		for i = 1, #self.BakedText, 1 do
@@ -1320,24 +1320,23 @@ end
 function Box:repositionText()
 	local tasks = self.TextTasks
 	local textLenghts = self.TextLengths
-	local pos = vec(0, 0)
+	local border = (self.sprite and self.sprite.TextMargin or self.TextMargin or ZERO) * self.AccumulatedScaleFactor
+	local pos = border.xy:mul(1,-1)
 	local size = self.Size
-	local o = (self.TextOffset + (self.Nineslice and self.Nineslice.TextOffset or ZERO)) *
-	self.AccumulatedScaleFactor
-	local scale = (self.FontScale + (self.Nineslice and self.Nineslice.FontScale or 0)) *
-	self.AccumulatedScaleFactor
+	local o = (self.TextOffset + (self.sprite and self.sprite.TextOffset or ZERO)) * self.AccumulatedScaleFactor
+	local scale = (self.FontScale + (self.sprite and self.sprite.FontScale or 0)) * self.AccumulatedScaleFactor
 	local lineWidth = {}
 	local poses = {}
 
 	local forceNextLine = false
 	for i = 1, #self.BakedText, 1 do
 		local len = textLenghts[i]
-		if (self.TextBehavior == "WRAP") or forceNextLine then
+		if ((self.TextBehavior == "WRAP") or forceNextLine) and i > 1 then
 			if (pos.x > size.x - len * scale) or forceNextLine then
 				lineWidth[#lineWidth + 1] = { width = pos.x, poses = poses }
 				forceNextLine = false
 				poses = {}
-				pos.x = 0
+				pos.x = border.x
 				pos.y = pos.y - 10 * scale
 			end
 		end
@@ -1349,7 +1348,7 @@ function Box:repositionText()
 	end
 	lineWidth[#lineWidth + 1] = { width = pos.x, poses = poses }
 
-	local align = (self.TextAlign or self.Nineslice and self.Nineslice.TextAlign)
+	local align = (self.TextAlign or self.sprite and self.sprite.TextAlign or ZERO)
 	local j = 0
 	for l = 1, #lineWidth, 1 do
 		local line = lineWidth[l]
@@ -1378,7 +1377,7 @@ function Box:setText(text)
 	end
 	local t = flattenJsonText(text)
 	if not t[1] then t = { t } end -- convert to array
-	local clr = self.DefaultTextColor or self.Nineslice and self.Nineslice.DefaultTextColor
+	local clr = self.DefaultTextColor or self.sprite and self.sprite.DefaultTextColor
 	for _, c in pairs(t) do
 		if (c.color and c.color == "default") or c.color == nil then
 			c.color = clr
