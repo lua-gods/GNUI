@@ -9,8 +9,11 @@ local cfg = require("./../config") ---@type GNUI.Config
 local Event = cfg.event ---@type Event
 local Theme = require("./../theme") ---@type GNUI.ThemeAPI
 
-
 local Button = require("./button") ---@type GNUI.ButtonAPI
+
+
+---@class GNUI.TextFieldAPI
+local TextFieldAPI = {}
 
 
 ---@class GNUI.TextField : GNUI.Button
@@ -24,13 +27,13 @@ local Button = require("./button") ---@type GNUI.ButtonAPI
 local TextField = {}
 TextField.__index = function (t,i) return rawget(t,i) or TextField[i] or Button.__metamethods[i] or Box[i] end
 TextField.__type = "GNUI.TextField"
-
+TextFieldAPI.__metamethods = TextField
 
 ---@param parent GNUI.Box?
 ---@param variant GNUI.Theme.Variants?
 ---@param isMultiline boolean?
 ---@return GNUI.TextField
-function TextField.new(parent,isMultiline,variant)
+function TextFieldAPI.new(parent,isMultiline,variant)
 	---@type GNUI.TextField
 	local new = setmetatable(Button.new(parent,"None"),TextField)
 	new.textField = ""
@@ -196,4 +199,4 @@ end
 ---@private
 function TextField:setToggle() end
 
-return TextField
+return TextFieldAPI

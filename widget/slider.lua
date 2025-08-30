@@ -4,24 +4,28 @@
 / /_/ / /|  / a number range box.
 \____/_/ |_/ Source: link]]
 ---@diagnostic disable: assign-type-mismatch
-local Box = require("./../primitives/box") ---@type GNUI.Box
+local Box = require("./../prims/box") ---@type GNUI.Box
 local cfg = require("./../config") ---@type GNUI.Config
-local eventLib = cfg.event ---@type EventLibAPI
-local Theme = require("./../theme")
+local Event = cfg.event ---@type Event
+local Theme = require("./../theme") ---@type GNUI.ThemeAPI
 
-local Button = require("./button") ---@type GNUI.Button
-local TextField = require("./textField") ---@type GNUI.TextField
+local Button = require("./button") ---@type GNUI.ButtonAPI
+local TextField = require("./textField") ---@type GNUI.TextFieldAPI
 
 local DOUBLE_CLICK_TIME = 300
 
 
 local function snap(value,step)
-	if step > 0.01 then
+	if step > 0.0001 then
 		return math.floor(value / step + 0.5) * step
 	else
 		return value
 	end
 end
+
+
+---@class GNUI.SliderAPI
+local SliderAPI = {}
 
 
 ---@class GNUI.Slider : GNUI.Button
@@ -33,17 +37,17 @@ end
 ---@field value number
 ---@field sliderBox GNUI.Box
 ---@field numberBox GNUI.Box
----@field showNumber boolean
 ---@field allowInput boolean
----@field VALUE_CHANGED EventLibAPI
+---@field VALUE_CHANGED Event
 local Slider = {}
-Slider.__index = function (t,i) return rawget(t,i) or Slider[i] or Button[i] or Box[i] end
+Slider.__index = function (t,i) return rawget(t,i) or Slider[i] or Button.__metamethods[i] or Box[i] end
 Slider.__type = "GNUI.Slider"
+SliderAPI.__metamethods = Slider
 
 ---@param config {isVertical: boolean?,min: number?,max: number?,step: number,value: number?,showNumber: boolean?, loop: boolean, allowInput: boolean}
 ---@param variant string|"none"|"default"?
 ---@return GNUI.Slider
-function Slider.new(parent,config,variant)
+function SliderAPI.new(parent,config,variant)
 	config = config or {}
 	---@type GNUI.Slider
 	local self = setmetatable(Button.new(parent,"none"),Slider)
@@ -59,7 +63,16 @@ function Slider.new(parent,config,variant)
 	if type(config.isVertical) == "boolean" then
 		self.isVertical = config.isVertical
 	else
-		self.isVertical = true
+		-- makes the slider be based off of how squished the size is
+		self.SIZE_CHANGED:register(function ()
+			local aspectRatio = self.Size.x / self.Size.y
+			if aspectRatio < 1 then
+				self.isVertical = true
+			else
+				self.isVertical = false
+			end
+			self.SIZE_CHANGED:remove("verticalDeterminator")
+		end,"verticalDeterminator")
 	end
 	
 	if type(config.allowInput) == "boolean" then
@@ -68,10 +81,7 @@ function Slider.new(parent,config,variant)
 		self.allowInput = true
 	end
 	
-	self.showNumber = config.showNumber or false
-	if not (config.showNumber) then self.numberBox:setVisible(false) end
-	
-	self.VALUE_CHANGED = eventLib.new()
+	self.VALUE_CHANGED = Event.new()
 	
 	self.VALUE_CHANGED:register(function () self:updateSliderBox() end)
 	self:updateSliderBox()
@@ -121,7 +131,10 @@ function Slider.new(parent,config,variant)
 				end
 		end
 	end,"GNUI.Input")
-	Theme.style(self,variant)
+	self.spriteNormal = Theme.apply(self,"shaft",variant)
+	self:setSprite(self.spriteNormal)
+	self.sliderBox:setSprite(Theme.apply(self,"thumb",variant))
+	self.numberBox:setSprite(Theme.apply(self,"number",variant))
 	return self
 end
 
@@ -207,4 +220,4 @@ function Slider:setFontScale(scale)
 	return self
 end
 
-return Slider
+return SliderAPI

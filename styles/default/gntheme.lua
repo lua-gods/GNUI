@@ -128,40 +128,19 @@ theme.Button = {
 --		update(false,false)
 --	end
 }
--->========================================[ Slider ]=========================================<--
+--[────────────────────────────────────────-< Spider >-────────────────────────────────────────]--
 theme.Slider = {
-	---@param box GNUI.Slider
-	Default = function (box)
-		local spriteButton = GNUI.newSprite(atlas,7,1,11,7 ,2,2,2,4, 2)
-		local spriteBG = GNUI.newSprite(atlas,29,7,31,9, 1,1,1,1)
-		
-		box.sliderBox:setNineslice(spriteButton)
-		box.numberBox:setTextAlign(0.5,0.5)
-		
-	 
-		local wasPressed = true
-		local function update(pressed)
-			
-			if pressed ~= wasPressed then
-				wasPressed = pressed
-				if pressed then
-					GNUI.playSound("minecraft:ui.button.click",1) -- click
-				else
-				end
-			end
-		end
-		box.numberBox:setDefaultTextColor("white"):setTextEffect("OUTLINE")
-		
-		box:setNineslice(spriteBG)
-		box.BUTTON_CHANGED:register(update)
-		update(false)
-	end
+	default = {
+		shaft = GNUI.newSprite(atlas,29,7,31,9, 1,1,1,1),
+		thumb = GNUI.newSprite(atlas,7,1,11,7 ,2,2,2,4, 2),
+		number = GNUI.newSprite(atlas,0,0,0,0):setTextAlign(0.5,0.5):setTextEffect("OUTLINE"),
+	},
 }
 --[────────────────────────────────────────-< Text Field >-────────────────────────────────────────]--
 theme.TextField = {
 	default = {
-		normal = GNUI.newSprite(atlas,13,9,17,13, 2,2,2,2):setTextMargin(4,4,4,4),
-		pressed = GNUI.newSprite(atlas,13,9,17,13, 2,2,2,2):setTextMargin(4,4,4,4),
+		normal = GNUI.newSprite(atlas,13,9,17,13, 2,2,2,2):setTextMargin(3,3,3,3),
+		pressed = GNUI.newSprite(atlas,13,9,17,13, 2,2,2,2):setTextMargin(3,3,3,3),
 	}
 }
 -->========================================[ Separator ]=========================================<--

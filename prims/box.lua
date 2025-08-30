@@ -22,10 +22,10 @@ local nextID = 0
 ---| "TRIM" # Truncates the text
 
 
----@alias GNUI.TextEffect string
+---@alias GNUI.TextEffect string|nil
 ---| "SHADOW"
 ---| "OUTLINE"
----| "NONE"
+---| nil
 
 
 ---@class GNUI.Box  # A box is a Rectangle that represents the building block of GNUI
@@ -157,7 +157,7 @@ function Box.new(parent)
 		--TextAlign = vec(0, 0),
 		TextOffset = vec(0, 0),
 		FontScale = 1,
-		TextEffect = "NONE",
+		--TextEffect = "NONE",
 		--DefaultColor = "#FFFFFF",
 		TextBehavior = "WRAP",
 		TEXT_CHANGED = eventLib.new(),
@@ -1299,7 +1299,7 @@ function Box:rebuildTextTasks()
 	for i = 1, #self.BakedText, 1 do
 		tasks[i] = part:newText(i):setText(self.BakedText[i]):setScale(fs, fs, fs)
 	end
-
+	
 	local te = self.TextEffect or self.sprite and self.sprite.TextEffect
 
 	if te == "SHADOW" then

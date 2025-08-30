@@ -6,6 +6,7 @@
 
 ---@alias GNUI.Theme table<string,table<string|"default",table<string,GNUI.Sprite>>>
 
+---@type GNUI.Theme
 local theme = {}
 
 ---@alias GNUI.Theme.Variants string : string
@@ -88,7 +89,7 @@ function Theme.apply(box, field, variant)
 		return
 	end
 	if theme[class] and theme[class][variant] and theme[class][variant][field] then
-		return theme[class][variant][field]
+		return theme[class][variant][field]:copy()
 	end
 end
 
