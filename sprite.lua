@@ -92,6 +92,7 @@ function Sprite.new(obj)
 	new.DefaultTextColor = obj.DefaultTextColor
 	new.TextAlign = obj.TextAlign
 	new.TextBehavior = obj.TextBehavior
+	new.TextMargin = obj.TextMargin
 	
 	
 	new.TEXTURE_CHANGED:register(function ()
