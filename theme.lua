@@ -7,19 +7,25 @@
 ---@alias GNUI.Theme table<string,table<string|"default",table<string,GNUI.Sprite>>>
 
 ---@type GNUI.Theme
-local theme = {}
+local styles = {}
+
+---@class GNUI.ThemeAPI
+local Theme = {}
+local classCache = {}
+
 
 ---@alias GNUI.Theme.Variants string : string
 ---| "default"
 ---| "none"
 
--- load theme from data/theme folder
 
-local function mergeStyle(style)
-	for className, classData in pairs(style) do
-		theme[className] = theme[className] or {}
+---Loads a theme
+---@param theme GNUI.Theme
+function Theme.loadTheme(theme)
+	for className, classData in pairs(theme) do
+		styles[className] = theme[className] or {}
 		for styleName, styleFun in pairs(classData) do
-			theme[className][styleName] = styleFun
+			styles[className][styleName] = styleFun
 		end
 	end
 end
@@ -30,12 +36,11 @@ local requirePath = "./styles"
 for _, path in pairs(listFiles(requirePath, true)) do
 	if #requirePath ~= #path then
 		local style = require(path)
-		mergeStyle(style)
+		Theme.loadTheme(style)
 	end
 end
 
-
--- load `data/theme` folder
+-- load theme from data/theme folder
 if host:isHost() and file:isDirectory("GNUI/theme") then
 	local styleFuns = {}
 	for key, fileName in pairs(file:list("GNUI/theme")) do
@@ -59,13 +64,10 @@ if host:isHost() and file:isDirectory("GNUI/theme") then
 		local varag = { ... }
 		varag[1] = varag[1] .. "/theme"
 		varag[2] = name
-		mergeStyle(style(table.unpack(varag)))
+		Theme.loadTheme(style(table.unpack(varag)))
 	end
 end
 
----@class GNUI.ThemeAPI
-local Theme = {}
-local classCache = {}
 
 ---Styles a given class using the theme script, the single lua file in the theme folder.
 ---@param box GNUI.Box
@@ -85,11 +87,11 @@ function Theme.apply(box, field, variant)
 	
 	variant = variant or "default"
 	
-	if not theme[class] then
+	if not styles[class] then
 		return
 	end
-	if theme[class] and theme[class][variant] and theme[class][variant][field] then
-		return theme[class][variant][field]:copy()
+	if styles[class] and styles[class][variant] and styles[class][variant][field] then
+		return styles[class][variant][field]:copy()
 	end
 end
 

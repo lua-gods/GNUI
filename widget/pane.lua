@@ -1,0 +1,54 @@
+--[[______   __
+  / ____/ | / / By: GNamimates | https://gnon.top | Discord: @gn8.
+ / / __/  |/ / The Pane Class.
+/ /_/ / /|  / a way to automatically arrange children into some order inside the box. by default does nothing
+\____/_/ |_/ Source: link]]
+---@diagnostic disable: assign-type-mismatch
+local Box = require("./../prims/box") ---@type GNUI.Box
+local cfg = require("./../config") ---@type GNUI.Config
+local utils = cfg.utils ---@type GNUI.UtilsAPI
+local Event = cfg.event ---@type Event
+
+
+---@class GNUI.PaneAPI
+local PaneAPI = {}
+
+
+---@class GNUI.Pane : GNUI.Box
+---@field ItemSize Vector2
+---@field Spacing Vector2
+local Pane = {}
+Pane.__index = function (t,i) return rawget(t,i) or Pane[i] or Box[i] end
+Pane.__type = "GNUI.Pane"
+PaneAPI.__index = Pane.__index
+---Creates a new GridStacker.
+---@return GNUI.Pane
+function PaneAPI.new(parent)
+   ---@type GNUI.Pane
+   local box = Box.new(parent)
+   box._parent_class = Pane
+   box.Spacing = vec(0,0)
+   
+   setmetatable(box,Pane)
+   local function update() box:rearangeChildren() end
+   box.SIZE_CHANGED:register(update,"GridStacker")
+	box.CHILDREN_ADDED:register(function (child)
+		child.SIZE_CHANGED:register(update,"GridStacker")
+	end)
+	box.CHILDREN_REMOVED:register(function (child)
+		child.SIZE_CHANGED:unregister(update,"GridStacker")
+	end)
+   return box
+end
+
+---Rearanges the children. automatically called, but in case it dosent update, call this
+---@generic self
+---@param self self
+---@return self
+function Pane:rearangeChildren()
+   return self
+end
+
+
+
+return PaneAPI

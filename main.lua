@@ -112,4 +112,11 @@ else
 	api.playUISound = function(sound, pitch, volume) end
 end
 
+
+--[────────────────────────-< Host only >-────────────────────────]--
+if config.host_only then
+	error("Not implemented :sob:")
+end
+
+
 return api

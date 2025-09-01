@@ -18,13 +18,12 @@
 ---GNUI.Button.Slider ->    Slider
 
 local GNUI = require "../../main" ---@type GNUIAPI
-local atlas = textures[(...):gsub("/",".") ..".gnuiTheme"]
+local atlas = textures[(...):gsub("/",".") ..".gnuitheme"] ---@type Texture
 
 ---@type GNUI.Theme
 local theme = {}
 
 --[────────────────────────────────────────-< Box >-────────────────────────────────────────]--
-
 theme.Box = {
 	default = nil,
 	background = GNUI.newSprite(atlas,23,8,27,12 ,2,2,2,2),
@@ -43,13 +42,16 @@ theme.Button = {
 	--end,
 	
 	default = {
-		normal = GNUI.newSprite(atlas, 7,1,11,7 ,2,2,2,4, 2)
+		normal = GNUI.newSprite(atlas, 23,1,27,7 ,2,2,2,4, 2)
 		:setTextAlign(0.5,0.5)
 		:setDefaultTextColor("#000000"),
-		pressed= GNUI.newSprite(atlas,13,2,17,6 ,2,2,2,2)
+		pressed= GNUI.newSprite(atlas,17,9,21,13 ,2,2,2,2)
 		:setTextAlign(0.5,0.5)
 		:setDefaultTextColor("#000000")
 		:setTextOffset(0,2),
+		hovered=GNUI.newSprite(atlas, 17,1,21,7 ,2,2,2,4, 2)
+		:setTextAlign(0.5,0.5)
+		:setDefaultTextColor("#000000"),
 	},
 --	secondary = function (box)
 --		box.TextOffset = vec(0,2)
@@ -131,25 +133,23 @@ theme.Button = {
 --[────────────────────────────────────────-< Spider >-────────────────────────────────────────]--
 theme.Slider = {
 	default = {
-		shaft = GNUI.newSprite(atlas,29,7,31,9, 1,1,1,1),
-		thumb = GNUI.newSprite(atlas,7,1,11,7 ,2,2,2,4, 2),
+		shaft = GNUI.newSprite(atlas,33,24,35,26, 1,1,1,1),
+		thumb = GNUI.newSprite(atlas,39,17,43,22 ,2,2,2,3, 2),
+		thumbHover = GNUI.newSprite(atlas,33,17,37,22 ,2,2,2,3, 2),
+		thumbPressed = GNUI.newSprite(atlas,39,24,43,28 ,2,2,2,2),
 		number = GNUI.newSprite(atlas,0,0,0,0):setTextAlign(0.5,0.5):setTextEffect("OUTLINE"),
 	},
 }
 --[────────────────────────────────────────-< Text Field >-────────────────────────────────────────]--
 theme.TextField = {
 	default = {
-		normal = GNUI.newSprite(atlas,13,9,17,13, 2,2,2,2):setTextMargin(3,3,3,3),
-		pressed = GNUI.newSprite(atlas,13,9,17,13, 2,2,2,2):setTextMargin(3,3,3,3),
+		normal = GNUI.newSprite(atlas,17,17,19,20, 1,2,1,1):setTextMargin(3,3,3,3),
+		pressed = GNUI.newSprite(atlas,17,17,19,20, 1,2,1,1):setTextMargin(3,3,3,3),
 	}
 }
--->========================================[ Separator ]=========================================<--
+--[────────────────────────────────────────-< Separator? >-────────────────────────────────────────]--
 theme.Separator = {
-	---@param box GNUI.TextField
-	Default = function (box)
-		local spriteBG = GNUI.newSprite(atlas,1,15,1,15)
-		box:setSprite(spriteBG)
-	end
+	Default = GNUI.newSprite(atlas,1,15,1,15)
 }
 
 return theme
