@@ -73,7 +73,7 @@ end
 ---@param box GNUI.Box
 ---@param field string
 ---@param variant string|"none"|"default"?
-function Theme.apply(box, field, variant)
+function Theme.getStyle(box, field, variant)
 	if box[field] then return end
 	
 	local class

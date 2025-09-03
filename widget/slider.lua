@@ -131,10 +131,10 @@ function SliderAPI.new(parent,config,variant)
 				end
 		end
 	end,"GNUI.Input")
-	self.spriteNormal = Theme.apply(self,"shaft",variant)
+	self.spriteNormal = Theme.getStyle(self,"shaft",variant)
 	self:setSprite(self.spriteNormal)
-	self.sliderBox:setSprite(Theme.apply(self,"thumb",variant))
-	self.numberBox:setSprite(Theme.apply(self,"number",variant))
+	self.sliderBox:setSprite(Theme.getStyle(self,"thumb",variant))
+	self.numberBox:setSprite(Theme.getStyle(self,"number",variant))
 	return self
 end
 

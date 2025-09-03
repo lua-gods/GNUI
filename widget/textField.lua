@@ -46,9 +46,9 @@ function TextFieldAPI.new(parent,isMultiline,variant)
 	
 	local id = "GNUI.TextField"..new.id
 	
-	new.spriteNormal = Theme.apply(new, "normal", variant)
-	new.spritePressed = Theme.apply(new, "pressed", variant)
-	new.spriteHover = Theme.apply(new, "hover", variant)
+	new.spriteNormal = Theme.getStyle(new, "normal", variant)
+	new.spritePressed = Theme.getStyle(new, "pressed", variant)
+	new.spriteHover = Theme.getStyle(new, "hover", variant)
 	
 	local pressCanvas
 	local chatInput = ""

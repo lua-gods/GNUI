@@ -8,7 +8,7 @@ local Box = require("./../prims/box") ---@type GNUI.Box
 local cfg = require("./../config") ---@type GNUI.Config
 local utils = cfg.utils ---@type GNUI.UtilsAPI
 local Event = cfg.event ---@type Event
-
+local Theme = require("./../theme") ---@type GNUI.ThemeAPI
 
 ---@class GNUI.PaneAPI
 local PaneAPI = {}
@@ -16,19 +16,22 @@ local PaneAPI = {}
 
 ---@class GNUI.Pane : GNUI.Box
 ---@field ItemSize Vector2
----@field Spacing Vector2
+---@field spacing Vector2
 local Pane = {}
 Pane.__index = function (t,i) return rawget(t,i) or Pane[i] or Box[i] end
 Pane.__type = "GNUI.Pane"
 PaneAPI.__index = Pane.__index
+
 ---Creates a new GridStacker.
 ---@return GNUI.Pane
-function PaneAPI.new(parent)
+function PaneAPI.new(parent,variant)
    ---@type GNUI.Pane
    local box = Box.new(parent)
    box._parent_class = Pane
-   box.Spacing = vec(0,0)
+   box.spacing = vec(0,0)
    
+	box:setSprite(Theme.getStyle(box,"background",variant))
+	
    setmetatable(box,Pane)
    local function update() box:rearangeChildren() end
    box.SIZE_CHANGED:register(update,"GridStacker")

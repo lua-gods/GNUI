@@ -147,9 +147,12 @@ theme.TextField = {
 		pressed = GNUI.newSprite(atlas,17,17,19,20, 1,2,1,1):setTextMargin(3,3,3,3),
 	}
 }
---[────────────────────────────────────────-< Separator? >-────────────────────────────────────────]--
-theme.Separator = {
-	Default = GNUI.newSprite(atlas,1,15,1,15)
+--[────────────────────────────────────────-< Pane Stack >-────────────────────────────────────────]--
+
+theme.Stack = {
+	default = {
+		background = GNUI.newSprite(atlas,48,16,54,22, 3,3,3,3, -3, -3, -3, -3)
+	}
 }
 
 return theme

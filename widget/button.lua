@@ -62,9 +62,9 @@ function ButtonAPI.new(parent, variant)
 		end
 	end, "GNUI.Input")
 
-	box.spriteNormal = Theme.apply(box, "normal", variant)
-	box.spritePressed = Theme.apply(box, "pressed", variant)
-	box.spriteHover = Theme.apply(box, "hover", variant)
+	box.spriteNormal = Theme.getStyle(box, "normal", variant)
+	box.spritePressed = Theme.getStyle(box, "pressed", variant)
+	box.spriteHover = Theme.getStyle(box, "hover", variant)
 	
 	local wasPressed = true
 	local function update(pressed, hovering, forced)
