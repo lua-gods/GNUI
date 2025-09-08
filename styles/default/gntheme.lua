@@ -151,7 +151,8 @@ theme.TextField = {
 
 theme.Stack = {
 	default = {
-		background = GNUI.newSprite(atlas,48,16,54,22, 3,3,3,3, -3, -3, -3, -3)
+		background = GNUI.newSprite(atlas,48,16,54,22, 3,3,3,3, -3, -3, -3, -3):setPadding(7,7,7,7),
+		spacing = 7
 	}
 }
 

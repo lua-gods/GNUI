@@ -3,8 +3,10 @@ local cfg = require("./../config") ---@type GNUI.Config ---@type GNUI.Config
 local eventLib = cfg.event ---@type Event
 local utils = cfg.utils ---@type GNUI.UtilsAPI
 
+local SHRINK_MUL = vec(1,1,-1,-1)
 
-local ZERO = vec(0, 0)
+local V2ZERO = vec(0, 0)
+local V4ZERO = vec(0,0,0,0)
 
 local debugTex = textures["gnui_debug_outline"] or
 	 textures:newTexture("gnui_debug_outline", 6, 6)
@@ -46,6 +48,12 @@ local nextID = 0
 --- ============================ POSITIONING ============================
 ---@field Dimensions Vector4               # Determins the offset of each side from the final output
 ---@field DIMENSIONS_CHANGED Event         # Triggered when the final box dimensions has changed.
+---
+---@field Margin Vector4                   # The margin of the box on all sides.
+---@field MARGIN_CHANGED Event             # Triggered when the margin of the box is changed.
+---
+---@field Padding Vector4                  # The padding of the box on all sides.
+---@field PADDING_CHANGED Event            # Triggered when the padding of the box is changed.
 ---
 ---@field ContainmentRect Vector4          # The final output dimensions with anchors applied. incredibly handy piece of data.
 ---@field Z number                         # Offsets the box forward(+) or backward(-) if Z fighting is occuring, also affects its children.
@@ -137,6 +145,12 @@ function Box.new(parent)
 		Dimensions = vec(0, 0, 0, 0),
 		DIMENSIONS_CHANGED = eventLib.new(),
 
+		Margin = vec(0, 0, 0, 0),
+		MARGIN_CHANGED = eventLib.new(),
+		
+		Padding = vec(0, 0, 0, 0),
+		PADDING_CHANGED = eventLib.new(),
+		
 		ContainmentRect = vec(0, 0, 0, 0),
 		Z = 1,
 		ZSquish = 1,
@@ -703,6 +717,119 @@ function Box:setAnchorMax()
 	return self
 end
 
+
+---Sets the margin for all sides.
+---@param left number?
+function Box:setMarginLeft(left)
+	---@cast self GNUI.Box
+	self.Margin.x = left or 0
+	self:update()
+	return self
+end
+
+
+---Sets the margin for all sides.
+---@param top number?
+function Box:setMarginTop(top)
+	---@cast self GNUI.Box
+	self.Margin.y = top or 0
+	self:update()
+	return self
+end
+
+
+---Sets the margin for all sides.
+---@param right number?
+function Box:setMarginRight(right)
+	---@cast self GNUI.Box
+	self.Margin.z = right or 0
+	self:update()
+	return self
+end
+
+
+---Sets the margin for all sides.
+---@param bottom number?
+function Box:setMarginBottom(bottom)
+	---@cast self GNUI.Box
+	self.Margin.w = bottom or 0
+	self:update()
+	return self
+end
+
+
+---Sets the margin for all sides.
+---@param left number|Vector4|Vector2
+---@param top number|Vector2?
+---@param right number?
+---@param bottom number?
+---@generic self
+---@param self self
+---@return self
+function Box:setMargin(left, top, right, bottom)
+	---@cast self GNUI.Box
+	self.Margin = utils.vec4(left, top, right or left, bottom or top)
+	self:update()
+	return self
+end
+
+
+---Sets the margin for all sides.
+---@param left number?
+function Box:setPaddingLeft(left)
+	---@cast self GNUI.Box
+	self.Padding.x = left or 0
+	self:update()
+	return self
+end
+
+
+---Sets the Padding for all sides.
+---@param top number?
+function Box:setPaddingTop(top)
+	---@cast self GNUI.Box
+	self.Padding.y = top or 0
+	self:update()
+	return self
+end
+
+
+---Sets the Padding for all sides.
+---@param right number?
+function Box:setPaddingRight(right)
+	---@cast self GNUI.Box
+	self.Padding.z = right or 0
+	self:update()
+	return self
+end
+
+
+---Sets the Padding for all sides.
+---@param bottom number?
+function Box:setPaddingBottom(bottom)
+	---@cast self GNUI.Box
+	self.Padding.w = bottom or 0
+	self:update()
+	return self
+end
+
+
+---Sets the Padding for all sides.
+---@param left number|Vector4|Vector2
+---@param top number|Vector2?
+---@param right number?
+---@param bottom number?
+---@generic self
+---@param self self
+---@return self
+function Box:setPadding(left, top, right, bottom)
+	---@cast self GNUI.Box
+	self.Padding = utils.vec4(left, top, right or left, bottom or top)
+	self:update()
+	return self
+end
+
+
 --The proper way to set if the cursor is hovering, this will tell the box that it has changed after setting its value
 ---@param toggle boolean
 ---@generic self
@@ -782,20 +909,6 @@ function Box:setGrowDirection(x, y)
 	return self
 end
 
----Sets the shift of the children, useful for scrollbars.
----@param x number|Vector2
----@param y number?
----@generic self
----@param self self
----@return self
-function Box:setChildrenOffset(x, y)
-	---@cast self GNUI.Box
-	self.offsetChildren = utils.vec2(x or 0, y or 0)
-	self.cache.final_minimum_size_changed = true
-	self:update()
-
-	return self
-end
 
 ---Gets the minimum size of the container.
 function Box:getMinimumSize()
@@ -899,28 +1012,37 @@ function Box:_update()
 	end
 	self.Dimensions:scale(scale)
 	-- generate the containment rect
-	local cr = self.Dimensions:copy():add(self.Parent and
-		self.Parent.offsetChildren.xyxy * self.AccumulatedScaleFactor or vec(0, 0, 0, 0))
+	local final = self.Dimensions:copy()
+	
+	
 	-- adjust based on parent if this has one
 	local clipping = false
 	local size
+	final:add(self.Margin and (self.Margin * scale * SHRINK_MUL) or V4ZERO)
+	if self.sprite then
+		final:add(self.Margin and (self.sprite.Margin * scale * SHRINK_MUL) or V4ZERO)
+	end
 	if self.Parent and self.Parent.ContainmentRect then
 		local parent_scale = 1 / self.Parent.ScaleFactor
 		local pc = self.Parent.ContainmentRect - self.Parent.ContainmentRect.xyxy
+		pc:add(self.Parent and (self.Parent.Padding * scale * SHRINK_MUL) or V4ZERO)
+		if self.Parent.sprite then
+			pc:add(self.Parent and (self.Parent.sprite.Padding * scale * SHRINK_MUL) or V4ZERO)
+		end
 		local as = vec(
 			math.lerp(pc.x, pc.z, self.Anchor.x),
 			math.lerp(pc.y, pc.w, self.Anchor.y),
 			math.lerp(pc.x, pc.z, self.Anchor.z),
 			math.lerp(pc.y, pc.w, self.Anchor.w)
 		) * parent_scale * self.ScaleFactor
-		cr.x = cr.x + as.x
-		cr.y = cr.y + as.y
-		cr.z = cr.z + as.z
-		cr.w = cr.w + as.w
+		final.x = final.x + as.x
+		final.y = final.y + as.y
+		final.z = final.z + as.z
+		final.w = final.w + as.w
 
 		size = vec(
-			math.floor((cr.z - cr.x) * 100 + 0.5) / 100,
-			math.floor((cr.w - cr.y) * 100 + 0.5) / 100
+			math.floor((final.z - final.x) * 100 + 0.5) / 100,
+			math.floor((final.w - final.y) * 100 + 0.5) / 100
 		)
 		if self.CustomMinimumSize or (self.SystemMinimumSize.x ~= 0 or self.SystemMinimumSize.y ~= 0) then
 			local fms = vec(0, 0)
@@ -942,34 +1064,34 @@ function Box:_update()
 				fms = self.cache.final_minimum_size
 				shift = self.cache.final_minimum_size_shift
 			end
-			cr.z = math.max(cr.z, cr.x + fms.x)
-			cr.w = math.max(cr.w, cr.y + fms.y)
+			final.z = math.max(final.z, final.x + fms.x)
+			final.w = math.max(final.w, final.y + fms.y)
 
-			cr:add(shift.x, shift.y, shift.x, shift.y)
+			final:add(shift.x, shift.y, shift.x, shift.y)
 
 			size = vec(
-				math.floor((cr.z - cr.x) * 100 + 0.5) / 100,
-				math.floor((cr.w - cr.y) * 100 + 0.5) / 100
+				math.floor((final.z - final.x) * 100 + 0.5) / 100,
+				math.floor((final.w - final.y) * 100 + 0.5) / 100
 			)
 		end
 
 		-- calculate clipping
 		if self.ClipOnParent then
 			clipping =
-				 pc.x > cr.x
-				 or pc.y > cr.y
-				 or pc.z < cr.z
-				 or pc.w < cr.w
+				 pc.x > final.x
+				 or pc.y > final.y
+				 or pc.z < final.z
+				 or pc.w < final.w
 		end
 	else
 		size = vec(
-			math.floor((cr.z - cr.x) * 100 + 0.5) / 100,
-			math.floor((cr.w - cr.y) * 100 + 0.5) / 100
+			math.floor((final.z - final.x) * 100 + 0.5) / 100,
+			math.floor((final.w - final.y) * 100 + 0.5) / 100
 		)
 	end
 
 	self.cache.size = size
-	self.ContainmentRect = cr
+	self.ContainmentRect = final
 	self.Dimensions:scale(1 / scale)
 	self.Size = size
 	if not self.cache.last_size or self.cache.last_size ~= size then
@@ -1320,10 +1442,10 @@ end
 function Box:repositionText()
 	local tasks = self.TextTasks
 	local textLenghts = self.TextLengths
-	local border = (self.sprite and self.sprite.TextMargin or self.TextMargin or ZERO) * self.AccumulatedScaleFactor
+	local border = (self.sprite and self.sprite.TextMargin or self.TextMargin or V2ZERO) * self.AccumulatedScaleFactor
 	local pos = border.xy:mul(1,-1)
 	local size = self.Size
-	local o = (self.TextOffset + (self.sprite and self.sprite.TextOffset or ZERO)) * self.AccumulatedScaleFactor
+	local o = (self.TextOffset + (self.sprite and self.sprite.TextOffset or V2ZERO)) * self.AccumulatedScaleFactor
 	local scale = (self.FontScale + (self.sprite and self.sprite.FontScale or 0)) * self.AccumulatedScaleFactor
 	local lineWidth = {}
 	local poses = {}
@@ -1348,7 +1470,7 @@ function Box:repositionText()
 	end
 	lineWidth[#lineWidth + 1] = { width = pos.x, poses = poses }
 
-	local align = (self.TextAlign or self.sprite and self.sprite.TextAlign or ZERO)
+	local align = (self.TextAlign or self.sprite and self.sprite.TextAlign or V2ZERO)
 	local j = 0
 	for l = 1, #lineWidth, 1 do
 		local line = lineWidth[l]

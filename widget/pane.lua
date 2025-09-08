@@ -15,8 +15,6 @@ local PaneAPI = {}
 
 
 ---@class GNUI.Pane : GNUI.Box
----@field ItemSize Vector2
----@field spacing Vector2
 local Pane = {}
 Pane.__index = function (t,i) return rawget(t,i) or Pane[i] or Box[i] end
 Pane.__type = "GNUI.Pane"

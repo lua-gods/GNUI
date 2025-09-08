@@ -4,7 +4,7 @@
 / /_/ / /|  / the script that manages how every class looks.
 \____/_/ |_/ Source: link]]
 
----@alias GNUI.Theme table<string,table<string|"default",table<string,GNUI.Sprite>>>
+---@alias GNUI.Theme table<string,table<string|"default",table<string,GNUI.Sprite|any>>>
 
 ---@type GNUI.Theme
 local styles = {}
@@ -74,15 +74,14 @@ end
 ---@param field string
 ---@param variant string|"none"|"default"?
 function Theme.getStyle(box, field, variant)
-	if box[field] then return end
 	
 	local class
-	local type = box.__type
-	if classCache[type] then
-		class = classCache[type]
+	local rawClass = box.__type
+	if classCache[rawClass] then
+		class = classCache[rawClass]
 	else
-		class = type:match("[^%.]+$") -- GNUI.Button -> Button
-		classCache[type] = class
+		class = rawClass:match("[^%.]+$") -- GNUI.Button -> Button
+		classCache[rawClass] = class
 	end
 	
 	variant = variant or "default"
@@ -91,7 +90,16 @@ function Theme.getStyle(box, field, variant)
 		return
 	end
 	if styles[class] and styles[class][variant] and styles[class][variant][field] then
-		return styles[class][variant][field]:copy()
+		if styles[class][variant][field] then
+			local ok, result = pcall(function ()
+				return styles[class][variant][field].copy
+			end)
+			if ok then
+				return result(styles[class][variant][field])
+			else
+				return styles[class][variant][field]
+			end
+		end
 	end
 end
 

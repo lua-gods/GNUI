@@ -11,10 +11,10 @@ local Event = cfg.event ---@type Event
 local Theme = require("./../../theme") ---@type GNUI.ThemeAPI
 
 ---@class GNUI.Pane.StackAPI
+---@field spacing number
 local StackAPI = {}
 
 ---@class GNUI.Pane.Stack : GNUI.Pane
----@field ItemSize Vector2
 ---@field spacing Vector2
 local Stack = {}
 Stack.__index = function (t,i) return rawget(t,i) or Stack[i] or Pane.__index(t,i) end
@@ -30,8 +30,8 @@ function StackAPI.new(parent,variant)
    setmetatable(box,Stack)
 	
 	box:setSprite(Theme.getStyle(box, "background", variant))
-	box.spacing = Theme.getStyle(box, "spacing", variant) or vec(0,0,0,0)
-   return box
+	box.spacing = Theme.getStyle(box, "spacing", variant) or 0
+	return box
 end
 
 ---Rearanges the children. automatically called, but in case it dosent update, call this
@@ -39,11 +39,11 @@ end
 ---@param self self
 ---@return self
 function Stack:rearangeChildren()
-   ---@cast self GNUI.Pane
-   local y = self.spacing.y
+   ---@cast self GNUI.Pane.Stack
+   local y = 0
    for i,child in pairs(self.Children) do
 		local size = child:getSize()
-      child:setPos(self.spacing.x,y)
+      child:setPos(0,y)
 		:setAnchor(0,0,1,0)
 		y = y + size.y + self.spacing
    end

@@ -26,6 +26,9 @@ local update = {}
 ---@field Alpha number                      # The opacity of the sprite.
 ---@field Scale number                      # The scale of the borders of a 9-slice.
 ---
+---@field Margin Vector4                    # the margin of the sprite in the form (left, top, right, bottom)
+---@field Padding Vector4                   # the padding of the sprite in the form (left, top, right, bottom)
+---
 ---@field RenderTasks table<any,SpriteTask> # a list of sprite tasks used by the sprite
 ---@field RenderType ModelPart.renderType   # the render type of the sprite.
 ---
@@ -76,6 +79,9 @@ function Sprite.new(obj)
 	
 	new.BorderThickness = obj.BorderThickness or vec(0,0,0,0)
 	new.BORDER_THICKNESS_CHANGED = event.new()
+	
+	new.Margin = obj.Margin or vec(0,0,0,0)
+	new.Padding = obj.Padding or vec(0,0,0,0)
 	
 	new.BorderExpand = obj.BorderExpand or vec(0,0,0,0)
 	new.BORDER_EXPAND_CHANGED = event.new()
@@ -202,6 +208,121 @@ function Sprite:setScale(scale)
 	self.BORDER_THICKNESS_CHANGED:invoke(self,self.BorderThickness)
 	return self
 end
+
+--[────────────────────────-< Margin >-────────────────────────]--
+
+---Sets the margin for all sides.
+---@param left number?
+function Sprite:setMarginLeft(left)
+	---@cast self GNUI.Sprite
+	self.Margin.x = left or 0
+	self:update()
+	return self
+end
+
+
+---Sets the margin for all sides.
+---@param top number?
+function Sprite:setMarginTop(top)
+	---@cast self GNUI.Sprite
+	self.Margin.y = top or 0
+	self:update()
+	return self
+end
+
+
+---Sets the margin for all sides.
+---@param right number?
+function Sprite:setMarginRight(right)
+	---@cast self GNUI.Sprite
+	self.Margin.z = right or 0
+	self:update()
+	return self
+end
+
+
+---Sets the margin for all sides.
+---@param bottom number?
+function Sprite:setMarginBottom(bottom)
+	---@cast self GNUI.Sprite
+	self.Margin.w = bottom or 0
+	self:update()
+	return self
+end
+
+
+---Sets the margin for all sides.
+---@param left number|Vector4|Vector2
+---@param top number|Vector2?
+---@param right number?
+---@param bottom number?
+---@generic self
+---@param self self
+---@return self
+function Sprite:setMargin(left, top, right, bottom)
+	---@cast self GNUI.Sprite
+	self.Margin = utils.vec4(left, top, right or left, bottom or top)
+	self:update()
+	return self
+end
+
+--[────────────────────────-< Padding >-────────────────────────]--
+
+---Sets the margin for all sides.
+---@param left number?
+function Sprite:setPaddingLeft(left)
+	---@cast self GNUI.Sprite
+	self.Padding.x = left or 0
+	self:update()
+	return self
+end
+
+
+---Sets the Padding for all sides.
+---@param top number?
+function Sprite:setPaddingTop(top)
+	---@cast self GNUI.Sprite
+	self.Padding.y = top or 0
+	self:update()
+	return self
+end
+
+
+---Sets the Padding for all sides.
+---@param right number?
+function Sprite:setPaddingRight(right)
+	---@cast self GNUI.Sprite
+	self.Padding.z = right or 0
+	self:update()
+	return self
+end
+
+
+---Sets the Padding for all sides.
+---@param bottom number?
+function Sprite:setPaddingBottom(bottom)
+	---@cast self GNUI.Sprite
+	self.Padding.w = bottom or 0
+	self:update()
+	return self
+end
+
+
+---Sets the Padding for all sides.
+---@param left number|Vector4|Vector2
+---@param top number|Vector2?
+---@param right number?
+---@param bottom number?
+---@generic self
+---@param self self
+---@return self
+function Sprite:setPadding(left, top, right, bottom)
+	---@cast self GNUI.Sprite
+	self.Padding = utils.vec4(left, top, right or left, bottom or top)
+	self:update()
+	return self
+end
+
 
 -->====================[ Border ]====================<--
 
