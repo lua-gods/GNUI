@@ -73,6 +73,7 @@ end
 ---@param box GNUI.Box
 ---@param field string
 ---@param variant string|"none"|"default"?
+---@return GNUI.Sprite|any
 function Theme.getStyle(box, field, variant)
 	
 	local class
@@ -83,7 +84,6 @@ function Theme.getStyle(box, field, variant)
 		class = rawClass:match("[^%.]+$") -- GNUI.Button -> Button
 		classCache[rawClass] = class
 	end
-	
 	variant = variant or "default"
 	
 	if not styles[class] then
