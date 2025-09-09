@@ -32,12 +32,12 @@ function PaneAPI.new(parent,variant)
 	
    setmetatable(box,Pane)
    local function update() box:rearangeChildren() end
-   box.SIZE_CHANGED:register(update,"GridStacker")
+   box.SIZE_CHANGED:register(update,"Pane")
 	box.CHILDREN_ADDED:register(function (child)
-		child.SIZE_CHANGED:register(update,"GridStacker")
+		child.SIZE_CHANGED:register(update,"Pane")
 	end)
 	box.CHILDREN_REMOVED:register(function (child)
-		child.SIZE_CHANGED:unregister(update,"GridStacker")
+		child.SIZE_CHANGED:unregister(update,"Pane")
 	end)
    return box
 end
