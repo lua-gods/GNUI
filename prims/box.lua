@@ -3,16 +3,16 @@ local cfg = require("./../config") ---@type GNUI.Config ---@type GNUI.Config
 local eventLib = cfg.event ---@type Event
 local utils = cfg.utils ---@type GNUI.UtilsAPI
 
-local SHRINK_MUL = vec(1,1,-1,-1)
+local SHRINK_MUL = vec(1, 1, -1, -1)
 
 local V2ZERO = vec(0, 0)
-local V4ZERO = vec(0,0,0,0)
+local V4ZERO = vec(0, 0, 0, 0)
 
 local debugTex = textures["gnui_debug_outline"] or
-	textures:newTexture("gnui_debug_outline", 6, 6)
-	:fill(0, 0, 6, 6, vec(0, 0, 0, 1))
-	:fill(1, 1, 4, 4, vec(1, 1, 1))
-	:fill(2, 2, 2, 2, vec(0, 0, 0, 1))
+	 textures:newTexture("gnui_debug_outline", 6, 6)
+	 :fill(0, 0, 6, 6, vec(0, 0, 0, 1))
+	 :fill(1, 1, 4, 4, vec(1, 1, 1))
+	 :fill(2, 2, 2, 2, vec(0, 0, 0, 1))
 local Sprite = require("./../sprite")
 
 local nextID = 0
@@ -42,7 +42,7 @@ local nextID = 0
 ---@field CHILDREN_ADDED Event             # when a child is added. first parameter is the child added.
 ---@field CHILDREN_REMOVED Event           # when a child is removed. first parameter is the child removed.
 ---@field CHILDREN_CHANGED Event           # when the children list is changed.
----@field PARENT_CHANGED table             # when the parent changes.
+---@field PARENT_CHANGED Event             # when the parent changes. arguments being (new parent, old parent)
 ---@field isFreed boolean                  # true when the element is being freed.
 ---@field ON_FREE Event                    # when the element is wiped from history.
 --- ============================ POSITIONING ============================
@@ -147,10 +147,10 @@ function Box.new(parent)
 
 		Margin = vec(0, 0, 0, 0),
 		MARGIN_CHANGED = eventLib.new(),
-		
+
 		Padding = vec(0, 0, 0, 0),
 		PADDING_CHANGED = eventLib.new(),
-		
+
 		ContainmentRect = vec(0, 0, 0, 0),
 		Z = 1,
 		ZSquish = 1,
@@ -576,9 +576,18 @@ function Box:setSize(x, y)
 	return self
 end
 
----Gets the Size of this container.
+---Gets the Dimension size of this container, excluding margins and anchors.
 ---@return Vector2
-function Box:getSize()
+function Box:getDimensionSize()
+	---@diagnostic disable-next-line: return-type-mismatch
+	return self.Dimensions.zw - self.Dimensions.xy
+end
+
+---Returns the final size of this container, including all the margins and anchors.  
+---**NOTE**: This will call force update on the hierarchy to give an accurate result.
+---@return Vector2
+function Box:getFinalSize()
+	self:forceUpdate()
 	---@diagnostic disable-next-line: return-type-mismatch
 	return self.ContainmentRect.zw - self.ContainmentRect.xy
 end
@@ -717,7 +726,6 @@ function Box:maxAnchor()
 	return self
 end
 
-
 ---Sets the margin for all sides.
 ---@param left number?
 function Box:setMarginLeft(left)
@@ -726,7 +734,6 @@ function Box:setMarginLeft(left)
 	self:update()
 	return self
 end
-
 
 ---Sets the margin for all sides.
 ---@param top number?
@@ -737,7 +744,6 @@ function Box:setMarginTop(top)
 	return self
 end
 
-
 ---Sets the margin for all sides.
 ---@param right number?
 function Box:setMarginRight(right)
@@ -747,7 +753,6 @@ function Box:setMarginRight(right)
 	return self
 end
 
-
 ---Sets the margin for all sides.
 ---@param bottom number?
 function Box:setMarginBottom(bottom)
@@ -756,7 +761,6 @@ function Box:setMarginBottom(bottom)
 	self:update()
 	return self
 end
-
 
 ---Sets the margin for all sides.
 ---@param left number|Vector4|Vector2
@@ -773,7 +777,6 @@ function Box:setMargin(left, top, right, bottom)
 	return self
 end
 
-
 ---Sets the margin for all sides.
 ---@param left number?
 function Box:setPaddingLeft(left)
@@ -782,7 +785,6 @@ function Box:setPaddingLeft(left)
 	self:update()
 	return self
 end
-
 
 ---Sets the Padding for all sides.
 ---@param top number?
@@ -793,7 +795,6 @@ function Box:setPaddingTop(top)
 	return self
 end
 
-
 ---Sets the Padding for all sides.
 ---@param right number?
 function Box:setPaddingRight(right)
@@ -803,7 +804,6 @@ function Box:setPaddingRight(right)
 	return self
 end
 
-
 ---Sets the Padding for all sides.
 ---@param bottom number?
 function Box:setPaddingBottom(bottom)
@@ -812,7 +812,6 @@ function Box:setPaddingBottom(bottom)
 	self:update()
 	return self
 end
-
 
 ---Sets the Padding for all sides.
 ---@param left number|Vector4|Vector2
@@ -828,7 +827,6 @@ function Box:setPadding(left, top, right, bottom)
 	self:update()
 	return self
 end
-
 
 --The proper way to set if the cursor is hovering, this will tell the box that it has changed after setting its value
 ---@param toggle boolean
@@ -872,9 +870,9 @@ function Box:setCustomMinimumSize(x, y)
 	return self
 end
 
--- This API is only made for libraries, use `Container:setCustomMinimumSize()` instead
---Sets the minimum size of the container.
---* this does not make the box update. `Container:update()` still needs to be called.
+-- This API is only made for libraries, use `Container:setCustomMinimumSize()` instead  
+--Sets the minimum size of the container.  
+--* this does not make the box update. `Container:update()` still needs to be called.  
 ---@param x number|Vector2
 ---@param y number?
 ---@generic self
@@ -908,7 +906,6 @@ function Box:setGrowDirection(x, y)
 	self:update()
 	return self
 end
-
 
 ---Gets the minimum size of the container.
 function Box:getMinimumSize()
@@ -1013,8 +1010,8 @@ function Box:_update()
 	self.Dimensions:scale(scale)
 	-- generate the containment rect
 	local final = self.Dimensions:copy()
-	
-	
+
+
 	-- adjust based on parent if this has one
 	local clipping = false
 	local size
@@ -1191,7 +1188,37 @@ function Box:_propagateUpdateToChildren(force_all)
 	end
 end
 
--->========================================[ Text ]=========================================<--
+--[────────────────────────────────────────-< Extra Utilities >-────────────────────────────────────────]--
+
+---@alias GNUI.Box.AspectRatio.Priority
+---| "HEIGHT" # use the height of the box
+---| "WIDTH" # use the width of the box
+---| "LARGEST" # use the largest of the two
+---| "SMALLEST" # use the smallest of the two
+
+
+---**UTILITY FUNCTION**
+---Forces the aspect ratio of the box
+---@param ratio number
+---@param priority GNUI.Box.AspectRatio.Priority
+---@generic self
+---@param self self
+---@return self
+function Box:forceAspectRatio(ratio, priority)
+	---@cast self GNUI.Box
+	local method
+	if priority == "HEIGHT" then
+		method = function(size)
+			self:setSize(size.y, 0)
+		end
+	end
+	if priority == "HEIGHT" then
+		self.SIZE_CHANGED:register(method,"forceAspectRatio")
+	end
+	return self
+end
+
+--[────────────────────────────────────────-< Text >-────────────────────────────────────────]--
 
 ---@alias Minecraft.RawJSONText.Type string
 ---| "text"
@@ -1421,7 +1448,7 @@ function Box:rebuildTextTasks()
 	for i = 1, #self.BakedText, 1 do
 		tasks[i] = part:newText(i):setText(self.BakedText[i]):setScale(fs, fs, fs)
 	end
-	
+
 	local te = self.TextEffect or self.sprite and self.sprite.TextEffect
 
 	if te == "SHADOW" then
@@ -1442,11 +1469,14 @@ end
 function Box:repositionText()
 	local tasks = self.TextTasks
 	local textLenghts = self.TextLengths
-	local border = (self.sprite and self.sprite.TextMargin or self.TextMargin or V2ZERO) * self.AccumulatedScaleFactor
-	local pos = border.xy:mul(1,-1)
+	local border = (self.sprite and self.sprite.TextMargin or self.TextMargin or V2ZERO) *
+	self.AccumulatedScaleFactor
+	local pos = border.xy:mul(1, -1)
 	local size = self.Size
-	local o = (self.TextOffset + (self.sprite and self.sprite.TextOffset or V2ZERO)) * self.AccumulatedScaleFactor
-	local scale = (self.FontScale + (self.sprite and self.sprite.FontScale or 0)) * self.AccumulatedScaleFactor
+	local o = (self.TextOffset + (self.sprite and self.sprite.TextOffset or V2ZERO)) *
+	self.AccumulatedScaleFactor
+	local scale = (self.FontScale + (self.sprite and self.sprite.FontScale or 0)) *
+	self.AccumulatedScaleFactor
 	local lineWidth = {}
 	local poses = {}
 

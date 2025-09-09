@@ -122,7 +122,7 @@ function SliderAPI.new(parent,config,variant)
 	---@param event GNUI.InputEventMouseMotion
 	self.MOUSE_MOVED:register(function (event)
 		if self.isPressed then
-				local pos = self:toLocal(event.pos)/self:getSize()
+				local pos = self:toLocal(event.pos)/self:getDimensionSize()
 				local gsize = self.cache.grabber_size or 0
 				if self.isVertical then
 					self:setValue(math.map(pos.y,gsize,1-gsize,self.min,self.max))
