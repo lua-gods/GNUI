@@ -11,11 +11,17 @@ local Event = cfg.event ---@type Event
 local Theme = require("./../../theme") ---@type GNUI.ThemeAPI
 
 ---@class GNUI.Pane.StackAPI
----@field spacing number
 local StackAPI = {}
 
+---@alias GNUI.Pane.Stack.Direction
+---| "UP"
+---| "DOWN"
+---| "LEFT"
+---| "RIGHT"
+
 ---@class GNUI.Pane.Stack : GNUI.Pane
----@field spacing Vector2
+---@field spacing number
+---@field direction string
 local Stack = {}
 Stack.__index = function (t,i) return rawget(t,i) or Stack[i] or Pane.__index(t,i) end
 Stack.__type = "GNUI.Pane.Stack"
@@ -34,19 +40,48 @@ function StackAPI.new(parent,variant)
 	return box
 end
 
+
+---@param direction GNUI.Pane.Stack.Direction
+---@generic self
+---@param self self
+---@return self
+function Stack:setStackDirection(direction)
+	---@cast self GNUI.Pane.Stack
+	self.direction = direction
+	self:update()
+	return self
+end
+
 ---Rearanges the children. automatically called, but in case it dosent update, call this
 ---@generic self
 ---@param self self
 ---@return self
 function Stack:rearangeChildren()
    ---@cast self GNUI.Pane.Stack
-   local y = 0
+	local dir = self.direction
+   local w = 0
+	local isVertical = dir == "UP" or dir == "DOWN"
+	local isFlipped = dir == "UP" or dir == "LEFT"
+	
+	local anchor = vec(0,0,isVertical and 1 or 0,isVertical and 0 or 1)
+	local axis = isVertical and "y" or "x"
+	
    for i,child in pairs(self.Children) do
-		local size = child:getSize()
-      child:setPos(0,y)
-		:setAnchor(0,0,1,0)
-		y = y + size.y + self.spacing
+		local size = child:getDimensionSize()
+      child:setPos(
+			isVertical and 0 or w,
+			isVertical and w or 0
+		)
+		:setAnchor(anchor)
+		if isFlipped then
+			w = w - size[axis] - self.spacing
+		end
+		if not isFlipped then
+			w = w + size[axis] + self.spacing
+		end
    end
+	self:setSystemMinimumSize(math.abs(w),0)
+	:setGrowDirection(-1,1)
    return self
 end
 
