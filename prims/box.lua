@@ -9,10 +9,10 @@ local V2ZERO = vec(0, 0)
 local V4ZERO = vec(0,0,0,0)
 
 local debugTex = textures["gnui_debug_outline"] or
-	 textures:newTexture("gnui_debug_outline", 6, 6)
-	 :fill(0, 0, 6, 6, vec(0, 0, 0, 1))
-	 :fill(1, 1, 4, 4, vec(1, 1, 1))
-	 :fill(2, 2, 2, 2, vec(0, 0, 0, 1))
+	textures:newTexture("gnui_debug_outline", 6, 6)
+	:fill(0, 0, 6, 6, vec(0, 0, 0, 1))
+	:fill(1, 1, 4, 4, vec(1, 1, 1))
+	:fill(2, 2, 2, 2, vec(0, 0, 0, 1))
 local Sprite = require("./../sprite")
 
 local nextID = 0
@@ -710,7 +710,7 @@ end
 ---@generic self
 ---@param self self
 ---@return self
-function Box:setAnchorMax()
+function Box:maxAnchor()
 	---@cast self GNUI.Box
 	self.Anchor = vec(0, 0, 1, 1)
 	self:update()
