@@ -5,7 +5,7 @@
 \____/_/ |_/ source: link ]]
 
 ---@diagnostic disable: assign-type-mismatch
-local Box = require("lib.GNUI.prims.box") ---@type GNUI.Box
+local Box = require("./../prims/box") ---@type GNUI.Box
 local cfg = require("./../config") ---@type GNUI.Config
 local Event = cfg.event ---@type Event
 local Theme = require("./../theme") ---@type GNUI.ThemeAPI
@@ -68,13 +68,15 @@ function ButtonAPI.new(parent, variant)
 	
 	local wasPressed = true
 	local function update(pressed, hovering, forced)
-		if pressed ~= wasPressed or forced then
-			wasPressed = pressed
-			if pressed then
-				box:setSprite(box.spritePressed or box.spriteNormal)
-				if not forced then
-					playUISound("minecraft:ui.button.click", 1) -- click
-				end
+		wasPressed = pressed
+		if pressed then
+			box:setSprite(box.spritePressed or box.spriteNormal)
+			if not forced then
+				playUISound("minecraft:ui.button.click", 1) -- click
+			end
+		else
+			if hovering then
+				box:setSprite(box.spriteHover or box.spriteNormal)
 			else
 				box:setSprite(box.spriteNormal)
 			end
