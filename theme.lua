@@ -70,14 +70,14 @@ end
 
 
 ---Styles a given class using the theme script, the single lua file in the theme folder.
----@param box GNUI.Box
+---@param box GNUI.Box|string
 ---@param field string
 ---@param variant string|"none"|"default"?
 ---@return GNUI.Sprite|any
 function Theme.getStyle(box, field, variant)
 	
 	local class
-	local rawClass = box.__type
+	local rawClass = type(box) == "string" and box or box.__type
 	if classCache[rawClass] then
 		class = classCache[rawClass]
 	else
