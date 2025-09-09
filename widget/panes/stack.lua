@@ -52,6 +52,13 @@ function Stack:setStackDirection(direction)
 	return self
 end
 
+local ANCHORS = {
+	["UP"] = vec(0,1,1,1),
+	["DOWN"] = vec(0,0,1,0),
+	["LEFT"] = vec(1,0,1,1),
+	["RIGHT"] = vec(0,0,0,1)
+}
+
 ---Rearanges the children. automatically called, but in case it dosent update, call this
 ---@generic self
 ---@param self self
@@ -63,19 +70,20 @@ function Stack:rearangeChildren()
 	local isVertical = dir == "UP" or dir == "DOWN"
 	local isFlipped = dir == "UP" or dir == "LEFT"
 	
-	local anchor = vec(0,0,isVertical and 1 or 0,isVertical and 0 or 1)
+	local anchor = ANCHORS[dir]
+	
 	local axis = isVertical and "y" or "x"
 	
    for i,child in pairs(self.Children) do
 		local size = child:getDimensionSize()
+		if isFlipped then
+			w = w - size[axis] - self.spacing
+		end
       child:setPos(
 			isVertical and 0 or w,
 			isVertical and w or 0
 		)
 		:setAnchor(anchor)
-		if isFlipped then
-			w = w - size[axis] - self.spacing
-		end
 		if not isFlipped then
 			w = w + size[axis] + self.spacing
 		end
