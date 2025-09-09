@@ -94,11 +94,11 @@ function api.getScreen()
 end
 
 ---Enables debug mode for the soon to be created boxes. will not enable debug mode on exiting boxes.
-function api.debugMode()
+function api.showBounds()
 	config.debug_mode = true
 end
 
-api.showBoundingBoxes = api.debugMode
+api.showBoundingBoxes = api.showBounds
 
 if host:isHost() then
 	---@param sound Minecraft.soundID
