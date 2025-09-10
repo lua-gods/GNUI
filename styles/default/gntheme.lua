@@ -26,8 +26,8 @@ local theme = {}
 --[────────────────────────────────────────-< Box >-────────────────────────────────────────]--
 theme.Box = {
 	default = nil,
-	background = {backdrop = GNUI.newSprite(atlas,23,8,27,12 ,2,2,2,2)},
-	solid = {backdrop = GNUI.newSprite(atlas,2,12,2,12)},
+	background = {backdrop = GNUI.newSprite(atlas,1,17,3,19 ,1,1,1,1)},
+	solid = {backdrop = GNUI.newSprite(atlas,1,21,3,23)},
 	group = {
 		backdrop = GNUI.newSprite(atlas,48,16,54,22, 3,3,3,3, -3, -3, -3, -3)
 		:setPadding(7,12,7,7)
