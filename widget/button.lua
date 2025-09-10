@@ -68,11 +68,12 @@ function ButtonAPI.new(parent, variant)
 	
 	local wasPressed = true
 	local function update(pressed, hovering, forced)
-		wasPressed = pressed
 		if pressed then
-			box:setSprite(box.spritePressed or box.spriteNormal)
-			if not forced then
-				playUISound("minecraft:ui.button.click", 1) -- click
+			if wasPressed ~= pressed then
+				box:setSprite(box.spritePressed or box.spriteNormal)
+				if not forced then
+					playUISound("minecraft:ui.button.click", 1) -- click
+				end
 			end
 		else
 			if hovering then
@@ -81,6 +82,7 @@ function ButtonAPI.new(parent, variant)
 				box:setSprite(box.spriteNormal)
 			end
 		end
+		wasPressed = pressed
 	end
 	box.BUTTON_CHANGED:register(update)
 	update(false, false, true)
