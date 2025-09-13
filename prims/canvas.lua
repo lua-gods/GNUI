@@ -157,9 +157,11 @@ local Sprite = require("./../sprite") ---@type GNUI.Sprite
 ---| "key.mouse.8"        # `Mouse 8`
 ---| "key.mouse.scroll"        # `Mouse 8`
 
-local keymap = client.getEnum("keybinds")
-
-for key, value in pairs(keymap) do keymap[key] = "key.keyboard." .. value end
+local keymap = {}
+local key = keybinds:newKeybind("GNUU","key.keyboard.a")
+for _, keyString in ipairs(client.getEnum("keybinds")) do
+	keymap[key:setKey(keyString):getID()] = keyString
+end
 
 local mousemap = {
 	[0] = "left",
@@ -177,7 +179,7 @@ local mousemap = {
 for key, value in pairs(mousemap) do mousemap[key] = "key.mouse." .. value end
 
 ---@class GNUI.Canvas : GNUI.Box # A special type of container that handles all the inputs
----@field MousePosition Vector2 # the position of the mouse
+---@field MousePos Vector2 # the position of the mouse
 ---@field HoveredElement GNUI.any? # the element the mouse is currently hovering over
 ---@field PassiveHoveredElement GNUI.Box? # the last hovering element.
 ---@field HOVERING_ELEMENT_CHANGED Event # triggered when the hovering element changes
@@ -272,7 +274,7 @@ events.WORLD_RENDER:register(function(delta) WORLD_RENDER:invoke() Sprite.update
 ---@return GNUI.Canvas
 function Canvas.new(autoScreenInputs)
 	local new = Box.new() ---@type GNUI.Canvas
-	new.MousePosition = vec(0, 0)
+	new.MousePos = vec(0, 0)
 	new.reciveInputs = true
 	new.MOUSE_MOVED_GLOBAL = eventLib.new()
 	new.INPUT = eventLib.new()
@@ -304,19 +306,19 @@ end
 function Canvas:setMousePos(x, y)
 	---@cast self GNUI.Canvas
 	local mpos = utils.vec2(x, y)
-	local relative = mpos - self.MousePosition
+	local relative = mpos - self.MousePos
 	if true then -- relative.x ~= 0 or relative.y ~= 0 
-		self.MousePosition = mpos
+		self.MousePos = mpos
 
 		---@type GNUI.InputEventMouseMotion
-		local event = {relative = relative, pos = self.MousePosition}
+		local event = {relative = relative, pos = self.MousePos}
 		self.MOUSE_MOVED_GLOBAL:invoke(event)
 		if self.HoveredElement then self.HoveredElement.MOUSE_MOVED:invoke(event) end
 
 		for _, e in pairs(self.PressedElements) do
 			if e ~= self.HoveredElement then e.MOUSE_MOVED:invoke(event) end
 		end
-		self:pos2HoveringChild(self.MousePosition)
+		self:pos2HoveringChild(self.MousePos)
 	end
 	return self
 end
@@ -398,10 +400,10 @@ function Canvas:parseInputEvent(key, state, shift, ctrl, alt, char, strength)
 		end
 	end
 	if not captured then
-		parseInputEventToChildren(self, event, self.MousePosition)
+		parseInputEventToChildren(self, event, self.MousePos)
 		for _, e in pairs(self.PressedElements) do
 			if e ~= self.HoveredElement and e.Canvas == self then
-				parseInputEventOnElement(e, event, self.MousePosition, true)
+				parseInputEventOnElement(e, event, self.MousePos, true)
 			end
 		end
 	end
@@ -410,7 +412,7 @@ function Canvas:parseInputEvent(key, state, shift, ctrl, alt, char, strength)
 			self.PressedElements[key] = self.HoveredElement
 		else
 			if self.PressedElements[key] then
-				self.PressedElements[key].MOUSE_MOVED:invoke({relative = vec(0, 0), pos = self.MousePosition})
+				self.PressedElements[key].MOUSE_MOVED:invoke({relative = vec(0, 0), pos = self.MousePos})
 			end
 			self.PressedElements[key] = nil
 		end

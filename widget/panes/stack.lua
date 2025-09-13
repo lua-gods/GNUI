@@ -32,7 +32,7 @@ StackAPI.__metamethod = Stack
 function StackAPI.new(parent,variant)
    ---@type GNUI.Pane.Stack
    local box = Pane.new(parent,"none")
-   box._parent_class = Stack
+	box.direction = "DOWN"
    setmetatable(box,Stack)
 	
 	box:setSprite(Theme.getStyle(box, "background", variant))
@@ -59,6 +59,13 @@ local ANCHORS = {
 	["RIGHT"] = vec(0,0,0,1)
 }
 
+local GROW_DIRECTION = {
+	["UP"] = vec(1,1),
+	["DOWN"] = vec(1,1),
+	["LEFT"] = vec(-1,1),
+	["RIGHT"] = vec(1,1)
+}
+
 ---Rearanges the children. automatically called, but in case it dosent update, call this
 ---@generic self
 ---@param self self
@@ -75,21 +82,25 @@ function Stack:rearangeChildren()
 	local axis = isVertical and "y" or "x"
 	
    for i,child in pairs(self.Children) do
-		local size = child:getDimensionSize()
-		if isFlipped then
-			w = w - size[axis] - self.spacing
-		end
-      child:setPos(
-			isVertical and 0 or w,
-			isVertical and w or 0
-		)
-		:setAnchor(anchor)
-		if not isFlipped then
-			w = w + size[axis] + self.spacing
+		if child.Visible then
+			local size = child:getDimensionSize()
+			if isFlipped then
+				w = w - size[axis] - self.spacing
+			end
+			child:setPos(
+				isVertical and 0 or w,
+				isVertical and w or 0
+			)
+			:setAnchor(anchor)
+			if not isFlipped then
+				w = w + size[axis] + self.spacing
+			end
 		end
    end
-	self:setSystemMinimumSize(math.abs(w),0)
-	:setGrowDirection(-1,1)
+	self:setSystemMinimumSize(
+	(not isVertical) and math.abs(w) or 0,
+	isVertical and math.abs(w) or 0)
+	:setGrowDirection(GROW_DIRECTION[dir])
    return self
 end
 

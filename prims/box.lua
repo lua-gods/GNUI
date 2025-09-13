@@ -30,6 +30,14 @@ local nextID = 0
 ---| nil
 
 
+---@class GNUI.Event.InputEvent : Event
+---@field register fun(self: self, func: fun(event: GNUI.InputEvent), name: any?): boolean?
+
+
+---@class GNUI.Event.InputEventMouseMotion : Event
+---@field register fun(self: self, func: fun(event: GNUI.InputEventMouseMotion), name: any?): boolean?
+
+
 ---@class GNUI.Box  # A box is a Rectangle that represents the building block of GNUI
 --- ============================ CHILD MANAGEMENT ============================
 ---@field name string                      # An optional property used to get the element by a name.
@@ -94,9 +102,9 @@ local nextID = 0
 ---@field Color Vector3                    # The tint applied to the sprite.
 --- ============================ INPUTS ============================
 ---@field CursorHovering boolean           # True when the cursor is hovering over the container, compared with the parent container.
----@field INPUT Event                      # Serves as the handler for all inputs within the boundaries of the container.
+---@field INPUT GNUI.Event.InputEvent      # Serves as the handler for all inputs within the boundaries of the container.
 ---@field canCaptureCursor boolean         # True when the box can capture the cursor. from its parent
----@field MOUSE_MOVED Event                # Triggered when the mouse position changes within this container.  `GNUI.InputEventMouseMotion` being the first agument, containing data about the event.
+---@field MOUSE_MOVED GNUI.Event.InputEventMouseMotion # Triggered when the mouse position changes within this container.  `GNUI.InputEventMouseMotion` being the first agument, containing data about the event.
 ---@field MOUSE_PRESSENCE_CHANGED Event    # Triggered when the state of the mouse to box interaction changes, arguments include: (hovering: boolean, pressed: boolean)
 ---@field MOUSE_ENTERED Event              # Triggered once the cursor is hovering over the container
 ---@field MOUSE_EXITED Event               # Triggered once the cursor leaves the confinement of this container.
@@ -546,6 +554,19 @@ function Box:setPos(x, y)
 	return self
 end
 
+---Returns the `Dimensions.xy` aka. the top left of the box
+---@return Vector2
+function Box:getPos()
+	return self.Dimensions.xy
+end
+
+---Returns the `Dimensions.zw` aka. the bottom right of the box
+---@return Vector2
+function Box:getEndPos()
+---@diagnostic disable-next-line: return-type-mismatch
+	return self.Dimensions.zw
+end
+
 ---Sets the position of this container.
 ---check out `Box:setPos()` for setting the position from the other end.
 ---@generic self
@@ -553,7 +574,7 @@ end
 ---@param x number|Vector2
 ---@param y number?
 ---@return self
-function Box:setEnd(x, y)
+function Box:setEndPos(x, y)
 	---@cast self GNUI.Box
 	local new = utils.vec2(x or 0, y or 0)
 	local size = self.Dimensions.zw - self.Dimensions.xy
@@ -1037,39 +1058,34 @@ function Box:_update()
 		final.z = final.z + as.z
 		final.w = final.w + as.w
 
-		size = vec(
-			math.floor((final.z - final.x) * 100 + 0.5) / 100,
-			math.floor((final.w - final.y) * 100 + 0.5) / 100
-		)
+		size = final.zw - final.xy  --[[@as Vector2]]
+		
 		if self.CustomMinimumSize or (self.SystemMinimumSize.x ~= 0 or self.SystemMinimumSize.y ~= 0) then
-			local fms = vec(0, 0)
-
-			if self.cache.final_minimum_size_changed or not self.cache.final_minimum_size then
-				self.cache.final_minimum_size_changed = false
-				if self.CustomMinimumSize then
+			local fms = vec(0, 0) -- Final Minimum Size
+			
+			if self.CustomMinimumSize then
 					fms.x = math.max(fms.x, self.CustomMinimumSize.x)
-					fms.y = math.max(fms.y, self.CustomMinimumSize.y)
-				end
-				if self.SystemMinimumSize then
-					fms.x = math.max(fms.x, self.SystemMinimumSize.x)
-					fms.y = math.max(fms.y, self.SystemMinimumSize.y)
-				end
-				shift = (fms - size) * -(self.GrowDirection * -0.5 + 0.5)
-				self.cache.final_minimum_size = fms
-				self.cache.final_minimum_size_shift = shift
-			else
-				fms = self.cache.final_minimum_size
-				shift = self.cache.final_minimum_size_shift
+				fms.y = math.max(fms.y, self.CustomMinimumSize.y)
 			end
+			if self.SystemMinimumSize then
+				fms.x = math.max(fms.x, self.SystemMinimumSize.x)
+				fms.y = math.max(fms.y, self.SystemMinimumSize.y)
+			end
+			
+			self.cache.final_minimum_size = fms
+			self.cache.final_minimum_size_shift = shift
+			
 			final.z = math.max(final.z, final.x + fms.x)
 			final.w = math.max(final.w, final.y + fms.y)
-
+			
+			shift = (fms - size) * -(self.GrowDirection * -0.5 + 0.5)
+			
+			shift.x = math.min(shift.x, 0)
+			shift.y = math.min(shift.y, 0)
+			
 			final:add(shift.x, shift.y, shift.x, shift.y)
 
-			size = vec(
-				math.floor((final.z - final.x) * 100 + 0.5) / 100,
-				math.floor((final.w - final.y) * 100 + 0.5) / 100
-			)
+			size = final.zw - final.xy --[[@as Vector2]]
 		end
 
 		-- calculate clipping
