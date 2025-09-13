@@ -157,9 +157,11 @@ local Nineslice = require("./../nineslice") ---@type Nineslice
 ---| "key.mouse.8"        # `Mouse 8`
 ---| "key.mouse.scroll"        # `Mouse 8`
 
-local keymap = client.getEnum("keybinds")
-
-for key, value in pairs(keymap) do keymap[key] = "key.keyboard." .. value end
+local keymap = {}
+local key = keybinds:newKeybind("GNUU","key.keyboard.a")
+for _, keyString in ipairs(client.getEnum("keybinds")) do
+	keymap[key:setKey(keyString):getID()] = keyString
+end
 
 local mousemap = {
 	[0] = "left",
