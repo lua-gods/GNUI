@@ -38,7 +38,7 @@ theme.Box = {
 --[────────────────────────────────────────-< Button >-────────────────────────────────────────]--
 theme.Button = {
 	default = {
-		normal = GNUI.newSprite(atlas, 23,1,27,7 ,2,2,2,4, 2)
+		normal = GNUI.newSprite(atlas, 23,2,27,7 ,2,2,2,3, 2)
 		:setTextAlign(0.5,0.5)
 		:setDefaultTextColor("#000000"),
 		pressed= GNUI.newSprite(atlas,17,9,21,13 ,2,2,2,2)
@@ -66,9 +66,9 @@ theme.Slider = {
 theme.TextField = {
 	default = {
 		normal = GNUI.newSprite(atlas,17,17,19,20, 1,2,1,1)
-		:setTextMargin(3,3,3,3),
+		:setTextMargin(2,2,2,2),
 		pressed = GNUI.newSprite(atlas,17,17,19,20, 1,2,1,1)
-		:setTextMargin(3,3,3,3),
+		:setTextMargin(2,2,2,2),
 	}
 }
 --[────────────────────────────────────────-< Pane Stack >-────────────────────────────────────────]--
