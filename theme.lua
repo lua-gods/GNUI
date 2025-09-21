@@ -23,7 +23,7 @@ local classCache = {}
 ---@param theme GNUI.Theme
 function Theme.loadTheme(theme)
 	for className, classData in pairs(theme) do
-		styles[className] = theme[className] or {}
+		styles[className] = styles[className] or {}
 		for styleName, styleFun in pairs(classData) do
 			styles[className][styleName] = styleFun
 		end
