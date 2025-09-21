@@ -59,7 +59,11 @@ function SliderAPI.new(parent,config,variant)
 	self.loop = config.loop or false
 	self.keybind = "key.mouse.left"
 	self.sliderBox = Box.new(self):setCanCaptureCursor(false)
-	self.numberBox = Box.new(self):setAnchor(0,0,1,1):setCanCaptureCursor(false)
+	self.showNumber = config.showNumber
+	if type(config.showNumber) == "boolean" then
+		self.numberBox = Box.new(self):setAnchor(0,0,1,1):setCanCaptureCursor(false)
+	end
+	
 	if type(config.isVertical) == "boolean" then
 		self.isVertical = config.isVertical
 	else
@@ -93,14 +97,18 @@ function SliderAPI.new(parent,config,variant)
 			if event.state == 1 then
 				local clickTime = client:getSystemTime()
 				if self.allowInput and clickTime - lastClickTime < DOUBLE_CLICK_TIME then
-					self.numberBox:setVisible(false)
+					if self.showNumber then
+						self.numberBox:setVisible(false)
+					end
 					local numberField = TextField.new(self):setAnchor(0,0,1,1)
 					numberField.FIELD_CONFIRMED:register(function (out)
 						numberField:free()
 						if tonumber(out) then
 							self:setValue(tonumber(out))
 						end
-						self.numberBox:setVisible(true)
+						if self.showNumber then
+							self.numberBox:setVisible(true)
+						end
 					end)
 					numberField:press()
 					self:release()
@@ -114,7 +122,7 @@ function SliderAPI.new(parent,config,variant)
 			end
 		elseif event.key == "key.mouse.scroll" then
 			local dir = event.strength > 0 and 1 or -1
-			self:setValue(self.value - math.max(self.step,0.1) * dir)
+			self:setValue(self.value - dir)
 			return true
 		end
 	end,"GNUI.Input")
@@ -133,8 +141,10 @@ function SliderAPI.new(parent,config,variant)
 	end,"GNUI.Input")
 	self.spriteNormal = Theme.getStyle(self,"shaft",variant)
 	self:setSprite(self.spriteNormal)
+	if self.showNumber then
+		self.numberBox:setSprite(Theme.getStyle(self,"number",variant))
+	end
 	self.sliderBox:setSprite(Theme.getStyle(self,"thumb",variant))
-	self.numberBox:setSprite(Theme.getStyle(self,"number",variant))
 	return self
 end
 
@@ -202,7 +212,9 @@ function Slider:updateSliderBox()
 	if self.isVertical then self.sliderBox:setAnchor(0,a1,1,a2)
 	else self.sliderBox:setAnchor(a1,0,a2,1)
 	end
-	self.numberBox:setText(self.value)
+	if self.showNumber then
+		self.numberBox:setText(self.value)
+	end
 	return self
 end
 
