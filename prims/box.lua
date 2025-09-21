@@ -63,6 +63,7 @@ local nextID = 0
 ---@field Padding Vector4                  # The padding of the box on all sides.
 ---@field PADDING_CHANGED Event            # Triggered when the padding of the box is changed.
 ---
+---@field ChildrenOffset Vector2           # The offset of the children from the final output
 ---@field ContainmentRect Vector4          # The final output dimensions with anchors applied. incredibly handy piece of data.
 ---@field Z number                         # Offsets the box forward(+) or backward(-) if Z fighting is occuring, also affects its children.
 ---@field ZSquish number                   # Multiplies how much the modelpart is positioned in the Z axis
@@ -159,6 +160,7 @@ function Box.new(parent)
 		Padding = vec(0, 0, 0, 0),
 		PADDING_CHANGED = eventLib.new(),
 
+		ChildrenOffset = vec(0, 0),
 		ContainmentRect = vec(0, 0, 0, 0),
 		Z = 1,
 		ZSquish = 1,
@@ -849,6 +851,17 @@ function Box:setPadding(left, top, right, bottom)
 	return self
 end
 
+
+---@param x number|Vector2
+---@param y number
+---@return GNUI.Box
+function Box:setChildrenOffset(x,y)
+	---@cast self GNUI.Box
+	self.ChildrenOffset = utils.vec2(x or 0, y or 0)
+	self:update()
+	return self
+end
+
 --The proper way to set if the cursor is hovering, this will tell the box that it has changed after setting its value
 ---@param toggle boolean
 ---@generic self
@@ -1059,6 +1072,7 @@ function Box:_update()
 		final.w = final.w + as.w
 
 		size = final.zw - final.xy  --[[@as Vector2]]
+		final = final + self.Parent.ChildrenOffset.xyxy
 		
 		if self.CustomMinimumSize or (self.SystemMinimumSize.x ~= 0 or self.SystemMinimumSize.y ~= 0) then
 			local fms = vec(0, 0) -- Final Minimum Size
