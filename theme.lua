@@ -73,8 +73,9 @@ end
 ---@param box GNUI.Box|string
 ---@param field string
 ---@param variant string|"none"|"default"?
+---@param verbose boolean?
 ---@return GNUI.Sprite|any
-function Theme.getStyle(box, field, variant)
+function Theme.getStyle(box, field, variant, verbose)
 	
 	local class
 	local rawClass = type(box) == "string" and box or box.__type
@@ -85,6 +86,10 @@ function Theme.getStyle(box, field, variant)
 		classCache[rawClass] = class
 	end
 	variant = variant or "default"
+	if verbose then
+		print("VARIANT: ", variant)
+		print("CLASS: ", class)
+	end
 	
 	if not styles[class] then
 		return
