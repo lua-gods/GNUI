@@ -37,7 +37,7 @@ function PaneAPI.new(parent,variant)
 		child.SIZE_CHANGED:register(update,"Pane")
 	end)
 	box.CHILDREN_REMOVED:register(function (child)
-		child.SIZE_CHANGED:unregister(update,"Pane")
+		child.SIZE_CHANGED:remove(update,"Pane")
 	end)
    return box
 end
