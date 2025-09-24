@@ -57,6 +57,7 @@ function TextFieldAPI.new(parent,isMultiline,variant)
 		if new.isEditing then
 			new:setEditing(false,cancel)
 			pressCanvas.INPUT:remove(id)
+			print("OFF")
 			events.CHAR_TYPED:remove(id)
 			events.KEY_PRESS:remove(id)
 			events.WORLD_RENDER:remove(id)
@@ -69,8 +70,11 @@ function TextFieldAPI.new(parent,isMultiline,variant)
 			pressCanvas = new.Canvas
 			---@param event GNUI.InputEvent
 			pressCanvas.INPUT:register(function (event)
+				print("ON")
 				if event.key == "key.mouse.left" and event.state == 1 then
 					new:click()
+					pressCanvas.INPUT:remove(id)
+					print("OFF")
 				end
 				return true
 			end,id)
@@ -95,6 +99,7 @@ function TextFieldAPI.new(parent,isMultiline,variant)
 						new:appendTextField("\n")
 					else
 						new:click()
+						return true
 					end
 					elseif key == 263 then -- left
 						if ctrl then

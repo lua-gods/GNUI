@@ -50,6 +50,7 @@ local update = {}
 ---@field TextAlign Vector2?                # The alignment of the text within the box.
 ---@field TextBehavior GNUI.TextBehavior?   # Tells the text what to do when out of bounds.
 ---@field TextMargin Vector4?               # The margin of the text on all sides.
+---@field ChildrenOffset Vector2?           # The offset of the children from the final output
 ---@field package _queue_update boolean
 local Sprite = {}
 Sprite.__index = Sprite
@@ -99,6 +100,8 @@ function Sprite.new(obj)
 	new.TextAlign = obj.TextAlign
 	new.TextBehavior = obj.TextBehavior
 	new.TextMargin = obj.TextMargin
+	
+	new.ChildrenOffset = obj.ChildrenOffset
 	
 	
 	new.TEXTURE_CHANGED:register(function ()
@@ -812,5 +815,15 @@ function Sprite:setTextMargin(left,top,right,bottom)
 	self.TextMargin = utils.vec4(left,top,right or left,bottom or top)
 	return self
 end
+
+
+---@param x number|Vector2
+---@param y number
+---@return GNUI.Sprite
+function Sprite:setChildrenOffset(x,y)
+	self.ChildrenOffset = utils.vec2(x or 0, y or 0)
+	return self
+end
+
 
 return Sprite

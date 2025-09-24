@@ -76,7 +76,6 @@ local nextID = 0
 ---@field CustomMinimumSize Vector2        # Minimum size that the box will use.
 ---@field SystemMinimumSize Vector2        # The minimum size that the box can use, set by the box itself.
 ---@field GrowDirection Vector2            # The direction in which the box grows into when is too small for the parent container.
----@field offsetChildren Vector2           # Shifts the children.
 ---
 ---@field ScaleFactor number               # Scales the displayed sprites and its children based on the factor.
 ---@field AccumulatedScaleFactor number    # Scales the displayed sprites and its children based on the factor.
@@ -172,7 +171,6 @@ function Box.new(parent)
 
 		SystemMinimumSize = vec(0, 0),
 		GrowDirection = vec(1, 1),
-		offsetChildren = vec(0, 0),
 
 		ScaleFactor = 1,
 		AccumulatedScaleFactor = 1,
@@ -503,7 +501,7 @@ function Box:setSprite(sprite)
 		self.SPRITE_CHANGED:invoke()
 	end
 	self:rebuildTextTasks()
-
+	self:update()
 	return self
 end
 
@@ -602,8 +600,11 @@ end
 ---Gets the Dimension size of this container, excluding margins and anchors.
 ---@return Vector2
 function Box:getDimensionSize()
+	local size = self.Dimensions.zw - self.Dimensions.xy
+	size.x = math.max(size.x,self.CustomMinimumSize and self.CustomMinimumSize.x or 0,self.SystemMinimumSize and self.SystemMinimumSize.x or 0)
+	size.y = math.max(size.y,self.CustomMinimumSize and self.CustomMinimumSize.y or 0,self.SystemMinimumSize and self.SystemMinimumSize.y or 0)
 	---@diagnostic disable-next-line: return-type-mismatch
-	return self.Dimensions.zw - self.Dimensions.xy
+	return size
 end
 
 ---Returns the final size of this container, including all the margins and anchors.  
@@ -1053,7 +1054,9 @@ function Box:_update()
 	if self.sprite then
 		final:add(self.Margin and (self.sprite.Margin * scale * SHRINK_MUL) or V4ZERO)
 	end
-	if self.Parent and self.Parent.ContainmentRect then
+	
+	
+	if self.Parent then
 		local parent_scale = 1 / self.Parent.ScaleFactor
 		local pc = self.Parent.ContainmentRect - self.Parent.ContainmentRect.xyxy
 		pc:add(self.Parent and (self.Parent.Padding * scale * SHRINK_MUL) or V4ZERO)
@@ -1073,6 +1076,9 @@ function Box:_update()
 
 		size = final.zw - final.xy  --[[@as Vector2]]
 		final = final + self.Parent.ChildrenOffset.xyxy
+		if self.Parent.sprite and self.Parent.sprite.ChildrenOffset then
+			final = final + self.Parent.sprite.ChildrenOffset.xyxy
+		end
 		
 		if self.CustomMinimumSize or (self.SystemMinimumSize.x ~= 0 or self.SystemMinimumSize.y ~= 0) then
 			local fms = vec(0, 0) -- Final Minimum Size
