@@ -202,7 +202,7 @@ local autoCanvases = {}
 
 -- >====================[ Figura Input Handling Conections ]====================<--
 
-local function screenCheck()
+local function canUseCursor()
 	return host:isCursorUnlocked() and not host:getScreen() or host:isChatOpen()
 end
 
@@ -218,7 +218,7 @@ events.KEY_PRESS:register(function(key, state, modifiers)
 	local minecraft_keybind = keymap[key]
 	if minecraft_keybind then
 		for _, value in pairs(autoCanvases) do
-			if value.reciveInputs and value.Visible and value.canCaptureCursor and screenCheck() then
+			if value.reciveInputs and value.Visible and value.canCaptureCursor and canUseCursor() then
 				value:parseInputEvent(minecraft_keybind, state, _shift, _ctrl, _alt, _char)
 				-- if value.captureInputs then return true end
 			end
@@ -232,7 +232,7 @@ if host:isHost() then
 		if not s or s == "net.minecraft.class_408" then
 			local cursor_pos = client:getMousePos() / client:getGuiScale()
 			for _, c in pairs(autoCanvases) do
-				if c.reciveInputs and c.Visible and not c.hasCustomCursorSetter and screenCheck() then
+				if c.reciveInputs and c.Visible and not c.hasCustomCursorSetter and canUseCursor() then
 					c:setMousePos(cursor_pos.x, cursor_pos.y)
 					if c.captureCursorMovement or c.captureInputs then return true end
 				else
@@ -246,7 +246,7 @@ end
 events.MOUSE_PRESS:register(function(button, state)
 	if mousemap[button] then
 		for _, c in pairs(autoCanvases) do
-			if c.reciveInputs and c.Visible and screenCheck() then
+			if c.reciveInputs and c.Visible and canUseCursor() then
 				c:parseInputEvent(mousemap[button], state, _shift, _ctrl, _alt)
 				if c.captureInputs then return true end
 			end
@@ -256,7 +256,7 @@ end)
 
 events.MOUSE_SCROLL:register(function(dir)
 	for _, c in pairs(autoCanvases) do
-		if c.reciveInputs and c.Visible and screenCheck() then
+		if c.reciveInputs and c.Visible and canUseCursor() then
 			c:parseInputEvent(mousemap[8], 1, _shift, _ctrl, _alt, nil, dir)
 		end
 	end
@@ -284,7 +284,14 @@ function Canvas.new(autoScreenInputs)
 	new.PASSIVE_HOVERING_ELEMENT_CHANGED = eventLib.new()
 	new.PressedElements = {}
 
-	WORLD_RENDER:register(function() new:_propagateUpdateToChildren() end, "GNUI_root_box." .. new.id)
+	WORLD_RENDER:register(function() 
+		new:_propagateUpdateToChildren() 
+		if not canUseCursor() then
+			if next(new.PressedElements) then
+				new.PressedElements = {}
+			end
+		end
+	end, "GNUI_root_box." .. new.id)
 
 	new.ModelPart:setLight(15, 15)
 	if autoScreenInputs then autoCanvases[#autoCanvases + 1] = new end
