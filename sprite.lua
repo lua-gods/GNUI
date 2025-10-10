@@ -29,7 +29,7 @@ local update = {}
 ---@field Margin Vector4                    # the margin of the sprite in the form (left, top, right, bottom)
 ---@field Padding Vector4                   # the padding of the sprite in the form (left, top, right, bottom)
 ---
----@field RenderTasks table<any,SpriteTask> # a list of sprite tasks used by the sprite
+---@field RenderTasks table<string,SpriteTask> # a list of sprite tasks used by the sprite
 ---@field RenderType ModelPart.renderType   # the render type of the sprite.
 ---
 ---@field BorderThickness Vector4           # the thickness of the border in the form (left, top, right, bottom)

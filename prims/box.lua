@@ -31,11 +31,11 @@ local nextID = 0
 
 
 ---@class GNUI.Event.InputEvent : Event
----@field register fun(self: self, func: fun(event: GNUI.InputEvent), name: any?): boolean?
+---@field register fun(self: self, func: fun(event: GNUI.InputEvent), name: string?): boolean?
 
 
 ---@class GNUI.Event.InputEventMouseMotion : Event
----@field register fun(self: self, func: fun(event: GNUI.InputEventMouseMotion), name: any?): boolean?
+---@field register fun(self: self, func: fun(event: GNUI.InputEventMouseMotion), name: string?): boolean?
 
 
 ---@class GNUI.Box  # A box is a Rectangle that represents the building block of GNUI
@@ -44,7 +44,7 @@ local nextID = 0
 ---@field id integer                       # A unique integer for this element. (next-free based).
 ---@field Visible boolean                  # `true` to see.
 ---@field Parent GNUI.any                  # the element's parents.
----@field Children table<any,GNUI.any>     # A list of the element's children.
+---@field Children table<string,GNUI.any>     # A list of the element's children.
 ---@field ChildIndex integer               # the element's place order on its parent.
 ---@field VISIBILITY_CHANGED Event         # on change of visibility.
 ---@field CHILDREN_ADDED Event             # when a child is added. first parameter is the child added.
@@ -411,7 +411,7 @@ function Box:updateChildrenIndex()
 end
 
 ---Sets the Child Index of the element.
----@param i any
+---@param i string
 ---@generic self
 ---@param self self
 ---@return self
@@ -448,8 +448,8 @@ function Box:purgeAllChildren()
 end
 
 ---Kills all the children in the given number range.
----@param ifrom any
----@param ito any
+---@param ifrom string
+---@param ito string
 function Box:purgeChildrenRange(ifrom, ito)
 	local children = {}
 	for i = math.max(ifrom, 1), math.min(ito, #self.Children), 1 do
@@ -508,7 +508,7 @@ end
 ---Sets the flag if this box should go invisible once touching outside of its parent.
 ---@generic self
 ---@param self self
----@param clip any
+---@param clip string
 ---@return self
 function Box:setClipOnParent(clip)
 	---@cast self GNUI.Box
@@ -1556,7 +1556,7 @@ local lengthTrim = client.getTextWidth("|") * 2
 ---@generic self
 ---@param self self
 ---@return self
----@param text any
+---@param text string
 function Box:setText(text)
 	---@cast self GNUI.Box
 	self.Text = text

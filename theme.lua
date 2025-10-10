@@ -4,7 +4,7 @@
 / /_/ / /|  / the script that manages how every class looks.
 \____/_/ |_/ Source: link]]
 
----@alias GNUI.Theme table<string,table<string|"default",table<string,GNUI.Sprite|any>>>
+---@alias GNUI.Theme table<string,table<string|"default",table<string,GNUI.Sprite|string>>>
 
 ---@type GNUI.Theme
 local styles = {}
@@ -74,7 +74,7 @@ end
 ---@param field string
 ---@param variant string|"none"|"default"?
 ---@param verbose boolean?
----@return GNUI.Sprite|any
+---@return GNUI.Sprite|string
 function Theme.getStyle(box, field, variant, verbose)
 	
 	local class
