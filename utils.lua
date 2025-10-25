@@ -1,3 +1,4 @@
+# flags: host_only
 ---@diagnostic disable: assign-type-mismatch
 ---@class GNUI.UtilsAPI
 local utils = {}
