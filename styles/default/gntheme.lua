@@ -1,3 +1,4 @@
+# flags: host_only
 ---@diagnostic disable: undefined-doc-name, undefined-field
 --[[______   __
   / ____/ | / /  by: GNanimates / https://gnon.top / Discord: @gn68s

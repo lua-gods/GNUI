@@ -1,3 +1,4 @@
+# flags: host_only
 ---@diagnostic disable: undefined-field
 --[[______  __
   / ____/ | / / By: GNamimates

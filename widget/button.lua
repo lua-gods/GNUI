@@ -1,3 +1,4 @@
+# flags: host_only
 --[[______   __
   / ____/ | / /  by: GNanimates / https://gnon.top / Discord: @gn68s
  / / __/  |/ / name:

@@ -1,3 +1,4 @@
+# flags: host_only
 ---@diagnostic disable: param-type-mismatch, inject-field
 local cfg = require("./../config") ---@type GNUI.Config ---@type GNUI.Config
 local eventLib = cfg.event ---@type Event

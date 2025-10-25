@@ -1,3 +1,4 @@
+# flags: host_only
 local Box = require("./../prims/box") ---@type GNUI.Box
 local cfg = require("./../config") ---@type GNUI.Config
 local Event = cfg.event ---@type Event

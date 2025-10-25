@@ -1,3 +1,4 @@
+# flags: host_only
 --[[______   __
   / ____/ | / / By: GNamimates | https://gnon.top | Discord: @gn8.
  / / __/  |/ / The TextField Class.

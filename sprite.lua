@@ -1,3 +1,4 @@
+# flags: host_only
 ---@diagnostic disable: param-type-mismatch
 --[[______   __
   / ____/ | / /  by: GNanimates / https://gnon.top / Discord: @gn68s
