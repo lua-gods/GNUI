@@ -398,7 +398,10 @@ function Canvas:parseInputEvent(key, state, shift, ctrl, alt, char, strength)
 	end
 	
 	if not captured then
-		parseInputEventOnElement(self:getChildFromPos(self.MousePos), event, self.MousePos, true)
+		local hoveredElement = self:getChildFromPos(self.MousePos)
+		if hoveredElement then
+			parseInputEventOnElement(hoveredElement, event, self.MousePos, true)
+		end
 	end
 	
 	if key ~= "key.mouse.scroll" then
