@@ -367,17 +367,6 @@ local function parseInputEventOnElement(element, event, position, force)
 	return false
 end
 
----propagates the INPUT event to children, if the cursor is on top of them.  
----if you want a box to always recive input, register a function from the canvas itself, instead of the box.
----@param element GNUI.any
----@param event GNUI.InputEvent
-function parseInputEventToChildren(element, event, position)
-	if element.Parent then position = position - element.ContainmentRect.xy end
-	for i = #element.Children, 1, -1 do
-		if parseInputEventOnElement(element.Children[i], event, position) then return true end
-	end
-	return false
-end
 
 ---Simulates a boolean key event into the canvas.
 ---@param key GNUI.keyCode
@@ -407,14 +396,11 @@ function Canvas:parseInputEvent(key, state, shift, ctrl, alt, char, strength)
 			break
 		end
 	end
+	
 	if not captured then
-		parseInputEventToChildren(self, event, self.MousePos)
-		for _, e in pairs(self.PressedElements) do
-			if e ~= self.HoveredElement and e.Canvas == self then
-				parseInputEventOnElement(e, event, self.MousePos, true)
-			end
-		end
+		parseInputEventOnElement(self:getChildFromPos(self.MousePos), event, self.MousePos, true)
 	end
+	
 	if key ~= "key.mouse.scroll" then
 		if state ~= 0 then -- QOL feature that allows boxes to recive a button being unpressed even when not hovered anymore.
 			self.PressedElements[key] = self.HoveredElement
