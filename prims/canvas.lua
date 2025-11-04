@@ -331,12 +331,11 @@ function Canvas:setMousePos(x, y)
 	return self
 end
 
-local parseInputEventToChildren
 
 --- The function that handles the INPUT event in all boxes.
 ---@param element GNUI.any
 ---@param event GNUI.InputEvent
-local function parseInputEventOnElement(element, event, position, force)
+local function parseInputEventOnElement(element, event)
 	if event.isHandled then return end
 	if element.Visible and element.canCaptureCursor then
 
@@ -344,27 +343,19 @@ local function parseInputEventOnElement(element, event, position, force)
 		for j = 1, #statuses, 1 do
 			if statuses[j] and statuses[j][1] then
 				event.isHandled = true
-				return true
 			end
 		end
 
-		if element:isPosInside(position) or force then
-			if not parseInputEventToChildren(element, event, position) then
-				statuses = element.INPUT:invoke(event)
-				for j = 1, #statuses, 1 do
-					if statuses[j] and statuses[j][1] then
-						event.isHandled = true
-						return true
-					end
-				end
-				if element.isCursorHovering and event.state and event.key:find "$key.mouse" then
-					element.Canvas.PressedElements = {element}
-				end
-				return true
+		statuses = element.INPUT:invoke(event)
+		for j = 1, #statuses, 1 do
+			if statuses[j] and statuses[j][1] then
+				event.isHandled = true
 			end
 		end
+		if element.isCursorHovering and event.state and event.key:find "$key.mouse" then
+			element.Canvas.PressedElements = {element}
+		end
 	end
-	return false
 end
 
 
@@ -400,7 +391,7 @@ function Canvas:parseInputEvent(key, state, shift, ctrl, alt, char, strength)
 	if not captured then
 		local hoveredElement = self:getChildFromPos(self.MousePos)
 		if hoveredElement then
-			parseInputEventOnElement(hoveredElement, event, self.MousePos, true)
+			parseInputEventOnElement(hoveredElement, event)
 		end
 	end
 	
