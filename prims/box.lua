@@ -256,6 +256,7 @@ function Box.new(parent)
 		end
 		new:update()
 	end)
+	assert(type(parent):find("^GNUI.") or parent == nil, "invalid parent given, recived: " .. type(parent), 2)
 	if parent then parent:addChild(new) end
 	return new
 end
@@ -916,14 +917,12 @@ end
 ---@return self
 function Box:setSystemMinimumSize(x, y)
 	---@cast self GNUI.Box
-	if (x and y) then
-		local value = utils.vec2(x, y)
+	local value = utils.vec2(x or 0, y or 0)
+	if self.SystemMinimumSize.x ~= value.x or self.SystemMinimumSize.y ~= value.y then
 		self.SystemMinimumSize = value
-	else
-		self.SystemMinimumSize = vec(0, 0)
+		self.cache.final_minimum_size_changed = true
+		self:update()
 	end
-	self.cache.final_minimum_size_changed = true
-	self:update()
 	return self
 end
 
@@ -1545,9 +1544,15 @@ function Box:repositionText()
 			j = j + 1
 			local p = line.poses[i]
 			tasks[j]:setPos(
-				-(size.x * align.x + p.x - line.width * align.x) - o.x,
-				-((size.y - #lineWidth * 10 * scale) * align.y - p.y) - o.y, -0.1)
+				math.floor(-(size.x * align.x + p.x - line.width * align.x) - o.x),
+				math.floor(-((size.y - #lineWidth * 10 * scale) * align.y - p.y) - o.y - 1), -0.1)
 		end
+	end
+	if #lineWidth > 1 then
+		local sms = self.SystemMinimumSize
+		self:setSystemMinimumSize(sms.x, #lineWidth * 10 * scale)
+	else
+		self:setSystemMinimumSize(0,0)
 	end
 end
 
