@@ -42,7 +42,7 @@ theme.Button = {
 		normal = GNUI.newSprite(atlas, 23,2,27,7 ,2,2,2,3, 1)
 		:setTextAlign(0.5,0.5)
 		:setDefaultTextColor("#000000")
-		:setChildrenOffset(0,-2),
+		:setChildrenOffset(0,-1),
 		pressed= GNUI.newSprite(atlas,17,9,21,13 ,2,2,2,2)
 		:setTextAlign(0.5,0.5)
 		:setDefaultTextColor("#000000")
@@ -50,21 +50,22 @@ theme.Button = {
 		hovered=GNUI.newSprite(atlas, 17,1,21,7 ,2,2,2,4, 1)
 		:setTextAlign(0.5,0.5)
 		:setDefaultTextColor("#000000")
-		:setChildrenOffset(0,-2),
+		:setChildrenOffset(0,-1),
 	},
 	secondary = {
 		normal = GNUI.newSprite(atlas, 39,2,43,7 ,2,2,2,3, 1)
 		:setTextAlign(0.5,0.5)
 		:setDefaultTextColor("#e7e7e7")
-		:setChildrenOffset(0,-2),
+		:setChildrenOffset(0,0),
 		pressed= GNUI.newSprite(atlas,39,9,43,13 ,2,2,2,2)
 		:setTextAlign(0.5,0.5)
 		:setDefaultTextColor("#e7e7e7")
+		:setChildrenOffset(0,1)
 		:setTextOffset(0,1),
 		hovered=GNUI.newSprite(atlas, 33,2,37,7 ,2,2,2,4, 1)
 		:setTextAlign(0.5,0.5)
 		:setDefaultTextColor("#e7e7e7")
-		:setChildrenOffset(0,-2),
+		:setChildrenOffset(0,0),
 	},
 }
 --[────────────────────────────────────────-< Spider >-────────────────────────────────────────]--
