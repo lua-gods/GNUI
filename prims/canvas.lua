@@ -402,6 +402,9 @@ function Canvas:parseInputEvent(key, state, shift, ctrl, alt, char, strength)
 			if self.PressedElements[key] then
 				self.PressedElements[key].MOUSE_MOVED:invoke({relative = vec(0, 0), pos = self.MousePos})
 			end
+			if self.PressedElements[key] then
+				parseInputEventOnElement(self.PressedElements[key], event)
+			end
 			self.PressedElements[key] = nil
 		end
 	end

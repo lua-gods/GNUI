@@ -509,7 +509,7 @@ end
 ---Sets the flag if this box should go invisible once touching outside of its parent.
 ---@generic self
 ---@param self self
----@param clip string
+---@param clip boolean
 ---@return self
 function Box:setClipOnParent(clip)
 	---@cast self GNUI.Box
