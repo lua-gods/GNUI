@@ -105,4 +105,15 @@ function Stack:rearangeChildren()
    return self
 end
 
+---@generic self
+---@param self self
+---@return self
+function Stack:setSpacing(spacing)
+	---@cast self GNUI.Pane.Stack
+	self.spacing = spacing
+	self:update()
+	return self
+end
+
+
 return StackAPI
