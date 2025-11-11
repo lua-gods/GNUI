@@ -231,7 +231,7 @@ if host:isHost() then
 	events.WORLD_RENDER:register(function ()
 		local s = host:getScreen()
 		if not s or s == "net.minecraft.class_408" then
-			local cursor_pos = client:getMousePos() / client:getGuiScale()
+			local cursor_pos = client:getMousePos() * (client.getScaledWindowSize() / client.getWindowSize())
 			for _, c in pairs(autoCanvases) do
 				if c.reciveInputs and c.Visible and not c.hasCustomCursorSetter and canUseCursor() then
 					c:setMousePos(cursor_pos.x, cursor_pos.y)
