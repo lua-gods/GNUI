@@ -205,11 +205,11 @@ end
 ---@return self
 function Slider:updateSliderBox()
 	---@cast self GNUI.Slider
-	local diff = math.min(math.abs(self.max - self.min),20) + 1
+	local diff = math.min(math.abs(self.max - self.min),10) + 1
 	local mul = (diff-1) / (self.max - self.min)
 	local l = self.value - self.min
 	local a1,a2 = (l * mul)/diff,(l * mul+1)/diff
-	self.cache.grabber_size = (a2 - a1) / 2
+	self.cache.grabber_size = (a2 - a1)
 	if self.isVertical then self.sliderBox:setAnchor(0,a1,1,a2)
 	else self.sliderBox:setAnchor(a1,0,a2,1)
 	end
