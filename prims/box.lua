@@ -272,6 +272,7 @@ function Box:setVisible(visible)
 		self.Visible = visible
 		self.VISIBILITY_CHANGED:invoke(visible)
 	end
+	self:update()
 	return self
 end
 
