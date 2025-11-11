@@ -107,7 +107,6 @@ function Theme.getStyle(box, field, variant, verbose)
 			end
 		end
 	end
-	return Theme.getStyle("Box", field, "default", verbose)
 end
 
 return Theme
