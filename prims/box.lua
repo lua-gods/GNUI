@@ -272,11 +272,6 @@ function Box:setVisible(visible)
 		self.Visible = visible
 		self.VISIBILITY_CHANGED:invoke(visible)
 	end
-		
-	-- Optimizes Figura rendering
-	for i = 1, #self.Children, 1 do
-		self.Children[i]:setVisible(visible)
-	end
 	
 	self:update()
 	return self
