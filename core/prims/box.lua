@@ -68,8 +68,12 @@ local BoxAPI = {}
 ---@field wrapText boolean
 ---
 ---@field flaggedUpdate boolean
----@field sprite GNUI.Sprite?
 ---@field canvas GNUI.Canvas
+---
+---@field variant string?
+---@field sprite GNUI.Sprite?
+---
+---@field isHovered boolean
 ---
 ---@field CURSOR_PRESENCE_CHANGED GNUI.Box.Event.CursorPresenceChanged
 ---@field KEY_INPUT GNUI.Box.Event.KeyInput
@@ -732,7 +736,8 @@ function Box:sovleForLayout(other)
 		end
 	else
 		for _, child in ipairs(self.children) do
-			child.bakedPos[x] = child.pos[x]
+			local margin = child:getMargin()
+			child.bakedPos[x] = child.pos[x] + margin[x]
 			if child.sizing[x] == "FIXED" then
 				child.bakedSize[x] = child.size[x]
 			end
@@ -749,8 +754,12 @@ end
 --────────────────────────-< Layout Parser >-────────────────────────--
 
 
-function BoxAPI.parse(layout,canvas)
-	local box = BoxAPI.new(canvas)
+---@param layout GNUI.Layout
+---@param canvas GNUI.Canvas
+---@param box GNUI.Box?
+---@return GNUI.Box
+function BoxAPI.parse(layout,canvas,box)
+	local box = box or BoxAPI.new(canvas)
 
 	local hasSizeX, hasSizeY = false, false
 	if layout.size then
@@ -761,6 +770,7 @@ function BoxAPI.parse(layout,canvas)
 	if layout.minSize then box:setMinimumSize(layout.minSize.x, layout.minSize.y) end
 	if layout.sizing then
 		if type(layout.sizing) == "string" then
+---@diagnostic disable-next-line: param-type-mismatch
 			box:setSizing(layout.sizing, layout.sizing)
 		else
 			box:setSizing(layout.sizing[1], layout.sizing[2])
@@ -776,7 +786,9 @@ function BoxAPI.parse(layout,canvas)
 	if layout.layout then box:setLayout(layout.layout) end
 	if layout.gap then box:setChildGap(layout.gap) end
 	
-	local style = Style.getStyle(box, layout.variant or "default", "normal")
+	box.variant = layout.variant or "default"
+	
+	local style = Style.getStyle(box, box.variant, "normal")
 	if style then
 		box:setSprite(style:newInstance(box))
 	end
