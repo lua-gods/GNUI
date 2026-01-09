@@ -13,18 +13,29 @@ end
 return {
 	box={
 		default={
-			normal = Quad.newStyle()
-			:setTexture("avatar")
-			--:setUV(1,0,6,7)
-			,
-		},
-		test={
 			normal = Nineslice.newStyle()
 			:setTexture(atlas)
-			:setUV(1,0,6,7)
-			:setBorder(2,2,2,4)
-			:setPadding(5,5,5,7)
+			:setUV(59,0,61,2)
+			:setBorder(1,1,1,1)
+			:setPadding(2,2,2,2)
 			--:setMargin(5,5,5,5)
+			,
+		}
+	},
+	button={
+		default={
+			normal = Nineslice.newStyle()
+			:setTexture(atlas)
+			:setUV(7,0,11,6)
+			:setBorder(2,2,2,4)
+			:setPadding(2,2,2,4)
+			,
+			pressed = Nineslice.newStyle()
+			:setTexture(atlas)
+			:setUV(7,26,11,30)
+			:setBorder(2,2,2,2)
+			:setPadding(2,2,2,2)
+			:setMargin(0,2,0,0)
 			,
 		}
 	}
