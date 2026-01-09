@@ -164,7 +164,6 @@ end
 ---@param id integer
 ---@param index integer
 function Sprite:setParent(id,index)
-	print("E")
 	self.childIndex = index
 	self.parentID = id
 	self.render:setParent(self.id,id,index)
