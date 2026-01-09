@@ -164,7 +164,7 @@ function Nineslice:applyStyle()
 	if self.style then
 		local style = self.style
 		local border = self.style.border
-		local uv = style.uv
+		local uv = style.uv:copy():add(0,0,1,1)
 		
 		self:setTexture(style.texture_path)
 		
