@@ -1,6 +1,8 @@
-local Quad = require("./sprites/quad") ---@type GNUI.Sprite.QuadAPI
-local Sprite = require("./sprites/sprite") ---@type GNUI.Sprite
+
+local SpriteStyle = require("./styles/sprite") ---@type GNUI.Sprite.StyleAPI
+
 local util =  require("../utils") ---@type GNUI.utils
+
 
 ---@alias GNUI.Theme table<string,table<string,table<string,GNUI.Sprite.Style>>>
 
@@ -38,13 +40,15 @@ end
 ---@param key any
 ---@return GNUI.Sprite.Style?
 function StyleAPI.getStyle(class,variant,key)
-	if type(class) == "table" then
+	if type(class) ~= "string" then
 		class = class.__style
 		assert(class,"No class found")
 	end
 	
 	if Theme[class] and Theme[class][variant] and Theme[class][variant][key] then
 		return Theme[class][variant][key]
+	else
+		error("Unknown style: " .. tostring(class) .. "." .. toJson(variant) .. "." .. tostring(key))
 	end
 end
 
