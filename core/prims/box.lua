@@ -204,7 +204,7 @@ end
 
 ---@return Vector4
 function Box:getMargin()
-	return self.margin + (self.sprite and self.sprite.style.margin or vec(0,0,0,0))
+	return self.margin + (self.sprite and self.sprite.style and self.sprite.style.margin or vec(0,0,0,0))
 end
 
 
@@ -599,6 +599,7 @@ end
 ---@return self
 function Box:solveForFitSizing(other)
 	local x = (other and "y" or "x")
+	local z = (other and "w" or "z")
 	---@cast self GNUI.Box
 	
 	for _, child in ipairs(self.children) do
@@ -616,18 +617,20 @@ function Box:solveForFitSizing(other)
 		if (self.layout == (other and "VERTICAL" or "HORIZONTAL")) then -- is parallel
 			local totalSize = 0
 			for _, child in ipairs(self.children) do
-				totalSize = totalSize + child.bakedSize[x] + child:getPadding()[x]
+				local childPadding = child:getPadding()
+				local childMargin = child:getMargin()
+				totalSize = totalSize + child.bakedSize[x] + childPadding[x] + childPadding[z] + childMargin[x] + childMargin[z]
 			end
 			totalSize = totalSize + self.childGap * (#self.children - 1)
 			self.bakedSize[x] = math.max(self.minSize[x],totalSize,textSize[x])
 		
 		else
-			local z = (other and "w" or "z")
 			local minSize = self.minSize[x]
 			for _, child in ipairs(self.children) do
-				minSize = math.max(minSize,child.bakedSize[x]+padding[x]+padding[z])
+				local childMargin = child:getMargin()
+				minSize = math.max(minSize,child.bakedSize[x] + childMargin[x] + childMargin[z])
 			end
-			self.bakedSize[x] = math.max(minSize,textSize[x]+padding[x]+padding[z])
+			self.bakedSize[x] = math.max(minSize,textSize[x]) + padding[x] + padding[z]
 		end
 	end
 	return self
@@ -756,8 +759,9 @@ end
 
 ---@param layout GNUI.Layout
 ---@param canvas GNUI.Canvas
----@param box GNUI.Box?
----@return GNUI.Box
+---@generic box
+---@param box box
+---@return box
 function BoxAPI.parse(layout,canvas,box)
 	local box = box or BoxAPI.new(canvas)
 
