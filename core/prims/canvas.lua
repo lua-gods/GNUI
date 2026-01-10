@@ -31,6 +31,7 @@ function CanvasAPI.new()
 	---@cast self GNUI.Canvas
 	self.render = Render.new(self)
 	self.queueUpdate = {}
+	self.pressedButtons = {}
 	setmetatable(self,Canvas)
 	return self
 end
@@ -87,6 +88,13 @@ end
 function Canvas:inputKey(scancode, state)
 	if self.hoveredBox then
 		self.hoveredBox.KEY_INPUT(scancode, state)
+		
+		if state == 1 then
+			self.pressedButtons[scancode] = self.hoveredBox
+		elseif state == 0 then
+			self.pressedButtons[scancode].KEY_INPUT(scancode,state)
+			self.pressedButtons[scancode] = nil
+		end
 	end
 end
 
@@ -99,12 +107,20 @@ end
 
 
 ---NOTE button 0 is scroll, and sate becomes the scroll amount
+---
 ---@overload fun(self: GNUI.Canvas ,button: 0, dist: number): GNUI.Canvas
 ---@param button integer
 ---@param state integer
 function Canvas:inputMouse(button,state)
 	if self.hoveredBox then
 		self.hoveredBox.MOUSE_INPUT(button,state)
+		
+		if state == 1 then
+			self.pressedButtons[button] = self.hoveredBox
+		elseif state == 0 then
+			self.pressedButtons[button].MOUSE_INPUT(button,state)
+			self.pressedButtons[button] = nil
+		end
 	end
 end
 
