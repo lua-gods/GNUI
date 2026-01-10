@@ -9,20 +9,9 @@ local LayoutAPI = {}
 
 
 ---@class GNUI.Layout
----@field type nil|"box"
----@field name string?
----@field size Vector2?
----@field minSize Vector2?
----@field sizing ({[1]:GNUI.Box.SizingMode,[2]:GNUI.Box.SizingMode}|GNUI.Box.SizingMode)?
----@field pos Vector2?
----@field gap number?
----@field layout GNUI.Box.LayoutMode?
----@field text string?
----@field textAlign (-1|0|1)?
----@field wrap boolean?
----@field variant string?
----
 ---@field [1] GNUI.Layout[]?
+---@field variant string?
+
 
 
 local elements = {}

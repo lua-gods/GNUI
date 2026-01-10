@@ -1,3 +1,4 @@
+---@diagnostic disable: duplicate-doc-field
 local config = require("../../config") ---@type GNUI.config
 local gncommon = require("../../../gncommon") ---@type GNCommon
 local utils = require("../../utils") ---@type GNUI.utils
@@ -119,7 +120,7 @@ function BoxAPI.new(canvas)
 		childIndex = 0,
 		children = {},
 		namedChildren = {},
-		childAlign = vec(0,0),
+		childAlign = vec(-1,-1),
 		
 		id = nextFree,
 		visible = true,
@@ -336,6 +337,20 @@ end
 function Box:setLayout(layout)
 	---@cast self GNUI.Box
 	self.layout = layout
+	self:update()
+	return self
+end
+
+
+---@overload fun(self: GNUI.Box ,hv: Vector2): GNUI.Box
+---@param h number
+---@param v number
+---@generic self
+---@param self self
+---@return self
+function Box:setChildAlign(h,v)
+	---@cast self GNUI.Box
+	self.childAlign = gncommon.vec2(h,v)
 	self:update()
 	return self
 end
@@ -731,10 +746,13 @@ function Box:sovleForLayout(other)
 				pos = pos + child.bakedSize[x] + childMargin[x] + childMargin[z] + self.childGap
 			end
 		else
-			local padding = self:getPadding()[x]
+			local padding = self:getPadding()
 			for _, child in ipairs(self.children) do
 				local margin = child:getMargin()
-				child.bakedPos[x] = padding + margin[x]
+				child.bakedPos[x] = math.lerp(
+				padding[x] + margin[x],
+				self.bakedSize[x] - child.bakedSize[x] - padding[x] - margin[x],
+				self.childAlign[x] * 0.5 + 0.5)
 			end
 		end
 	else
@@ -755,6 +773,20 @@ end
 
 
 --────────────────────────-< Layout Parser >-────────────────────────--
+
+---@class GNUI.Layout
+---@field type nil|"box"
+---@field name string?
+---@field size Vector2?
+---@field minSize Vector2?
+---@field sizing ({[1]:GNUI.Box.SizingMode,[2]:GNUI.Box.SizingMode}|GNUI.Box.SizingMode)?
+---@field pos Vector2?
+---@field gap number?
+---@field layout GNUI.Box.LayoutMode?
+---@field childAlign Vector2?
+---@field text string?
+---@field textAlign (-1|0|1)?
+---@field wrap boolean?
 
 
 ---@param layout GNUI.Layout
@@ -788,6 +820,7 @@ function BoxAPI.parse(layout,canvas,box)
 	end
 	if layout.pos then box:setPos(layout.pos.x, layout.pos.y) end
 	if layout.layout then box:setLayout(layout.layout) end
+	if layout.childAlign then box:setChildAlign(layout.childAlign) end
 	if layout.gap then box:setChildGap(layout.gap) end
 	
 	box.variant = layout.variant or "default"
