@@ -15,7 +15,16 @@ return {
 		default={
 			normal = Nineslice.newStyle()
 			:setTexture(atlas)
-			:setUV(59,0,61,2)
+			:setUV(59,17,61,19)
+			:setBorder(1,1,1,1)
+			:setPadding(2,2,2,2)
+			--:setMargin(5,5,5,5)
+			,
+		},
+		glass={
+			normal = Nineslice.newStyle()
+			:setTexture(atlas)
+			:setUV(59,21,61,23)
 			:setBorder(1,1,1,1)
 			:setPadding(2,2,2,2)
 			--:setMargin(5,5,5,5)
@@ -38,6 +47,13 @@ return {
 			:setPadding(2,2,2,2)
 			:setMargin(0,2,0,0)
 			:setTextColor(0,0,0)
+			,
+			hovered = Nineslice.newStyle()
+			:setTexture(atlas)
+			:setUV(7,8,11,14)
+			:setBorder(2,2,2,4)
+			:setPadding(2,2,2,4)
+			:setTextColor("#1b1b1b")
 			,
 		}
 	}

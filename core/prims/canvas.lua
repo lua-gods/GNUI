@@ -68,7 +68,7 @@ function Canvas:setCursorPos(x,y)
 	
 	if self.hoveredBox ~= newHoveredBox then
 		if self.hoveredBox then
-			self.isHovered = false
+			self.hoveredBox.isHovered = false
 			self.hoveredBox.CURSOR_PRESENCE_CHANGED:invoke(false)
 		end
 		self.hoveredBox = newHoveredBox

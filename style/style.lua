@@ -1,6 +1,3 @@
-
-local SpriteStyle = require("./styles/sprite") ---@type GNUI.Sprite.StyleAPI
-
 local util =  require("../utils") ---@type GNUI.utils
 
 
@@ -38,7 +35,7 @@ end
 ---@param class string|GNUI.Box
 ---@param variant string
 ---@param key any
----@return GNUI.Sprite.Style?
+---@return GNUI.Sprite.Style
 function StyleAPI.getStyle(class,variant,key)
 	if type(class) ~= "string" then
 		class = class.__style
@@ -50,6 +47,14 @@ function StyleAPI.getStyle(class,variant,key)
 	else
 		error("Unknown style: " .. tostring(class) .. "." .. toJson(variant) .. "." .. tostring(key))
 	end
+end
+
+
+---@param box GNUI.Box
+---@param key string
+---@return GNUI.Sprite.Style
+function StyleAPI.getKey(box,key)
+	return StyleAPI.getStyle(box.__style,box.variant,key)
 end
 
 

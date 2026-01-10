@@ -3,7 +3,9 @@
  / / __/  |/ / name: GNUI Sprite Module
 / /_/ / /|  /  desc: base class for all sprites
 \____/_/ |_/ source: link ]]
-local Style = require("../styles/sprite") ---@type GNUI.Sprite.StyleAPI
+
+
+local SpriteStyle = require("../styles/sprite") ---@type GNUI.Sprite.StyleAPI
 local gncommon = require("lib.gncommon") ---@type GNCommon
 
 
@@ -56,10 +58,10 @@ function SpriteAPI.new(box)
 end
 
 
-Style.setInstancer(SpriteAPI.new)
+SpriteStyle.setInstancer(SpriteAPI.new)
 ---@return GNUI.Sprite.Style
 function SpriteAPI.newStyle()
-	return Style.new()
+	return SpriteStyle.new()
 end
 
 
@@ -119,6 +121,7 @@ function Sprite:setPadding(left,top,right,bottom)
 end
 
 
+---Applies the given style to this sprite,
 ---@param style GNUI.Sprite.Style
 ---@generic self
 ---@param self self
