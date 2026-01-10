@@ -52,7 +52,7 @@ local function parseEntry(canvas, layout)
 			end
 			return box
 		else
-			error("Failed to parse layout: " .. layout.type .. "\n" .. box,2)
+			error("Failed to parse layout: " .. tostring(layout.type) .. "\n" .. box,2)
 		end
 	else
 		error("Unknown layout type: " .. (layout and layout.type or "nil"))
@@ -68,3 +68,4 @@ function LayoutAPI.parse(canvas, layout)
 end
 
 return LayoutAPI
+

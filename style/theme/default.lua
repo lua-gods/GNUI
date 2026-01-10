@@ -29,6 +29,7 @@ return {
 			:setUV(7,0,11,6)
 			:setBorder(2,2,2,4)
 			:setPadding(2,2,2,4)
+			:setTextColor("#1b1b1b")
 			,
 			pressed = Nineslice.newStyle()
 			:setTexture(atlas)
@@ -36,6 +37,7 @@ return {
 			:setBorder(2,2,2,2)
 			:setPadding(2,2,2,2)
 			:setMargin(0,2,0,0)
+			:setTextColor(0,0,0)
 			,
 		}
 	}

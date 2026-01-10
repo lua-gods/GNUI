@@ -86,6 +86,9 @@ end
 ---@field uv Vector4
 ---@field quad SpriteTask
 ---
+---@field color Vector3
+---@field textColor string
+---
 ---@field padding Vector4
 ---@field label TextTask
 ---@field text string
@@ -106,6 +109,8 @@ function Render:newVisualQuad()
 		id = id,
 		index = 10,
 		childCount = 0,
+		color = vec(1,1,1),
+		textColor = "ffffff",
 		pos = vec(0,0),
 		children = {},
 		padding = vec(0,0,0,0),
@@ -207,6 +212,22 @@ function Render:setTexture(id,path)
 	:setRegion(uv.zw * visual.texture_size)
 end
 
+function Render:setBoxColor(id,r,g,b)
+	local visual = self.visuals[id]
+	visual.quad:setColor(r,g,b)
+end
+
+
+---@param id integer
+---@param r number
+---@param g number
+---@param b number
+function Render:setTextColor(id,r,g,b)
+	local visual = self.visuals[id]
+	visual.textColor = vectors.rgbToHex(r,g,b)
+	self:setText(id)
+end
+
 
 ---NOTE: Quad exclusive function
 ---
@@ -231,12 +252,13 @@ end
 
 function Render:setText(id,text)
 	local visual = self.visuals[id]
-	if not visual.label then
-		visual.label = visual.model:newText("label"):setPos(-visual.padding.x,-visual.padding.y)
+	if visual.text or text then
+		if not visual.label then
+			visual.label = visual.model:newText("label"):setPos(-visual.padding.x,-visual.padding.y)
+		end
+		visual.text = text or visual.text or ""
+		visual.label:text(('{"text":"%s","color":"#%s"}'):format(visual.text,visual.textColor))
 	end
-	
-	visual.label:text(text)
-	visual.text = text
 end
 
 

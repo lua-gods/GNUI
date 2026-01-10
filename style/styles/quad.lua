@@ -9,6 +9,8 @@ local QuadStyleAPI = {}
 
 ---@class GNUI.Sprite.Quad.Style : GNUI.Sprite.Style
 ---@field texture_path string
+---@field color Vector3
+---@field textColor Vector3
 ---@field uv Vector4
 local QuadStyle = {}
 QuadStyle.__index = function (t,i)
@@ -27,6 +29,8 @@ function QuadStyleAPI.new()
 	---@cast self GNUI.Sprite.Quad.Style
 	self.texture_path = ""
 	self.uv = gncommon.vec4(0,0,0,0)
+	self.color = vec(1,1,1)
+	self.textColor = vec(1,1,1)
 	setmetatable(self,QuadStyle)
 	return self
 end
@@ -73,6 +77,34 @@ end
 function QuadStyle:setUV(x1,y1,x2,y2)
 	---@cast self GNUI.Sprite.Quad.Style
 	self.uv = gncommon.vec4(x1,y1,x2,y2)
+	return self
+end
+
+
+---@overload fun(self: self, rgb: Vector3): self
+---@param r number
+---@param g number
+---@param b number
+---@return GNUI.Sprite.Quad.Style
+function QuadStyle:setColor(r,g,b)
+	self.color = gncommon.vec3(r,g,b)
+	return self
+end
+
+
+---@overload fun(self: self, hex: string): self
+---@overload fun(self: self, rgb: Vector3): self
+---@param r number
+---@param g number
+---@param b number
+---@return GNUI.Sprite.Quad.Style
+function QuadStyle:setTextColor(r,g,b)
+	local t = type(r)
+	if t == "string" then
+		self.textColor = vectors.hexToRGB(r)
+	else
+		self.textColor = gncommon.vec3(r,g,b)
+	end
 	return self
 end
 

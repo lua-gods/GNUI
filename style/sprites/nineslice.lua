@@ -30,6 +30,8 @@ local NinesliceAPI = {}
 ---@field idBottomRight integer
 ---@field idBottom integer
 ---@field idBottomLeft integer
+---
+---@field ids integer[]
 local Nineslice = {}
 Nineslice.__index = function (t,i)
 	return rawget(t,i) or Nineslice[i] or Quad.index(i) or Sprite.index(i)
@@ -58,6 +60,20 @@ function NinesliceAPI.new(box)
 	self.idBottomRight = self.render:newVisualQuad()
 	self.idBottom = self.render:newVisualQuad()
 	self.idBottomLeft = self.render:newVisualQuad()
+	
+	self.ids = {
+		self.idTopLeft,
+		self.idTop,
+		self.idTopRight,
+		
+		self.idLeft,
+		self.idCenter,
+		self.idRight,
+		
+		self.idBottomLeft,
+		self.idBottom,
+		self.idBottomRight,
+	}
 	
 	setmetatable(self, Nineslice)
 	self:setBox(box)
@@ -173,12 +189,17 @@ function Nineslice:applyStyle()
 		self.render:setUV(self.idTopRight, uv.z-border.z,    uv.y,      uv.z,                uv.y+border.y)
 		
 		self.render:setUV(self.idLeft,  uv.x,                uv.y+border.y,       uv.x+border.x,   uv.w-border.w)
-		self.render:setUV(self.idCenter,      uv.x+border.x,       uv.y+border.y,       uv.z-border.z,   uv.w-border.w)
+		self.render:setUV(self.idCenter,      uv.x+border.x, uv.y+border.y,       uv.z-border.z,   uv.w-border.w)
 		self.render:setUV(self.idRight, uv.z-border.z,       uv.y+border.y,       uv.z,            uv.w-border.w)
 		
-		self.render:setUV(self.idBottomLeft,  uv.x, uv.w-border.w, uv.x+border.x, uv.w)
+		self.render:setUV(self.idBottomLeft,  uv.x,          uv.w-border.w, uv.x+border.x, uv.w)
 		self.render:setUV(self.idBottom,      uv.x+border.x, uv.w-border.w, uv.z-border.z, uv.w)
 		self.render:setUV(self.idBottomRight, uv.z-border.z, uv.w-border.w, uv.z, uv.w)
+
+		for index, id in ipairs(self.ids) do
+			self.render:setBoxColor(id,style.color.x,style.color.y,style.color.z)
+		end
+		self.render:setTextColor(self.id,style.textColor.x,style.textColor.y,style.textColor.z)
 		
 		if self.parentID then
 			self:setParent(self.parentID, self.childIndex)

@@ -18,7 +18,6 @@ local SpriteAPI = {}
 ---@field childIndex integer
 ---@field parentID integer
 ---
----@field color Vector3
 ---@field pos Vector2
 ---@field size Vector2
 ---
@@ -44,6 +43,8 @@ function SpriteAPI.new(box)
 		padding = vec(0,0,0,0),
 		margin = vec(0,0,0,0),
 		childIndex = 1,
+		
+		boxColor = vec(1,1,1),
 		
 		render = box.canvas.render,
 		id = box.canvas.render:newVisualQuad()

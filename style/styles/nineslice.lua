@@ -8,7 +8,7 @@ local util = require("../../utils") ---@type GNUI.utils
 local NinesliceStyleAPI = {}
 
 
----@class GNUI.Sprite.Nineslice.Style : GNUI.Sprite.Style
+---@class GNUI.Sprite.Nineslice.Style : GNUI.Sprite.Quad.Style
 ---@field border Vector4
 local NinesliceStyle = {}
 NinesliceStyle.__index = function (t,i)
@@ -23,7 +23,7 @@ end
 
 ---@return GNUI.Sprite.Nineslice.Style
 function NinesliceStyleAPI.new()
-	local self = SpriteStyle.new()
+	local self = QuadStyle.new()
 	---@cast self GNUI.Sprite.Nineslice.Style
 	self.texture_path = ""
 	self.uv = vec(0,0,0,0)

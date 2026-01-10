@@ -66,6 +66,9 @@ function Quad:applyStyle()
 		local style = self.style
 		self.render:setTexture(self.id,style.texture_path)
 		self.render:setUV(self.id,style.uv.x,style.uv.y,style.uv.z,style.uv.w)
+		
+		self.render:setBoxColor(self.id,style.color.x,style.color.y,style.color.z)
+		self.render:setTextColor(self.id,style.textColor.x,style.textColor.y,style.textColor.z)
 	end
 end
 

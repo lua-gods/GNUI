@@ -92,8 +92,10 @@ function Canvas:inputKey(scancode, state)
 		if state == 1 then
 			self.pressedButtons[scancode] = self.hoveredBox
 		elseif state == 0 then
-			self.pressedButtons[scancode].KEY_INPUT(scancode,state)
-			self.pressedButtons[scancode] = nil
+			if self.pressedButtons[scancode] then
+				self.pressedButtons[scancode].KEY_INPUT(scancode,state)
+				self.pressedButtons[scancode] = nil
+			end
 		end
 	end
 end
@@ -118,8 +120,10 @@ function Canvas:inputMouse(button,state)
 		if state == 1 then
 			self.pressedButtons[button] = self.hoveredBox
 		elseif state == 0 then
-			self.pressedButtons[button].MOUSE_INPUT(button,state)
-			self.pressedButtons[button] = nil
+			if self.pressedButtons[button] then
+				self.pressedButtons[button].MOUSE_INPUT(button,state)
+				self.pressedButtons[button] = nil
+			end
 		end
 	end
 end
