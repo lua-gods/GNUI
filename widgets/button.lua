@@ -1,3 +1,4 @@
+---@diagnostic disable: duplicate-doc-field
 local config = require("../config") ---@type GNUI.config
 local Box = require("../core/prims/box") ---@type GNUI.BoxAPI
 local Event = require("../" .. config.EVENT)
@@ -49,6 +50,8 @@ end
 
 --────────────────────────-< Layout Parser >-────────────────────────--
 
+---@class GNUI.Layout
+---@field type "button"?
 
 ---@param layout any
 ---@param canvas GNUI.Canvas
