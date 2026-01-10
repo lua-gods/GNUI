@@ -13,10 +13,13 @@ local CanvasAPI = {}
 ---@field render GNUI.RenderInstance
 ---@field queueUpdate GNUI.Box[]
 ---@field hoveredBox GNUI.Box
+---@field pressedButtons GNUI.Box[]
 local Canvas = {}
 Canvas.__index = function (t,i)
 	return rawget(t,i) or Canvas[i] or Box.index(i)
 end
+
+
 
 
 ---Creates a new canvas for boxes to attach to, this box is special, 
