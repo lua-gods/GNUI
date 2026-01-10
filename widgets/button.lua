@@ -35,13 +35,15 @@ function ButtonAPI.new(canvas)
 		if button == 0 then
 			if state == 1 then
 				self.down = true
-				self.sprite:setStyle(Style.getStyle(self,self.variant,"pressed"))
 			elseif state == 0 and self.down then
 				self.PRESSED:invoke()
 				self.down = false
-				self.sprite:setStyle(Style.getStyle(self,self.variant,"normal"))
 			end
+			self:applyApropriateStyle()
 		end
+	end)
+	self.CURSOR_PRESENCE_CHANGED:register(function (inside)
+		self:applyApropriateStyle()
 	end)
 	setmetatable(self, Button)
 	return self
@@ -49,6 +51,18 @@ end
 
 
 --────────────────────────-< Layout Parser >-────────────────────────--
+
+function Button:applyApropriateStyle()
+	if self.down then
+		self.sprite:setStyle(Style.getKey(self,"pressed"))
+	else
+		if self.isHovered then
+			self.sprite:setStyle(Style.getKey(self,"hovered"))
+		else
+			self.sprite:setStyle(Style.getKey(self,"normal"))
+		end
+	end
+end
 
 ---@class GNUI.Layout
 ---@field type "button"?
