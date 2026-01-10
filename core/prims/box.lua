@@ -751,7 +751,7 @@ function Box:sovleForLayout(other)
 				local margin = child:getMargin()
 				child.bakedPos[x] = math.lerp(
 				padding[x] + margin[x],
-				self.bakedSize[x] - child.bakedSize[x] - padding[x] - margin[x],
+				self.bakedSize[x] - child.bakedSize[x] - padding[z] - margin[z],
 				self.childAlign[x] * 0.5 + 0.5)
 			end
 		end
