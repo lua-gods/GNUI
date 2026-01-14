@@ -1,10 +1,12 @@
 local util = require("lib.gncommon") ---@type GNCommon
+local gncommon = require("lib.gncommon") ---@type GNCommon
 
 ---@class GNUI.Sprite.StyleAPI
 local SpriteSTyleAPI = {}
 
 ---@class GNUI.Sprite.Style
 ---@field padding Vector4
+---@field expand Vector4
 ---@field margin Vector4
 local SpriteStyle = {}
 SpriteStyle.__index = SpriteStyle
@@ -32,9 +34,26 @@ end
 function SpriteSTyleAPI.new()
 	local self = {
 		padding = util.vec4(0,0,0,0),
+		expand = vec(0,0,0,0),
 		margin = util.vec4(0,0,0,0)
 	}
 	setmetatable(self,SpriteStyle)
+	return self
+end
+
+
+---@overload fun(self: self, leftTopRightBottom: Vector4): self
+---@overload fun(self: self, leftTop: Vector2, rightBottom: Vector2): self
+---@param left number
+---@param top number
+---@param right number
+---@param bottom number
+---@generic self
+---@param self self
+---@return self
+function SpriteStyle:setExpand(left,top,right,bottom)
+	---@cast self GNUI.Sprite.Quad.Style
+	self.expand = gncommon.vec4(left,top,right,bottom)
 	return self
 end
 
