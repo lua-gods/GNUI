@@ -1,7 +1,14 @@
 local util =  require("../utils") ---@type GNUI.utils
 
 
----@alias GNUI.Theme table<string,table<string,table<string,GNUI.Sprite.Style>>>
+---@class GNUI.Theme
+---@field [string] GNUI.Theme.Class
+
+---@class GNUI.Theme.Class
+---@field [string] GNUI.Theme.Class.Variant | string
+
+---@class GNUI.Theme.Class.Variant
+---@field [string] GNUI.Sprite.Style
 
 ---@type GNUI.Theme
 local Theme = {}
@@ -19,17 +26,23 @@ for index, path in ipairs(util.listFiles("./theme")) do
 		end
 		
 		for keyVariant, variant in pairs(class) do
-			if not Theme[keyClass][keyVariant] then
-				Theme[keyClass][keyVariant] = {}
-			end
-			
-			for keyKey, key in pairs(variant) do
-				Theme[keyClass][keyVariant][keyKey] = key
+			if type(variant) == "table" then
+				if not Theme[keyClass][keyVariant] then
+					Theme[keyClass][keyVariant] = {}
+				end
+				if type(variant) == "table" then
+					for keyKey, key in pairs(variant) do
+						Theme[keyClass][keyVariant][keyKey] = key
+					end
+				else
+					Theme[keyClass][keyVariant] = variant
+				end
+			else
+				Theme[keyClass][keyVariant] = variant
 			end
 		end
 	end
 end
-
 
 ---Get a style
 ---@param class string|GNUI.Box
@@ -42,11 +55,28 @@ function StyleAPI.getStyle(class,variant,key)
 		assert(class,"No class found")
 	end
 	
-	if Theme[class] and Theme[class][variant] and Theme[class][variant][key] then
-		return Theme[class][variant][key]
-	else
-		error("Unknown style: " .. tostring(class) .. "." .. toJson(variant) .. "." .. tostring(key))
+	if Theme[class] then
+		local classVal = Theme[class]
+		
+		if classVal[variant] then
+			local variantVal = classVal[variant]
+
+			-- solve for refStyle in variants
+			while type(variantVal) == "string" do
+				variantVal = Theme[class][variantVal]
+				Theme[class][variant] = variantVal
+			end
+
+			assert(variantVal,"Unknown variant: " .. class .. "." .. variant)
+			
+			if variantVal[key] then
+				local key = variantVal[key]
+				
+				return key
+			end
+		end
 	end
+	error("Unknown style: " .. class .. "." .. variant .. "." .. key)
 end
 
 

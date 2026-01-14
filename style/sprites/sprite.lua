@@ -76,7 +76,8 @@ end
 function Sprite:setPos(x,y)
 	---@cast self GNUI.Sprite
 	self.pos = gncommon.vec2(x,y)
-	self.render:setPos(self.id, self.pos.x, self.pos.y)
+	local expand = self.style and self.style.expand.xy or vec(0,0)
+	self.render:setPos(self.id, self.pos.x - expand.x, self.pos.y - expand.y)
 	return self
 end
 
@@ -90,7 +91,9 @@ end
 function Sprite:setSize(x,y)
 	---@cast self GNUI.Sprite
 	self.size = gncommon.vec2(x,y)
-	self.render:setSize(self.id, self.size.x, self.size.y)
+	local expand = self.style and (self.style.expand.xy + self.style.expand.zw) or vec(0,0)
+	---@cast expand Vector2
+	self.render:setSize(self.id, self.size.x+expand.x, self.size.y+expand.y)
 	return self
 end
 

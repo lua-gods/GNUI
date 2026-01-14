@@ -115,8 +115,9 @@ end
 
 function Nineslice:updateSprites()
 	local border = self.style.border
-	local size = self.size
-	local pos = self.pos
+	local expand = self.style.expand
+	local size = self.size + expand.xy + expand.zw
+	local pos = self.pos - expand.xy
 	self.render:setSize(self.id,      size.x, size.y)
 	
 	self.render:setSize(self.idTopLeft,  border.x, border.y)
@@ -131,7 +132,7 @@ function Nineslice:updateSprites()
 	self.render:setSize(self.idBottom,      size.x-border.x-border.z, border.w)
 	self.render:setSize(self.idBottomRight, border.z, border.w)
 	
-	self.render:setPos(self.id,  pos.x, pos.y)
+	self.render:setPos(self.id,  self.pos.x,self.pos.y)
 	
 	self.render:setPos(self.idTopLeft,  pos.x, pos.y)
 	self.render:setPos(self.idTop,      pos.x+border.x, pos.y)
