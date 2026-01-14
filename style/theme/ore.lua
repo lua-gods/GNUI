@@ -33,8 +33,9 @@ return {
 		}
 	},
 	button={
-		default="blue",
+		default="secondary",
 		green="primary",
+		
 		primary={
 			normal = Nineslice.newStyle()
 			:setTexture(atlas)
@@ -49,9 +50,8 @@ return {
 			:setBorder(3,3,3,3)
 			:setPadding(2,2,2,2)
 			:setMargin(0,2,0,0)
-			:setTextColor(0,0,0)
 			:setExpand(1,1,1,1)
-			:setTextColor("#ffffff")
+			:setTextColor(1,1,1)
 			,
 			hovered = Nineslice.newStyle()
 			:setTexture(atlas)
