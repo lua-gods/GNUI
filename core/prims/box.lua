@@ -632,12 +632,11 @@ function Box:solveForFitSizing(other)
 		if (self.layout == (other and "VERTICAL" or "HORIZONTAL")) then -- is parallel
 			local totalSize = 0
 			for _, child in ipairs(self.children) do
-				local childPadding = child:getPadding()
 				local childMargin = child:getMargin()
-				totalSize = totalSize + child.bakedSize[x] + childPadding[x] + childPadding[z] + childMargin[x] + childMargin[z]
+				totalSize = totalSize + child.bakedSize[x] + childMargin[x] + childMargin[z]
 			end
 			totalSize = totalSize + self.childGap * (#self.children - 1)
-			self.bakedSize[x] = math.max(self.minSize[x],totalSize,textSize[x])
+			self.bakedSize[x] = math.max(self.minSize[x],totalSize,textSize[x]) + padding[x] + padding[z]
 		
 		else
 			local minSize = self.minSize[x]
