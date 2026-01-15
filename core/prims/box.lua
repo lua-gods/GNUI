@@ -629,7 +629,7 @@ function Box:solveForFitSizing(other)
 		
 	elseif self.sizing[x] == "FIT" then
 		
-		if (self.layout == (other and "VERTICAL" or "HORIZONTAL")) then -- is parallel
+		if self.layout == (other and "VERTICAL" or "HORIZONTAL") then -- is parallel
 			local totalSize = 0
 			for _, child in ipairs(self.children) do
 				local childMargin = child:getMargin()
