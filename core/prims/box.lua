@@ -634,6 +634,7 @@ function Box:solveForFitSizing(other)
 			for _, child in ipairs(self.children) do
 				local childMargin = child:getMargin()
 				totalSize = totalSize + child.bakedSize[x] + childMargin[x] + childMargin[z]
+				
 			end
 			totalSize = totalSize + self.childGap * (#self.children - 1)
 			self.bakedSize[x] = math.max(self.minSize[x],totalSize,textSize[x]) + padding[x] + padding[z]
@@ -734,7 +735,7 @@ end
 function Box:sovleForLayout(other)
 	---@cast self GNUI.Box
 	local x = (other and "y" or "x")
-	local z = (other and "z" or "w")
+	local z = (other and "w" or "z")
 	
 	if self.layout then
 		if self.layout == (other and "VERTICAL" or "HORIZONTAL") then

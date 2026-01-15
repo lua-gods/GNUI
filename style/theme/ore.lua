@@ -59,14 +59,16 @@ return {
 			:setTexture(atlas)
 			:setUV(15,0,19,6)
 			:setBorder(2,2,2,4)
-			:setPadding(2,2,2,4)
+			:setPadding(3,3,3,1)
+			:setExpand(0,0,0,2)
+			:setMargin(0,0,0,50)
 			:setTextColor("#ffffff")
 			,
 			pressed = Nineslice.newStyle()
 			:setTexture(atlas)
 			:setUV(14,17,20,23)
 			:setBorder(3,3,3,3)
-			:setPadding(2,2,2,2)
+			:setPadding(3,3,3,2)
 			:setMargin(0,2,0,0)
 			:setExpand(1,1,1,1)
 			:setTextColor(1,1,1)
@@ -75,7 +77,7 @@ return {
 			:setTexture(atlas)
 			:setUV(14,8,20,16)
 			:setBorder(3,3,3,5)
-			:setPadding(2,2,2,4)
+			:setPadding(3,3,3,4)
 			:setExpand(1,1,1,1)
 			:setTextColor("#ffffff")
 			,
@@ -202,16 +204,17 @@ return {
 			,
 			pressed = Nineslice.newStyle()
 			:setTexture(atlas)
-			:setUV(36,9,38,11)
+			:setUV(36,11,38,13)
 			:setBorder(1,1,1,1)
 			:setPadding(1,1,1,1)
 			:setTextColor("#ffffff")
 			,
 			hovered = Nineslice.newStyle()
 			:setTexture(atlas)
-			:setUV(36,5,38,7)
-			:setBorder(1,1,1,1)
+			:setUV(35,5,39,9)
+			:setBorder(2,2,2,2)
 			:setPadding(1,1,1,1)
+			:setExpand(1,1,1,1)
 			:setTextColor("#ffffff")
 			,
 		},
