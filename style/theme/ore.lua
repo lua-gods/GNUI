@@ -16,7 +16,7 @@ return {
 		opaque={
 			normal = Nineslice.newStyle()
 			:setTexture(atlas)
-			:setUV(60,17,62,19)
+			:setUV(40,1,42,3)
 			:setBorder(1,1,1,1)
 			:setPadding(2,2,2,2)
 			--:setMargin(5,5,5,5)
@@ -25,9 +25,27 @@ return {
 		glass={
 			normal = Nineslice.newStyle()
 			:setTexture(atlas)
-			:setUV(60,21,62,23)
+			:setUV(40,5,42,7)
 			:setBorder(1,1,1,1)
 			:setPadding(2,2,2,2)
+			--:setMargin(5,5,5,5)
+			,
+		},
+		header={
+			normal = Nineslice.newStyle()
+			:setTexture(atlas)
+			:setUV(52,11,54,13)
+			:setBorder(1,1,1,1)
+			:setPadding(2,2,2,2)
+			--:setMargin(5,5,5,5)
+			,
+		},
+		ribbon={
+			normal = Nineslice.newStyle()
+			:setTexture(atlas)
+			:setUV(52,5,54,9)
+			:setBorder(0,0,0,2)
+			:setPadding(1,1,3,1)
 			--:setMargin(5,5,5,5)
 			,
 		}
@@ -171,6 +189,29 @@ return {
 			:setBorder(3,3,3,5)
 			:setPadding(2,2,2,4)
 			:setExpand(1,1,1,1)
+			:setTextColor("#ffffff")
+			,
+		},
+		bevel={
+			normal = Nineslice.newStyle()
+			:setTexture(atlas)
+			:setUV(36,1,38,3)
+			:setBorder(1,1,1,1)
+			:setPadding(1,1,1,1)
+			:setTextColor("#ffffff")
+			,
+			pressed = Nineslice.newStyle()
+			:setTexture(atlas)
+			:setUV(36,9,38,11)
+			:setBorder(1,1,1,1)
+			:setPadding(1,1,1,1)
+			:setTextColor("#ffffff")
+			,
+			hovered = Nineslice.newStyle()
+			:setTexture(atlas)
+			:setUV(36,5,38,7)
+			:setBorder(1,1,1,1)
+			:setPadding(1,1,1,1)
 			:setTextColor("#ffffff")
 			,
 		},
