@@ -109,7 +109,7 @@ function Sprite:setText(text)
 		if self.text == text then return end
 		self.text = text
 	end
-	self.render:setText(self.id,text)
+	self.render:setText(self.id,self.text)
 end
 
 

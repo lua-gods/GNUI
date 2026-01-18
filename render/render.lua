@@ -155,17 +155,16 @@ end
 
 ---@param visual GNUI.Render.Visual
 local function updateLabelText(visual)
-	if not visual.label then
-		visual.label = visual.model:newText("label")
-	end
 	if visual.text then
+		if not visual.label then
+			visual.label = visual.model:newText("label")
+		end
 		visual.label:setText('{"text":"'..visual.text..'","color":"#'..(visual.textColor or "ffffff")..'"}')
 	end
 end
 
 ---@param visual GNUI.Render.Visual
 local function updateLabelPos(visual)
-	
 	if visual.label and visual.text then
 		visual.label:alignment(visual.textAlignment.x == -1 and "LEFT" or visual.textAlignment.x == 0 and "CENTER" or "RIGHT")
 		visual.label:setWidth(visual.size.x)
@@ -290,6 +289,7 @@ end
 
 
 function Render:setText(id,text)
+	assert(self.visuals[id],"Visual Quad "..id.." not found")
 	local visual = self.visuals[id]
 	visual.text = text
 	updateLabelText(visual)
