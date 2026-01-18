@@ -1,13 +1,15 @@
+--[[______   __
+  / ____/ | / /  by: GNanimates / https://gnon.top / Discord: @gn68s
+ / / __/  |/ / name: Internal Primitive BoxAPI
+/ /_/ / /|  /  desc: meant to be used by widgets, use the Widget Box API for anything else
+\____/_/ |_/ source: link ]]
 ---@diagnostic disable: duplicate-doc-field
 local config = require("../../config") ---@type GNUI.config
 local gncommon = require("../../../gncommon") ---@type GNCommon
 local utils = require("../../utils") ---@type GNUI.utils
 local Event = require("../../"..config.EVENT) ---@type Event
 
-local Layout = require("../../" .. config.LAYOUT) ---@class GNUI.LayoutAPI
-local Style = require("../../" .. config.STYLE) ---@class GNUI.StyleAPI
-
----@class GNUI.BoxAPI
+---@class GNUI.Primitive.BoxAPI
 local BoxAPI = {}
 
 
@@ -777,77 +779,5 @@ function Box:sovleForLayout(other)
 	return self
 end
 
-
---────────────────────────-< Layout Parser >-────────────────────────--
-
----@class GNUI.Layout
----@field type nil|"box"
----@field name string?
----@field size Vector2?
----@field minSize Vector2?
----@field sizing ({[1]:GNUI.Box.SizingMode,[2]:GNUI.Box.SizingMode}|GNUI.Box.SizingMode)?
----@field pos Vector2?
----@field gap number?
----@field layout GNUI.Box.LayoutMode?
----@field childAlign Vector2?
----@field text string?
----@field textAlign {[1]:(-1|0|1),[2]:(-1|0|1)}?
----@field wrap boolean?
-
-
----@param layout GNUI.Layout
----@param canvas GNUI.Canvas
----@generic box
----@param box box
----@return box
-function BoxAPI.parse(layout,canvas,box)
-	local box = box or BoxAPI.new(canvas)
-
-	local hasSizeX, hasSizeY = false, false
-	if layout.size then
-		box:setSize(layout.size.x, layout.size.y)
-		hasSizeX = layout.size.x ~= -1
-		hasSizeY = layout.size.y ~= -1
-	end
-	if layout.minSize then box:setMinimumSize(layout.minSize.x, layout.minSize.y) end
-	if layout.sizing then
-		if type(layout.sizing) == "string" then
----@diagnostic disable-next-line: param-type-mismatch
-			box:setSizing(layout.sizing, layout.sizing)
-		else
-			box:setSizing(layout.sizing[1], layout.sizing[2])
-		end
-	else
-		if box.text then
-			box:setSizing("FILL", "FIT")
-		else
-			box:setSizing(hasSizeX and "FIXED" or "FIT", hasSizeY and "FIXED" or "FIT")
-		end
-	end
-	if layout.pos then box:setPos(layout.pos.x, layout.pos.y) end
-	if layout.layout then box:setLayout(layout.layout) end
-	if layout.childAlign then box:setChildAlign(layout.childAlign) end
-	if layout.gap then box:setChildGap(layout.gap) end
-	
-	box.variant = layout.variant or "default"
-	
-	local style = Style.getStyle(box, box.variant, "normal")
-	if style then
-		box:setSprite(style:newInstance(box))
-	end
-
-	if layout.text then box:setText(layout.text) end
-	if layout.textAlign then box:setTextAlignment(layout.textAlign[1],layout.textAlign[2]) end
-	if layout.wrap then box:setWrapText(layout.wrap) end
-
-	if layout.name then
-		box:setName(layout.name)
-		box.name = layout.name
-	end
-
-	return box
-end
-
-Layout.registerType("box", BoxAPI.parse)
 
 return BoxAPI

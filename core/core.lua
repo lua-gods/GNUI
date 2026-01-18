@@ -1,4 +1,4 @@
-local box = require("./prims/box") ---@type GNUI.BoxAPI
+local box = require("./prims/box") ---@type GNUI.Primitive.BoxAPI
 local canvas = require("./prims/canvas") ---@type GNUI.CanvasAPI
 
 ---Holds all instantiations for elements in GNUI
