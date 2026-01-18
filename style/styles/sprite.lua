@@ -7,6 +7,8 @@ local SpriteSTyleAPI = {}
 ---@class GNUI.Sprite.Style
 ---@field padding Vector4
 ---@field expand Vector4
+---@field textColor Vector3
+---@field textAlignment Vector2
 ---@field margin Vector4
 local SpriteStyle = {}
 SpriteStyle.__index = SpriteStyle
@@ -35,7 +37,8 @@ function SpriteSTyleAPI.new()
 	local self = {
 		padding = util.vec4(0,0,0,0),
 		expand = vec(0,0,0,0),
-		margin = util.vec4(0,0,0,0)
+		margin = util.vec4(0,0,0,0),
+		textAlignment = vec(0,0),
 	}
 	setmetatable(self,SpriteStyle)
 	return self
@@ -86,6 +89,39 @@ end
 function SpriteStyle:setMargin(left,top,right,bottom)
 	---@cast self GNUI.Sprite
 	self.margin = util.vec4(left,top,right,bottom)
+	return self
+end
+
+
+---@param r number
+---@param g number
+---@param b number
+---@generic self
+---@param self self
+---@return self
+---@overload fun(self: self, hex: string): self
+---@overload fun(self: self, rgb: Vector3): self
+function SpriteStyle:setTextColor(r,g,b)
+	---@cast self GNUI.Sprite.Style
+	local t = type(r)
+	if t == "string" then
+		self.textColor = vectors.hexToRGB(r)
+	else
+		self.textColor = gncommon.vec3(r,g,b)
+	end
+	return self
+end
+
+
+---@param h (-1|0|1)?
+---@param v (-1|0|1)?
+---@generic self
+---@param self self
+---@return self
+function SpriteStyle:setTextAlignment(h,v)
+	---@cast self GNUI.Sprite.Style
+	if h then self.textAlignment.x = h end
+	if v then self.textAlignment.y = v end
 	return self
 end
 

@@ -394,7 +394,6 @@ function Box:setStyle(style)
 		if style then
 			self.sprite:setStyle(style)
 		end
-		self.sprite:applyStyle()
 	end
 	return self
 end
@@ -523,11 +522,18 @@ end
 ---@generic self
 ---@param self self
 ---@return self
----@param alignment -1|0|1
-function Box:setTextAlignment(alignment)
+---@param h -1|0|1
+---@param v -1|0|1
+function Box:setTextAlignment(h,v)
 	---@cast self GNUI.Box
-	self.textAlignment = alignment
+	self.textAlignment = vec(h,v)
 	return self
+end
+
+
+---@return Vector2
+function Box:getTextAlignment()
+	return self.textAlignment or (self.sprite and self.sprite.style and self.sprite.style.textAlignment)
 end
 
 
@@ -578,8 +584,8 @@ end
 function Box:updateSprites()
 	if self.sprite then
 		local sprite = self.sprite
-		sprite:setPos(self.bakedPos)
-		sprite:setSize(self.bakedSize)
+		sprite:setPos(self.bakedPos.x,self.bakedPos.y)
+		sprite:setSize(self.bakedSize.x,self.bakedSize.y)
 	end
 	for _, child in ipairs(self.children) do
 		child:updateSprites()
@@ -785,7 +791,7 @@ end
 ---@field layout GNUI.Box.LayoutMode?
 ---@field childAlign Vector2?
 ---@field text string?
----@field textAlign (-1|0|1)?
+---@field textAlign {[1]:(-1|0|1),[2]:(-1|0|1)}?
 ---@field wrap boolean?
 
 
@@ -831,7 +837,7 @@ function BoxAPI.parse(layout,canvas,box)
 	end
 
 	if layout.text then box:setText(layout.text) end
-	if layout.textAlign then box:setTextAlignment(layout.textAlign) end
+	if layout.textAlign then box:setTextAlignment(layout.textAlign[1],layout.textAlign[2]) end
 	if layout.wrap then box:setWrapText(layout.wrap) end
 
 	if layout.name then

@@ -25,7 +25,7 @@ end
 function NinesliceStyleAPI.new()
 	local self = QuadStyle.new()
 	---@cast self GNUI.Sprite.Nineslice.Style
-	self.texture_path = ""
+	self.texturePath = ""
 	self.uv = vec(0,0,0,0)
 	self.border = vec(0,0,0,0)
 	setmetatable(self,NinesliceStyle)
@@ -56,7 +56,7 @@ end
 ---@return self
 function NinesliceStyle:setTexture(path)
 	---@cast self GNUI.Sprite.Nineslice.Style
-	self.texture_path = path
+	self.texturePath = path
 	self.uv = vec(0,0,1,1)
 	return self
 end

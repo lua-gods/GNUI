@@ -4,30 +4,28 @@
 / /_/ / /|  /  desc: an extension of sprite which can display a texture
 \____/_/ |_/ source: link ]]
 
-local Sprite = require("./sprite") ---@type GNUI.SpriteAPI
+local Sprite = require("./sprite") ---@type GNUI.Sprite
 local gncommon = require("lib.gncommon") ---@type GNCommon
 local Style = require("../styles/quad") ---@type GNUI.Sprite.Quad.StyleAPI
 local config = require("../../config") ---@type GNUI.config
 
----@class GNUI.Sprite.QuadAPI
-local QuadAPI = {}
-
 
 ---@class GNUI.Sprite.Quad : GNUI.Sprite
 ---@field style GNUI.Sprite.Quad.Style
+---@field uv Vector4
+---@field color Vector3
+---@field texturePath string
+---@
 local Quad = {}
 Quad.__index = function (t,i)
-	return rawget(t,i) or Quad[i] or Sprite.index(i)
+	return rawget(t,i) or Quad[i] or Sprite[i]
 end
-
-
-function QuadAPI.index(i) return Quad[i] end
 
 
 ---A representation of a quad that will get drawn
 ---@param box GNUI.Box
 ---@return GNUI.Sprite.Quad
-function QuadAPI.new(box)
+function Quad.new(box)
 	assert(box,"no GNUI.Box given")
 	local self = Sprite.new(box)
 	---@cast self GNUI.Sprite.Quad
@@ -39,9 +37,9 @@ function QuadAPI.new(box)
 end
 
 
-Style.setInstancer(QuadAPI.new)
+Style.setInstancer(Quad.new)
 ---@return GNUI.Sprite.Quad.Style
-function QuadAPI.newStyle()
+function Quad.newStyle()
 	return Style.new()
 end
 
@@ -49,30 +47,81 @@ end
 --────────────────────────-< API >-────────────────────────--
 
 
+---@overload fun(self: GNUI.Sprite.Quad)
 ---@param path string
----@generic self
----@param self self
----@return self
 function Quad:setTexture(path)
 	---@cast self GNUI.Sprite.Quad
-	self.texture_path = path
-	self.render:setTexture(self.id,self.texture_path)
+	if path then
+		if self.texturePath == path then return end
+		self.texturePath = path
+	end
+	
+	self.render:setTexture(self.id,self.texturePath)
 	return self
 end
 
 
-function Quad:applyStyle()
-	if self.style then
-		local style = self.style
-		self.render:setTexture(self.id,style.texture_path)
-		self.render:setUV(self.id,style.uv.x,style.uv.y,style.uv.z,style.uv.w)
-		
-		self.render:setBoxColor(self.id,style.color.x,style.color.y,style.color.z)
-		self.render:setTextColor(self.id,style.textColor.x,style.textColor.y,style.textColor.z)
+---@overload fun(self: GNUI.Sprite.Quad)
+---@param r number
+---@param g number
+---@param b number
+---@return GNUI.Sprite.Quad
+function Quad:setBoxColor(r,g,b)
+	if r then
+		local color = vec(r,g,b)
+		if self.style then color = color * self.style.color end
+		if self.color == color then return end
+		self.color = color
 	end
+	self.render:setBoxColor(self.id,self.color.x,self.color.y,self.color.z)
+
+end
+
+
+---@overload fun(self: GNUI.Sprite.Quad)
+---@param u1 number
+---@param v1 number
+---@param u2 number
+---@param v2 number
+---@return GNUI.Sprite.Quad
+function Quad:setUV(u1,v1,u2,v2)
+	if u1 then
+		local uv = vec(u1,v1,u2,v2)
+		if self.uv == uv then return end
+		self.uv = uv
+	end
+	self.render:setUV(self.id,self.uv.x,self.uv.y,self.uv.z,self.uv.w)
+	return self
+	
+end
+
+
+---@param style GNUI.Sprite.Quad.Style?
+function Quad:applyAll(style)
+	self:setText()
+	self:setPos()
+	self:setSize()
+	
+	self:setTexture(style and style.texturePath)
+	self:setUV(style and style.uv:unpack())
+	self:setBoxColor(style and style.color:unpack())
+	self:setTextColor(style and style.textColor:unpack())
+end
+
+
+---@overload fun(self: GNUI.Sprite.Quad)
+---@param style GNUI.Sprite.Quad.Style
+function Quad:setStyle(style)
+	---@cast self GNUI.Sprite.Quad
+	if style then
+		if self.style == style then return end
+		self.style = style
+	end
+	self:applyAll(self.style)
+	return self
 end
 
 
 
 
-return QuadAPI
+return Quad

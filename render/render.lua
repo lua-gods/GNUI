@@ -81,7 +81,7 @@ end
 ---@field free fun()
 ---@field model ModelPart
 ---
----@field texture_path string
+---@field texturePath string
 ---@field texture_size Vector2
 ---@field uv Vector4
 ---@field quad SpriteTask
@@ -169,7 +169,6 @@ function Render:setSize(id,x,y)
 end
 
 
----@overload fun(self: GNUI.RenderInstance, id: integer, leftTopRightBottom: Vector4): self
 ---@param id integer
 ---@param left number
 ---@param top number
@@ -177,9 +176,9 @@ end
 ---@param bottom number
 function Render:setPadding(id,left,top,right,bottom)
 	local visual = self.visuals[id]
-	visual.padding = gncommon.vec4(left,top,right,bottom)
+	visual.padding = vec(left,top,right,bottom)
 	if visual.label then
-		visual.label:setPos(left,top)
+		visual.label:setPos(-visual.padding.x,-visual.padding.y)
 	end
 end
 
@@ -203,7 +202,7 @@ function Render:setTexture(id,path)
 	local texture = textures[path]
 	local textureSize = texture:getDimensions()
 	local uv = vec(0,0,1,1)
-	visual.texture_path = path
+	visual.texturePath = path
 	visual.texture_size = textureSize
 	visual.uv = uv
 	visual.quad

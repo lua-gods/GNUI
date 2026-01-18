@@ -8,7 +8,7 @@ local QuadStyleAPI = {}
 
 
 ---@class GNUI.Sprite.Quad.Style : GNUI.Sprite.Style
----@field texture_path string
+---@field texturePath string
 ---@field color Vector3
 ---@field textColor Vector3
 ---@field uv Vector4
@@ -27,7 +27,7 @@ end
 function QuadStyleAPI.new()
 	local self = SpriteStyle.new()
 	---@cast self GNUI.Sprite.Quad.Style
-	self.texture_path = ""
+	self.texturePath = ""
 	self.uv = gncommon.vec4(0,0,0,0)
 	self.color = vec(1,1,1)
 	self.textColor = vec(1,1,1)
@@ -59,24 +59,24 @@ end
 ---@return self
 function QuadStyle:setTexture(path)
 	---@cast self GNUI.Sprite.Quad.Style
-	self.texture_path = path
+	self.texturePath = path
 	local size = util.getTextSize(path)
 	self.uv = vec(0,0,size.x,size.y)
 	return self
 end
 
 
----@overload fun(self: GNUI.Sprite.Quad.Style, xy1: Vector2, xy2: Vector2): self
----@param x1 number
----@param y1 number
----@param x2 number
----@param y2 number
+---@overload fun(self: GNUI.Sprite.Quad.Style, uv1: Vector2, uv2: Vector2): self
+---@param u1 number
+---@param v1 number
+---@param u2 number
+---@param v2 number
 ---@generic self
 ---@param self self
 ---@return self
-function QuadStyle:setUV(x1,y1,x2,y2)
+function QuadStyle:setUV(u1,v1,u2,v2)
 	---@cast self GNUI.Sprite.Quad.Style
-	self.uv = gncommon.vec4(x1,y1,x2,y2)
+	self.uv = gncommon.vec4(u1,v1,u2,v2)
 	return self
 end
 
@@ -90,26 +90,6 @@ function QuadStyle:setColor(r,g,b)
 	self.color = gncommon.vec3(r,g,b)
 	return self
 end
-
-
----@overload fun(self: self, hex: string): self
----@overload fun(self: self, rgb: Vector3): self
----@param r number
----@param g number
----@param b number
----@return GNUI.Sprite.Quad.Style
-function QuadStyle:setTextColor(r,g,b)
-	local t = type(r)
-	if t == "string" then
-		self.textColor = vectors.hexToRGB(r)
-	else
-		self.textColor = gncommon.vec3(r,g,b)
-	end
-	return self
-end
-
-
-
 
 
 return QuadStyleAPI

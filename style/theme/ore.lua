@@ -1,6 +1,6 @@
-local Sprite = require("../sprites/sprite") ---@type GNUI.SpriteAPI
-local Quad = require("../sprites/quad") ---@type GNUI.Sprite.QuadAPI
-local Nineslice = require("../sprites/nineslice") ---@type GNUI.Sprite.NinesliceAPI
+local Sprite = require("../sprites/sprite") ---@type GNUI.Sprite
+local Quad = require("../sprites/quad") ---@type GNUI.Sprite.Quad
+local Nineslice = require("../sprites/nineslice") ---@type GNUI.Sprite.Nineslice
 
 
 local atlas = nil ---@type string
@@ -62,6 +62,7 @@ return {
 			:setPadding(3,3,3,1)
 			:setExpand(0,0,0,2)
 			:setMargin(0,0,0,2)
+			:setTextAlignment(0,0)
 			:setTextColor("#ffffff")
 			,
 			pressed = Nineslice.newStyle()
