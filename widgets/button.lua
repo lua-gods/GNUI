@@ -1,6 +1,6 @@
 ---@diagnostic disable: duplicate-doc-field
 local config = require("../config") ---@type GNUI.config
-local Box = require("../core/prims/box") ---@type GNUI.BoxAPI
+local Box = require("./box") ---@type GNUI.BoxAPI
 local Event = require("../" .. config.EVENT)
 
 
@@ -14,6 +14,7 @@ local ButtonAPI = {}
 
 ---@class GNUI.Button : GNUI.Box
 ---@field down boolean
+---@field toggle boolean
 ---
 ---@field PRESSED Event
 local Button = {}
@@ -30,6 +31,7 @@ function ButtonAPI.new(canvas)
 	---@cast self GNUI.Button
 	
 	self.down = false
+	self.toggle = false
 	self.PRESSED = Event.new()
 	self.MOUSE_INPUT:register(function (button, state)
 		if button == 0 then

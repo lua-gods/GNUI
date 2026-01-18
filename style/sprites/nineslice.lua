@@ -220,18 +220,20 @@ end
 
 ---@param style GNUI.Sprite.Quad.Style
 function Nineslice:applyAll(style)
+	self:setText()
+	self:setPos()
+	self:setSize()
+	self:applyDimensions()
+	self:setPadding()
+	
 	if style then
 		self:setTexture(style.texturePath)
 		self:setUV(style.uv:unpack())
 		self:setBoxColor(style.color:unpack())
 		self:setTextColor(style.textColor:unpack())
 		self:setPadding(style.padding:unpack())
+		self:setTextAlignment(style.textAlignment:unpack())
 	end
-	self:setText()
-	self:setPos()
-	self:setSize()
-	self:applyDimensions()
-	self:setPadding()
 end
 
 

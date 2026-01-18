@@ -18,7 +18,7 @@ return {
 			:setTexture(atlas)
 			:setUV(40,1,42,3)
 			:setBorder(1,1,1,1)
-			:setPadding(2,2,2,2)
+			:setPadding(1,1,1,1)
 			--:setMargin(5,5,5,5)
 			,
 		},
@@ -27,7 +27,7 @@ return {
 			:setTexture(atlas)
 			:setUV(40,5,42,7)
 			:setBorder(1,1,1,1)
-			:setPadding(2,2,2,2)
+			:setPadding(1,1,1,1)
 			--:setMargin(5,5,5,5)
 			,
 		},

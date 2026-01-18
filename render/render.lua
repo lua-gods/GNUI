@@ -89,11 +89,13 @@ end
 ---@field quad SpriteTask
 ---
 ---@field color Vector3
----@field textColor string
 ---
 ---@field padding Vector4
 ---@field label TextTask
 ---@field text string
+---@field textColor string
+---@field textAlignment Vector2
+---@field wrapText boolean
 
 function Render:free(id)
 	self.visuals[id]:free()
@@ -117,7 +119,9 @@ function Render:newVisualQuad()
 		children = {},
 		padding = vec(0,0,0,0),
 		quad = model:newSprite("sprite"):setRenderType("CUTOUT_EMISSIVE_SOLID"),
-		model = model
+		model = model,
+		wrapText = true,
+		textAlignment = vec(-1,1)
 	}
 	if VERBOSE then print("NEW ",id) end
 	self.visuals[id] = new
@@ -149,6 +153,33 @@ function Render:setPos(id,x,y)
 	if VERBOSE then print("POS ",id,x,y) end
 end
 
+---@param visual GNUI.Render.Visual
+local function updateLabelText(visual)
+	if not visual.label then
+		visual.label = visual.model:newText("label")
+	end
+	if visual.text then
+		visual.label:setText('{"text":"'..visual.text..'","color":"#'..(visual.textColor or "ffffff")..'"}')
+	end
+end
+
+---@param visual GNUI.Render.Visual
+local function updateLabelPos(visual)
+	
+	if visual.label and visual.text then
+		visual.label:alignment(visual.textAlignment.x == -1 and "LEFT" or visual.textAlignment.x == 0 and "CENTER" or "RIGHT")
+		visual.label:setWidth(visual.size.x)
+		local textDim = client.getTextDimensions(visual.text, visual.size.x, visual.wrapText)
+		visual.label:setPos(
+			math.floor(-visual.padding.x - visual.size.x * (visual.textAlignment.x*0.5+0.5)+0.5),
+			math.floor(math.lerp(
+				-visual.padding.y,
+				-visual.size.y+visual.padding.y+textDim.y,
+				visual.textAlignment.y * 0.5 + 0.5
+			)+0.5)
+		)
+	end
+end
 
 ---NOTE: Quad exclusive function
 ---
@@ -167,9 +198,7 @@ function Render:setSize(id,x,y)
 		end
 	end
 	
-	if visual.label then
-		visual.label:setWidth(x-visual.padding.x-visual.padding.z):wrap(true)
-	end
+	updateLabelPos(visual)
 	if VERBOSE then print("SIZ ",id,x,y) end
 end
 
@@ -182,9 +211,7 @@ end
 function Render:setPadding(id,left,top,right,bottom)
 	local visual = self.visuals[id]
 	visual.padding = vec(left,top,right,bottom)
-	if visual.label then
-		visual.label:setPos(-visual.padding.x,-visual.padding.y)
-	end
+	updateLabelPos(visual)
 	if VERBOSE then print("PAD ",id,left,top,right,bottom) end
 end
 
@@ -234,7 +261,8 @@ end
 function Render:setTextColor(id,r,g,b)
 	local visual = self.visuals[id]
 	visual.textColor = vectors.rgbToHex(r,g,b)
-	self:setText(id)
+	updateLabelText(visual)
+	updateLabelPos(visual)
 	if VERBOSE then print("TCL ",id,r,g,b) end
 end
 
@@ -263,27 +291,20 @@ end
 
 function Render:setText(id,text)
 	local visual = self.visuals[id]
-	if visual.text or text then
-		if not visual.label then
-			visual.label = visual.model:newText("label"):setPos(-visual.padding.x,-visual.padding.y)
-		end
-		visual.text = text or visual.text or ""
-		visual.label:text(('{"text":"%s","color":"#%s"}'):format(visual.text,visual.textColor))
-	end
+	visual.text = text
+	updateLabelText(visual)
+	updateLabelPos(visual)
 	if VERBOSE then print("TXT ",id,text) end
 end
 
 
 ---@param id integer
 ---@param h -1|0|1
-function Render:setTextAlignment(id,h)
+---@param v -1|0|1
+function Render:setTextAlignment(id,h,v)
 	local visual = self.visuals[id]
-	if not visual.label then
-		visual.label = visual.model:newText("label")
-	end
-	if visual.label then
-		visual.label:alignment(h == -1 and "LEFT" or h == 0 and "CENTER" or "RIGHT")
-	end
+	visual.textAlignment = vec(h,v)
+	updateLabelPos(visual)
 	if VERBOSE then print("TCL ",id,h) end
 end
 

@@ -38,7 +38,7 @@ function SpriteSTyleAPI.new()
 		padding = util.vec4(0,0,0,0),
 		expand = vec(0,0,0,0),
 		margin = util.vec4(0,0,0,0),
-		textAlignment = vec(0,0),
+		textAlignment = vec(-1,-1),
 	}
 	setmetatable(self,SpriteStyle)
 	return self

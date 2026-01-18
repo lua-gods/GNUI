@@ -15,6 +15,12 @@ local gncommon = require("lib.gncommon") ---@type GNCommon
 ---@field box GNUI.Box?
 ---@field childIndex integer
 ---@field parentID integer
+---@field boxColor Vector3
+---
+---@field flagApply boolean
+---@field padding Vector4
+---@field textColor Vector3
+---@field textAlignment Vector2
 ---
 ---@field pos Vector2
 ---@field size Vector2
@@ -36,6 +42,9 @@ function Sprite.new(box)
 		padding = vec(0,0,0,0),
 
 		childIndex = 1,
+		
+		textColor = vec(1,1,1),
+		textAlignment = vec(0,0),
 		
 		boxColor = vec(1,1,1),
 		flagApply = false,
@@ -139,6 +148,21 @@ function Sprite:setPadding(l,t,r,b)
 end
 
 
+---@param h (-1|0|1)?
+---@param v (-1|0|1)?
+function Sprite:setTextAlignment(h,v)
+	---@cast self GNUI.Sprite
+	local changed = false
+	if h then self.textAlignment.x = h changed = true end
+	if v then self.textAlignment.y = v changed = true end
+	if changed then
+		self.render:setTextAlignment(self.id, self.textAlignment.x, self.textAlignment.y)
+	end
+	return self
+end
+
+
+
 ---@overload fun(self: GNUI.Sprite)
 ---@param style GNUI.Sprite.Style
 function Sprite:setStyle(style)
@@ -163,6 +187,7 @@ function Sprite:applyAll(style)
 	if style then
 		self:setPadding(style)
 		self:setTextColor(style.textColor:unpack())
+		self:setTextAlignment(style.textAlignment:unpack())
 	end
 end
 
