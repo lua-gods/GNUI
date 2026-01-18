@@ -1,5 +1,7 @@
 local gncommon = require("lib.gncommon") ---@type GNCommon
 
+local VERBOSE = false
+
 ---@diagnostic disable: param-type-mismatch
 ---@class GNUI.RenderAPI
 local RenderAPI = {}
@@ -117,7 +119,7 @@ function Render:newVisualQuad()
 		quad = model:newSprite("sprite"):setRenderType("CUTOUT_EMISSIVE_SOLID"),
 		model = model
 	}
-	
+	if VERBOSE then print("NEW ",id) end
 	self.visuals[id] = new
 	return id
 end
@@ -128,6 +130,7 @@ end
 ---Works for all visual types
 ---@param id integer
 function Render:free(id)
+	if VERBOSE then print("REM ",id) end
 	self.visuals[id].quad:remove()
 end
 
@@ -143,6 +146,7 @@ function Render:setPos(id,x,y)
 	local visual = self.visuals[id]
 	visual.model:pos(-x,-y,-visual.index)
 	visual.pos = vec(x,y)
+	if VERBOSE then print("POS ",id,x,y) end
 end
 
 
@@ -166,6 +170,7 @@ function Render:setSize(id,x,y)
 	if visual.label then
 		visual.label:setWidth(x-visual.padding.x-visual.padding.z):wrap(true)
 	end
+	if VERBOSE then print("SIZ ",id,x,y) end
 end
 
 
@@ -180,6 +185,7 @@ function Render:setPadding(id,left,top,right,bottom)
 	if visual.label then
 		visual.label:setPos(-visual.padding.x,-visual.padding.y)
 	end
+	if VERBOSE then print("PAD ",id,left,top,right,bottom) end
 end
 
 
@@ -188,6 +194,7 @@ function Render:setIndex(id,index)
 	local pos = visual.pos
 	visual.index = index
 	visual.model:pos(pos.x,pos.y,index)
+	if VERBOSE then print("IDX ",id,index) end
 end
 
 
@@ -209,11 +216,14 @@ function Render:setTexture(id,path)
 	:texture(textures[path],textureSize.x,textureSize.y)
 	:setUV(uv.xy / visual.texture_size)
 	:setRegion(uv.zw * visual.texture_size)
+	
+	if VERBOSE then print("TEX ",id,path) end
 end
 
 function Render:setBoxColor(id,r,g,b)
 	local visual = self.visuals[id]
 	visual.quad:setColor(r,g,b)
+	if VERBOSE then print("CLR ",id,r,g,b) end
 end
 
 
@@ -225,6 +235,7 @@ function Render:setTextColor(id,r,g,b)
 	local visual = self.visuals[id]
 	visual.textColor = vectors.rgbToHex(r,g,b)
 	self:setText(id)
+	if VERBOSE then print("TCL ",id,r,g,b) end
 end
 
 
@@ -246,6 +257,7 @@ function Render:setUV(id,u1,v1,u2,v2)
 	visual.quad
 	:setUV(uv.xy/visual.texture_size)
 	:setRegion((uv.zw-uv.xy))
+	if VERBOSE then print("UV ",id,u1,v1,u2,v2) end
 end
 
 
@@ -258,19 +270,21 @@ function Render:setText(id,text)
 		visual.text = text or visual.text or ""
 		visual.label:text(('{"text":"%s","color":"#%s"}'):format(visual.text,visual.textColor))
 	end
+	if VERBOSE then print("TXT ",id,text) end
 end
 
 
 ---@param id integer
----@param alignment -1|0|1
-function Render:setTextAlignment(id,alignment)
+---@param h -1|0|1
+function Render:setTextAlignment(id,h)
 	local visual = self.visuals[id]
 	if not visual.label then
 		visual.label = visual.model:newText("label")
 	end
 	if visual.label then
-		visual.label:alignment(alignment == -1 and "LEFT" or alignment == 0 and "CENTER" or "RIGHT")
+		visual.label:alignment(h == -1 and "LEFT" or h == 0 and "CENTER" or "RIGHT")
 	end
+	if VERBOSE then print("TCL ",id,h) end
 end
 
 
@@ -305,6 +319,7 @@ function Render:setParent(id,parentID,index)
 		
 		visual.model:scale(1,1,0.5/math.max(parent.childCount,1))
 	end
+	if VERBOSE then print("PNT ",id,parentID) end
 end
 
 return RenderAPI
