@@ -18,6 +18,9 @@ local ButtonAPI = {}
 ---@field down boolean
 ---@field toggle boolean
 ---
+---@field BUTTON_DOWN Event
+---@field BUTTON_UP Event
+---
 ---@field PRESSED Event.GNUI.Button.PRESSED
 local Button = {}
 Button.__index = function (t,i)
@@ -35,8 +38,12 @@ function ButtonAPI.new(canvas)
 	self.down = false
 	self.toggle = false
 	self.PRESSED = Event.new()
+	self.BUTTON_DOWN = Event.new()
+	self.BUTTON_UP = Event.new()
+	
 	self.MOUSE_INPUT:register(function (button, state)
 		if button == 0 then
+			local lastDown = self.down
 			if state == 1 then
 				if self.toggle then
 					self.down = not self.down
@@ -48,6 +55,13 @@ function ButtonAPI.new(canvas)
 				if not self.toggle then
 					self.PRESSED:invoke()
 					self.down = false
+				end
+			end
+			if lastDown ~= self.down then
+				if self.down then
+					self.BUTTON_DOWN:invoke()
+				else
+					self.BUTTON_UP:invoke()
 				end
 			end
 			self:applyApropriateStyle()
@@ -72,6 +86,8 @@ function Button:press()
 	end
 	return self
 end
+
+
 
 
 ---@param toggle boolean
