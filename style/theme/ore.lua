@@ -62,7 +62,7 @@ return {
 			:setPadding(6,6,6,4)
 			:setExpand(0,0,0,2)
 			:setMargin(0,0,0,2)
-			:setTextAlignment(1,0)
+			:setTextAlignment(0,0)
 			:setTextColor("#ffffff")
 			,
 			pressed = Nineslice.newStyle()
@@ -71,7 +71,7 @@ return {
 			:setBorder(3,3,3,3)
 			:setPadding(6,6,6,4)
 			:setMargin(0,2,0,0)
-			:setTextAlignment(1,1)
+			:setTextAlignment(0,0)
 			:setExpand(1,1,1,1)
 			:setTextColor("#ffffff")
 			,
@@ -81,6 +81,7 @@ return {
 			:setBorder(3,3,3,5)
 			:setPadding(6,6,6,4)
 			:setExpand(1,1,1,3)
+			:setTextAlignment(0,0)
 			:setMargin(0,0,0,2)
 			:setTextColor("#ffffff")
 			,
@@ -94,6 +95,7 @@ return {
 			:setPadding(6,6,6,4)
 			:setExpand(0,0,0,2)
 			:setMargin(0,0,0,2)
+			:setTextAlignment(0,0)
 			:setTextColor("#1b1b1b")
 			,
 			pressed = Nineslice.newStyle()
@@ -103,6 +105,7 @@ return {
 			:setPadding(6,6,6,4)
 			:setMargin(0,2,0,0)
 			:setExpand(1,1,1,1)
+			:setTextAlignment(0,0)
 			:setTextColor("#1b1b1b")
 			,
 			hovered = Nineslice.newStyle()
@@ -112,6 +115,7 @@ return {
 			:setPadding(6,6,6,4)
 			:setExpand(1,1,1,3)
 			:setMargin(0,0,0,2)
+			:setTextAlignment(0,0)
 			:setTextColor("#1b1b1b")
 			,
 		},

@@ -31,15 +31,21 @@ function ButtonAPI.new(canvas)
 	---@cast self GNUI.Button
 	
 	self.down = false
-	self.toggle = false
+	self.toggle = true
 	self.PRESSED = Event.new()
 	self.MOUSE_INPUT:register(function (button, state)
 		if button == 0 then
 			if state == 1 then
-				self.down = true
+				if self.toggle then
+					self.down = not self.down
+				else
+					self.down = true
+				end
 			elseif state == 0 and self.down then
 				self.PRESSED:invoke()
-				self.down = false
+				if not self.toggle then
+					self.down = false
+				end
 			end
 			self:applyApropriateStyle()
 		end

@@ -174,7 +174,7 @@ local function updateLabelPos(visual)
 			math.floor(math.lerp(-visual.padding.x,visual.padding.z,align.x) - visual.size.x * (align.x)+0.5),
 			math.floor(math.lerp(
 				-visual.padding.y,
-				-visual.size.y+visual.padding.y+textDim.y,
+				-visual.size.y+visual.padding.w+textDim.y,
 				align.y
 			)+0.5)
 		)

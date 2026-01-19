@@ -143,7 +143,15 @@ function Sprite:setPadding(l,t,r,b)
 		if padding == self.padding then return end
 		self.padding = padding
 	end
-	self.render:setPadding(self.id, self.padding.x, self.padding.y, self.padding.z, self.padding.w)
+	
+	local expand = self.style and self.style.expand or vec(0,0,0,0)
+	
+	self.render:setPadding(self.id, 
+		self.padding.x,
+		self.padding.y,
+		self.padding.z+expand.z,
+		self.padding.w+expand.w
+	)
 	return self
 end
 
