@@ -1,4 +1,3 @@
----@diagnostic disable: duplicate-doc-field
 local config = require("../config") ---@type GNUI.config
 local Box = require("./box") ---@type GNUI.BoxAPI
 local Event = require("../" .. config.EVENT)
@@ -10,6 +9,7 @@ local Layout = require("../" .. config.LAYOUT) ---@class GNUI.LayoutAPI
 
 ---@class GNUI.ButtonAPI
 local ButtonAPI = {}
+
 
 ---@class Event.GNUI.Button.PRESSED : Event
 ---@field register fun(self,func:fun(down: boolean))|fun(func:fun(toggle: boolean))
@@ -28,6 +28,12 @@ Button.__index = function (t,i)
 end
 Button.__style = "button"
 Button.__type = "Button"
+
+
+function ButtonAPI.index(i)
+	return Button[i]
+end
+
 
 ---@param canvas GNUI.Canvas
 ---@return GNUI.Button
@@ -119,6 +125,7 @@ function Button:applyApropriateStyle()
 	end
 end
 
+---@diagnostic disable: duplicate-doc-field
 ---@class GNUI.Layout
 ---@field type "button"?
 
