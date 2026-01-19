@@ -18,7 +18,7 @@ local ButtonAPI = {}
 ---@field down boolean
 ---@field toggle boolean
 ---
----@field PRESSED Event
+---@field PRESSED Event.GNUI.Button.PRESSED
 local Button = {}
 Button.__index = function (t,i)
 	return rawget(t,i) or Button[i] or Box.index(i)
