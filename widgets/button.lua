@@ -31,7 +31,7 @@ function ButtonAPI.new(canvas)
 	---@cast self GNUI.Button
 	
 	self.down = false
-	self.toggle = true
+	self.toggle = false
 	self.PRESSED = Event.new()
 	self.MOUSE_INPUT:register(function (button, state)
 		if button == 0 then
@@ -54,6 +54,18 @@ function ButtonAPI.new(canvas)
 		self:applyApropriateStyle()
 	end)
 	setmetatable(self, Button)
+	return self
+end
+
+
+
+---@param toggle boolean
+---@generic self
+---@param self self
+---@return self
+function Button:setToggle(toggle)
+	---@cast self GNUI.Button
+	self.toggle = toggle
 	return self
 end
 
