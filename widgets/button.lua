@@ -11,6 +11,8 @@ local Layout = require("../" .. config.LAYOUT) ---@class GNUI.LayoutAPI
 ---@class GNUI.ButtonAPI
 local ButtonAPI = {}
 
+---@class Event.GNUI.Button.PRESSED : Event
+---@field register fun(self,func:fun(down: boolean))|fun(func:fun(toggle: boolean))
 
 ---@class GNUI.Button : GNUI.Box
 ---@field down boolean
@@ -38,12 +40,13 @@ function ButtonAPI.new(canvas)
 			if state == 1 then
 				if self.toggle then
 					self.down = not self.down
+					self.PRESSED:invoke(self.down)
 				else
 					self.down = true
 				end
 			elseif state == 0 and self.down then
-				self.PRESSED:invoke()
 				if not self.toggle then
+					self.PRESSED:invoke()
 					self.down = false
 				end
 			end
