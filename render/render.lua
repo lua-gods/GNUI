@@ -168,13 +168,14 @@ local function updateLabelPos(visual)
 	if visual.label and visual.text then
 		visual.label:alignment(visual.textAlignment.x == -1 and "LEFT" or visual.textAlignment.x == 0 and "CENTER" or "RIGHT")
 		visual.label:setWidth(visual.size.x)
-		local textDim = client.getTextDimensions(visual.text, visual.size.x, visual.wrapText)
+		local textDim = client.getTextDimensions(visual.text, visual.size.x-visual.padding.x-visual.padding.z, visual.wrapText)
+		local align = visual.textAlignment*0.5+0.5
 		visual.label:setPos(
-			math.floor(-visual.padding.x - visual.size.x * (visual.textAlignment.x*0.5+0.5)+0.5),
+			math.floor(math.lerp(-visual.padding.x,visual.padding.z,align.x) - visual.size.x * (align.x)+0.5),
 			math.floor(math.lerp(
 				-visual.padding.y,
 				-visual.size.y+visual.padding.y+textDim.y,
-				visual.textAlignment.y * 0.5 + 0.5
+				align.y
 			)+0.5)
 		)
 	end

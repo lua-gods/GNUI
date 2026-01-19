@@ -62,7 +62,7 @@ return {
 			:setPadding(6,6,6,4)
 			:setExpand(0,0,0,2)
 			:setMargin(0,0,0,2)
-			:setTextAlignment(0,0)
+			:setTextAlignment(1,0)
 			:setTextColor("#ffffff")
 			,
 			pressed = Nineslice.newStyle()
