@@ -61,6 +61,18 @@ function ButtonAPI.new(canvas)
 end
 
 
+---@generic self
+---@param self self
+---@return self
+function Button:press()
+	---@cast self GNUI.Button
+	self.MOUSE_INPUT(0,1)
+	if not self.toggle then
+		self.MOUSE_INPUT(0,0)
+	end
+	return self
+end
+
 
 ---@param toggle boolean
 ---@generic self
