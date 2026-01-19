@@ -50,6 +50,8 @@ return {
 			,
 		}
 	},
+	
+	
 	button={
 		default="secondary",
 		green="primary",
@@ -58,31 +60,46 @@ return {
 			normal = Nineslice.newStyle()
 			:setTexture(atlas)
 			:setUV(15,0,19,6)
+			
 			:setBorder(2,2,2,4)
 			:setPadding(6,6,6,4)
 			:setExpand(0,0,0,2)
-			:setMargin(0,0,0,2)
+			:setMargin(0,-2,0,2)
+			
 			:setTextAlignment(0,0)
 			:setTextColor("#ffffff")
 			,
-			pressed = Nineslice.newStyle()
+			pressedHovered = Nineslice.newStyle()
 			:setTexture(atlas)
 			:setUV(14,17,20,23)
+			
 			:setBorder(3,3,3,3)
 			:setPadding(6,6,6,4)
-			:setMargin(0,2,0,0)
-			:setTextAlignment(0,0)
 			:setExpand(1,1,1,1)
+			
+			:setTextAlignment(0,0)
 			:setTextColor("#ffffff")
 			,
 			hovered = Nineslice.newStyle()
 			:setTexture(atlas)
 			:setUV(14,8,20,16)
+			
 			:setBorder(3,3,3,5)
 			:setPadding(6,6,6,4)
 			:setExpand(1,1,1,3)
+			:setMargin(0,-2,0,2)
+			
 			:setTextAlignment(0,0)
-			:setMargin(0,0,0,2)
+			:setTextColor("#ffffff")
+			,
+			pressed = Nineslice.newStyle()
+			:setTexture(atlas)
+			:setUV(15,25,19,29)
+			
+			:setBorder(2,2,2,2)
+			:setPadding(6,6,6,4)
+			
+			:setTextAlignment(0,0)
 			:setTextColor("#ffffff")
 			,
 		},
@@ -91,30 +108,47 @@ return {
 			normal = Nineslice.newStyle()
 			:setTexture(atlas)
 			:setUV(8,0,12,6)
+			
 			:setBorder(2,2,2,4)
 			:setPadding(6,6,6,4)
 			:setExpand(0,0,0,2)
-			:setMargin(0,0,0,2)
+			:setMargin(0,-2,0,2)
+			
 			:setTextAlignment(0,0)
 			:setTextColor("#1b1b1b")
 			,
-			pressed = Nineslice.newStyle()
+			pressedHovered = Nineslice.newStyle()
 			:setTexture(atlas)
 			:setUV(7,17,13,23)
+			
 			:setBorder(3,3,3,3)
 			:setPadding(6,6,6,4)
-			:setMargin(0,2,0,0)
+			:setMargin(0,0,0,0)
 			:setExpand(1,1,1,1)
+			
 			:setTextAlignment(0,0)
 			:setTextColor("#1b1b1b")
 			,
 			hovered = Nineslice.newStyle()
 			:setTexture(atlas)
 			:setUV(7,8,13,16)
+			
 			:setBorder(3,3,3,5)
 			:setPadding(6,6,6,4)
 			:setExpand(1,1,1,3)
-			:setMargin(0,0,0,2)
+			:setMargin(0,-2,0,2)
+			
+			:setTextAlignment(0,0)
+			:setTextColor("#1b1b1b")
+			,
+			pressed = Nineslice.newStyle()
+			:setTexture(atlas)
+			:setUV(8,25,12,29)
+			
+			:setBorder(2,2,2,2)
+			:setPadding(6,6,6,4)
+			:setMargin(0,0,0,0)
+			
 			:setTextAlignment(0,0)
 			:setTextColor("#1b1b1b")
 			,
@@ -124,28 +158,46 @@ return {
 			normal = Nineslice.newStyle()
 			:setTexture(atlas)
 			:setUV(1,0,5,6)
+			
 			:setBorder(2,2,2,4)
 			:setPadding(6,6,6,4)
 			:setExpand(0,0,0,2)
-			:setMargin(0,0,0,2)
+			:setMargin(0,-2,0,2)
+			
+			:setTextAlignment(0,0)
 			:setTextColor("#ffffff")
 			,
-			pressed = Nineslice.newStyle()
+			pressedHovered = Nineslice.newStyle()
 			:setTexture(atlas)
 			:setUV(0,17,6,23)
+			
 			:setBorder(3,3,3,3)
 			:setPadding(6,6,6,4)
-			:setMargin(0,2,0,0)
 			:setExpand(1,1,1,1)
+			
+			:setTextAlignment(0,0)
 			:setTextColor("#ffffff")
 			,
 			hovered = Nineslice.newStyle()
 			:setTexture(atlas)
 			:setUV(0,8,6,16)
+			
 			:setBorder(3,3,3,5)
 			:setPadding(6,6,6,4)
 			:setExpand(1,1,1,3)
-			:setMargin(0,0,0,2)
+			:setMargin(0,-2,0,2)
+			
+			:setTextAlignment(0,0)
+			:setTextColor("#ffffff")
+			,
+			pressed = Nineslice.newStyle()
+			:setTexture(atlas)
+			:setUV(1,25,5,29)
+			
+			:setBorder(2,2,2,2)
+			:setPadding(6,6,6,4)
+			
+			:setTextAlignment(0,0)
 			:setTextColor("#ffffff")
 			,
 		},
@@ -154,28 +206,46 @@ return {
 			normal = Nineslice.newStyle()
 			:setTexture(atlas)
 			:setUV(22,0,26,6)
+			
 			:setBorder(2,2,2,4)
 			:setPadding(6,6,6,4)
 			:setExpand(0,0,0,2)
-			:setMargin(0,0,0,2)
+			:setMargin(0,-2,0,2)
+			
+			:setTextAlignment(0,0)
 			:setTextColor("#ffffff")
 			,
-			pressed = Nineslice.newStyle()
+			pressedHovered = Nineslice.newStyle()
 			:setTexture(atlas)
 			:setUV(21,17,27,23)
+			
 			:setBorder(3,3,3,3)
 			:setPadding(6,6,6,4)
-			:setMargin(0,2,0,0)
 			:setExpand(1,1,1,1)
+			
+			:setTextAlignment(0,0)
 			:setTextColor("#ffffff")
 			,
 			hovered = Nineslice.newStyle()
 			:setTexture(atlas)
 			:setUV(21,8,27,16)
+			
 			:setBorder(3,3,3,5)
 			:setPadding(6,6,6,4)
 			:setExpand(1,1,1,3)
-			:setMargin(0,0,0,2)
+			:setMargin(0,-2,0,2)
+			
+			:setTextAlignment(0,0)
+			:setTextColor("#ffffff")
+			,
+			pressed = Nineslice.newStyle()
+			:setTexture(atlas)
+			:setUV(22,25,26,29)
+			
+			:setBorder(2,2,2,2)
+			:setPadding(6,6,6,4)
+			
+			:setTextAlignment(0,0)
 			:setTextColor("#ffffff")
 			,
 		},
@@ -183,28 +253,46 @@ return {
 			normal = Nineslice.newStyle()
 			:setTexture(atlas)
 			:setUV(29,0,33,6)
+			
 			:setBorder(2,2,2,4)
 			:setPadding(6,6,6,4)
 			:setExpand(0,0,0,2)
-			:setMargin(0,0,0,2)
+			:setMargin(0,-2,0,2)
+			
+			:setTextAlignment(0,0)
 			:setTextColor("#ffffff")
 			,
-			pressed = Nineslice.newStyle()
+			pressedHovered = Nineslice.newStyle()
 			:setTexture(atlas)
 			:setUV(28,17,34,23)
+			
 			:setBorder(3,3,3,3)
 			:setPadding(6,6,6,4)
-			:setMargin(0,2,0,0)
 			:setExpand(1,1,1,1)
+			
+			:setTextAlignment(0,0)
 			:setTextColor("#ffffff")
 			,
 			hovered = Nineslice.newStyle()
 			:setTexture(atlas)
 			:setUV(28,8,34,16)
+			
 			:setBorder(3,3,3,5)
 			:setPadding(6,6,6,4)
 			:setExpand(1,1,1,3)
-			:setMargin(0,0,0,2)
+			:setMargin(0,-2,0,2)
+			
+			:setTextAlignment(0,0)
+			:setTextColor("#ffffff")
+			,
+			pressed = Nineslice.newStyle()
+			:setTexture(atlas)
+			:setUV(29,25,33,29)
+			
+			:setBorder(2,2,2,2)
+			:setPadding(6,6,6,4)
+			
+			:setTextAlignment(0,0)
 			:setTextColor("#ffffff")
 			,
 		},
@@ -212,23 +300,41 @@ return {
 			normal = Nineslice.newStyle()
 			:setTexture(atlas)
 			:setUV(36,1,38,3)
+			
 			:setBorder(1,1,1,1)
 			:setPadding(3,3,3,3)
+			
+			:setTextAlignment(0,0)
 			:setTextColor("#ffffff")
 			,
-			pressed = Nineslice.newStyle()
+			pressedHovered = Nineslice.newStyle()
 			:setTexture(atlas)
-			:setUV(36,11,38,13)
+			:setUV(35,15,39,19)
+			
 			:setBorder(1,1,1,1)
+			:setExpand(1,1,1,1)
 			:setPadding(3,3,3,3)
+			
+			:setTextAlignment(0,0)
 			:setTextColor("#ffffff")
 			,
 			hovered = Nineslice.newStyle()
 			:setTexture(atlas)
 			:setUV(35,5,39,9)
+			
 			:setBorder(2,2,2,2)
 			:setPadding(3,3,3,3)
 			:setExpand(1,1,1,1)
+			
+			:setTextAlignment(0,0)
+			:setTextColor("#ffffff")
+			,
+			pressed = Quad.newStyle()
+			:setTexture(atlas)
+			:setUV(36,11,38,13)
+			:setPadding(3,3,3,3)
+			
+			:setTextAlignment(0,0)
 			:setTextColor("#ffffff")
 			,
 		},
@@ -238,12 +344,17 @@ return {
 			:setUV(7,32,7,32)
 			:setTextColor("#ffffff")
 			,
-			pressed = Quad.newStyle()
+			pressedHovered = Quad.newStyle()
 			:setTexture(atlas)
 			:setUV(7,34,7,34)
 			:setTextColor("#ffffff")
 			,
 			hovered = Quad.newStyle()
+			:setTexture(atlas)
+			:setUV(7,32,7,32)
+			:setTextColor("#1b1b1b")
+			,
+			pressed = Quad.newStyle()
 			:setTexture(atlas)
 			:setUV(7,32,7,32)
 			:setTextColor("#1b1b1b")

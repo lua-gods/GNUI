@@ -62,7 +62,11 @@ end
 
 function Button:applyApropriateStyle()
 	if self.down then
-		self.sprite:setStyle(Style.getKey(self,"pressed"))
+		if self.isHovered then
+			self.sprite:setStyle(Style.getKey(self,"pressedHovered"))
+		else
+			self.sprite:setStyle(Style.getKey(self,"pressed"))
+		end
 	else
 		if self.isHovered then
 			self.sprite:setStyle(Style.getKey(self,"hovered"))
