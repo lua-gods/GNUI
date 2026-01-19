@@ -360,5 +360,41 @@ return {
 			:setTextColor("#1b1b1b")
 			,
 		},
+	},
+	textField={
+		default={
+			normal = Nineslice.newStyle()
+			:setTexture(atlas)
+			:setUV(1,32,5,36)
+			
+			:setBorder(1,3,1,1)
+			:setPadding(2,2,2,2)
+			
+			:setTextAlignment(-1,0)
+			:setTextColor("#ffffff")
+			,
+			active = Nineslice.newStyle()
+			:setTexture(atlas)
+			:setUV(0,38,6,44)
+			
+			:setBorder(2,4,2,2)
+			:setPadding(2,2,2,2)
+			:setExpand(1,1,1,1)
+			
+			:setTextAlignment(-1,0)
+			:setTextColor("#ffffff")
+			,
+			invalid = Nineslice.newStyle()
+			:setTexture(atlas)
+			:setUV(0,45,6,51)
+			
+			:setBorder(2,4,2,2)
+			:setPadding(2,2,2,2)
+			:setExpand(1,1,1,1)
+			
+			:setTextAlignment(-1,0)
+			:setTextColor("#ffffff")
+			,
+		}
 	}
 }
