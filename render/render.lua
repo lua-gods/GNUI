@@ -7,6 +7,11 @@ local VERBOSE = false
 local RenderAPI = {}
 
 
+---@class GNUI.Text
+---@field text string
+---@field color string
+
+
 ---An abstract class for all the renderers for GNUI
 ---@class GNUI.RenderInstance
 ---@field canvas GNUI.Canvas
@@ -84,7 +89,7 @@ end
 ---@field model ModelPart
 ---
 ---@field texturePath string
----@field texture_size Vector2
+---@field textureSize Vector2
 ---@field uv Vector4
 ---@field quad SpriteTask
 ---
@@ -92,7 +97,8 @@ end
 ---
 ---@field padding Vector4
 ---@field label TextTask
----@field text string
+---@field text string|GNUI.Text[]
+---@field jsonText string
 ---@field textColor string
 ---@field textAlignment Vector2
 ---@field wrapText boolean
@@ -153,13 +159,33 @@ function Render:setPos(id,x,y)
 	if VERBOSE then print("POS ",id,x,y) end
 end
 
+
+local function parseText(text,defaultColor)
+	local tableText
+	if type(text) == "string" then
+		tableText = {{text=text,color="#"..defaultColor}}
+	else
+		if type(text) == "table" then
+			for index, value in ipairs(text) do
+				if not value.color then
+					value.color = defaultColor
+				end
+			end
+			tableText = text
+		end
+	end
+	return toJson(tableText)
+end
+
+
 ---@param visual GNUI.Render.Visual
 local function updateLabelText(visual)
 	if visual.text then
 		if not visual.label then
 			visual.label = visual.model:newText("label")
 		end
-		visual.label:setText('{"text":"'..visual.text..'","color":"#'..(visual.textColor or "ffffff")..'"}')
+		visual.jsonText = parseText(visual.text,visual.textColor)
+		visual.label:setText(visual.jsonText)
 	end
 end
 
@@ -167,8 +193,9 @@ end
 local function updateLabelPos(visual)
 	if visual.label and visual.text then
 		visual.label:alignment(visual.textAlignment.x == -1 and "LEFT" or visual.textAlignment.x == 0 and "CENTER" or "RIGHT")
-		visual.label:setWidth(visual.size.x)
-		local textDim = client.getTextDimensions(visual.text, visual.size.x-visual.padding.x-visual.padding.z, visual.wrapText)
+		local fineWidth = visual.size.x-visual.padding.x-visual.padding.z
+		visual.label:setWidth(fineWidth)
+		local textDim = client.getTextDimensions(visual.jsonText, fineWidth, visual.wrapText)
 		local align = visual.textAlignment*0.5+0.5
 		visual.label:setPos(
 			math.floor(math.lerp(-visual.padding.x,visual.padding.z,align.x) - visual.size.x * (align.x)+0.5),
@@ -192,7 +219,7 @@ function Render:setSize(id,x,y)
 	visual.size = vec(x,y)
 	
 	if visual.quad then
-		local size = visual.texture_size
+		local size = visual.textureSize
 		if size then
 			visual.quad:scale(x/size.x,y/size.y,1)
 		end
@@ -237,12 +264,12 @@ function Render:setTexture(id,path)
 	local textureSize = texture:getDimensions()
 	local uv = vec(0,0,1,1)
 	visual.texturePath = path
-	visual.texture_size = textureSize
+	visual.textureSize = textureSize
 	visual.uv = uv
 	visual.quad
 	:texture(textures[path],textureSize.x,textureSize.y)
-	:setUV(uv.xy / visual.texture_size)
-	:setRegion(uv.zw * visual.texture_size)
+	:setUV(uv.xy / visual.textureSize)
+	:setRegion(uv.zw * visual.textureSize)
 	
 	if VERBOSE then print("TEX ",id,path) end
 end
@@ -261,6 +288,7 @@ end
 function Render:setTextColor(id,r,g,b)
 	local visual = self.visuals[id]
 	visual.textColor = vectors.rgbToHex(r,g,b)
+	visual.jsonText = parseText(visual.text,visual.textColor)
 	updateLabelText(visual)
 	updateLabelPos(visual)
 	if VERBOSE then print("TCL ",id,r,g,b) end
@@ -283,16 +311,19 @@ function Render:setUV(id,u1,v1,u2,v2)
 	local uv = gncommon.vec4(u1,v1,u2,v2)
 	visual.uv = uv
 	visual.quad
-	:setUV(uv.xy/visual.texture_size)
+	:setUV(uv.xy/visual.textureSize)
 	:setRegion((uv.zw-uv.xy))
 	if VERBOSE then print("UV ",id,u1,v1,u2,v2) end
 end
 
 
+---@param id any
+---@param text string|GNUI.Text[]
 function Render:setText(id,text)
 	assert(self.visuals[id],"Visual Quad "..id.." not found")
 	local visual = self.visuals[id]
 	visual.text = text
+	
 	updateLabelText(visual)
 	updateLabelPos(visual)
 	if VERBOSE then print("TXT ",id,text) end

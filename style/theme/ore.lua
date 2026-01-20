@@ -363,12 +363,24 @@ return {
 	},
 	textField={
 		default={
+			colorHighlight="#00ff00",
 			normal = Nineslice.newStyle()
 			:setTexture(atlas)
 			:setUV(1,32,5,36)
 			
 			:setBorder(1,3,1,1)
 			:setPadding(2,2,2,2)
+			
+			:setTextAlignment(-1,0)
+			:setTextColor("#ffffff")
+			,
+			hovered = Nineslice.newStyle()
+			:setTexture(atlas)
+			:setUV(0,38,6,44)
+			
+			:setBorder(2,4,2,2)
+			:setPadding(2,2,2,2)
+			:setExpand(1,1,1,1)
 			
 			:setTextAlignment(-1,0)
 			:setTextColor("#ffffff")

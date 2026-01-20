@@ -5,6 +5,16 @@ local config = require("../../config") ---@type GNUI.config
 local Render = require("../../"..config.RENDER) ---@type GNUI.RenderAPI
 
 
+---@class GNUI.Canvas.Event.CharInput : Event
+---@field register fun(self,func:(fun(char: string):boolean),id:any?)
+
+---@class GNUI.Canvas.Event.KeyInput : Event
+---@field register fun(self,func:(fun(scancode:integer, state:integer):boolean),id:any?)
+
+---@class GNUI.Canvas.Event.MouseInput : Event
+---@field register fun(self,func:(fun(button:integer,state:integer):boolean),id:any?)
+
+
 ---@class GNUI.CanvasAPI
 local CanvasAPI = {}
 
@@ -14,6 +24,10 @@ local CanvasAPI = {}
 ---@field queueUpdate GNUI.Box[]
 ---@field hoveredBox GNUI.Box
 ---@field pressedButtons GNUI.Box[]
+---
+---@field CHAR_INPUT GNUI.Canvas.Event.CharInput
+---@field KEY_INPUT GNUI.Canvas.Event.KeyInput
+---@field MOUSE_INPUT GNUI.Canvas.Event.MouseInput
 local Canvas = {}
 Canvas.__index = function (t,i)
 	return rawget(t,i) or Canvas[i] or Box.index(i)
@@ -39,7 +53,12 @@ end
 
 ---@return GNUI.Canvas
 function Canvas:flushUpdates()
-	self:forceUpdate()
+	for key, box in pairs(self.queueUpdate) do
+		if box.flaggedUpdate then
+			box:forceUpdate()
+		end
+	end
+	self.queueUpdate = {}
 	return self
 end
 
@@ -86,7 +105,16 @@ end
 ---@param scancode integer
 ---@param state integer
 function Canvas:inputKey(scancode, state)
-	if self.hoveredBox then
+	local outs = self.KEY_INPUT(scancode, state)
+	local allow = true
+	
+	for index, out in ipairs(outs) do
+		if out then
+			allow = false break
+		end
+	end
+	
+	if allow and self.hoveredBox then
 		self.hoveredBox.KEY_INPUT(scancode, state)
 		
 		if state == 1 then
@@ -98,11 +126,21 @@ function Canvas:inputKey(scancode, state)
 			end
 		end
 	end
+	return allow
 end
 
 
 function Canvas:inputChar(char)
-	if self.hoveredBox then
+	local outs = self.CHAR_INPUT(char)
+	local allow = true
+	
+	for index, out in ipairs(outs) do
+		if out then
+			allow = false break
+		end
+	end
+	
+	if allow and self.hoveredBox then
 		self.hoveredBox.CHAR_INPUT(char)
 	end
 end
@@ -114,7 +152,16 @@ end
 ---@param button integer
 ---@param state integer
 function Canvas:inputMouse(button,state)
-	if self.hoveredBox then
+	local outs = self.MOUSE_INPUT(button,state)
+	local allow = true
+	
+	for index, out in ipairs(outs) do
+		if out then
+			allow = false break
+		end
+	end
+	
+	if allow and self.hoveredBox then
 		self.hoveredBox.MOUSE_INPUT(button,state)
 		
 		if state == 1 then

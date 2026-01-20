@@ -82,8 +82,6 @@ local BoxAPI = {}
 ---@field KEY_INPUT GNUI.Box.Event.KeyInput
 ---@field CHAR_INPUT GNUI.Box.Event.CharInput
 ---@field MOUSE_INPUT GNUI.Box.Event.MouseInput
----
----@field [string] GNUI.Box
 local Box = {}
 Box.__index = function (t,i)
 	return rawget(t,i) or Box[i] or rawget(t,"children")[i] or rawget(t,"namedChildren")[i]
@@ -224,7 +222,7 @@ function Box:setPadding(left,top,right,bottom)
 	---@cast self GNUI.Box
 	self.padding = gncommon.vec4(left,top,right,bottom)
 	if self.sprite then
-		self.sprite:setPadding(self:getPadding())
+		self.sprite:setPadding(self:getPadding():unpack())
 	end
 	self:update()
 	return self
@@ -319,6 +317,7 @@ end
 function Box:setSizing(x,y)
 	---@cast self GNUI.Box
 	self.sizing = {x=x or self.sizing.x,y=y or self.sizing.y}
+	self:update()
 	return self
 end
 
@@ -397,6 +396,7 @@ function Box:setStyle(style)
 			self.sprite:setStyle(style)
 		end
 	end
+	self:update()
 	return self
 end
 
@@ -486,6 +486,7 @@ function Box:removeParent()
 	if self.parent then
 		self.parent:removeChild(self)
 	end
+	self:update()
 	return self
 end
 
@@ -496,6 +497,7 @@ end
 function Box:setParent(parent)
 	self:removeParent()
 	parent:addChild(self)
+	self:update()
 	return self
 end
 
@@ -517,6 +519,7 @@ function Box:setText(text)
 	if self.sprite then
 		self.sprite:setText(text)
 	end
+	self:update()
 	return self
 end
 
@@ -567,21 +570,37 @@ end
 
 --────────────────────────-< UPDATERS >-────────────────────────--
 
+---@param box GNUI.Box
+local function updatePropagate(box)
+	if box.canvas and not box.flaggedUpdate then
+		box.flaggedUpdate = true
+		box.canvas.queueUpdate[#box.canvas.queueUpdate+1] = box
+	end
+	for index, child in ipairs(box.children) do
+		updatePropagate(child)
+	end
+end
 
 ---Updates itself and its relatives that will get affected
 function Box:update()
-	self:updateItself()
-end
-
-
-function Box:updateItself()
 	if not self.flaggedUpdate then
-		self.flaggedUpdate = true
-		if self.canvas then
-			self.canvas.queueUpdate[self.id] = self
+		
+		if self.parent then
+			local parent = self.parent
+			
+			while parent do
+				if not parent.layout then
+					break
+				end
+				parent = parent.parent
+			end
+			updatePropagate(parent)
+		else
+			updatePropagate(self)
 		end
 	end
 end
+
 
 function Box:updateSprites()
 	if self.sprite then
@@ -591,6 +610,13 @@ function Box:updateSprites()
 	end
 	for _, child in ipairs(self.children) do
 		child:updateSprites()
+	end
+end
+
+local function unflag(box)
+	box.flaggedUpdate = false
+	for _, child in ipairs(box.children) do
+		unflag(child)
 	end
 end
 
@@ -610,8 +636,8 @@ function Box:forceUpdate()
 	:sovleForFillSizing(true)
 	:sovleForLayout(true)
 	
-	
 	:updateSprites()
+	unflag(self)
 	return self
 end
 
@@ -763,13 +789,11 @@ function Box:sovleForLayout(other)
 				self.childAlign[x] * 0.5 + 0.5)
 			end
 		end
-	else
-		for _, child in ipairs(self.children) do
-			local margin = child:getMargin()
-			child.bakedPos[x] = child.pos[x] + margin[x]
-			if child.sizing[x] == "FIXED" then
-				child.bakedSize[x] = child.size[x]
-			end
+	end
+	if self.parent and not self.parent.layout then
+		self.bakedPos[x] = self.pos[x] + self:getMargin()[x]
+		if self.sizing[x] == "FIXED" then
+			self.bakedSize[x] = self.size[x]
 		end
 	end
 	

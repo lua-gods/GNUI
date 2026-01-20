@@ -5,10 +5,10 @@ local util =  require("../utils") ---@type GNUI.utils
 ---@field [string] GNUI.Theme.Class
 
 ---@class GNUI.Theme.Class
----@field [string] GNUI.Theme.Class.Variant | string
+---@field [string] GNUI.Theme.Class.Variant|string
 
 ---@class GNUI.Theme.Class.Variant
----@field [string] GNUI.Sprite.Style
+---@field [string] GNUI.Sprite.Style|any
 
 ---@type GNUI.Theme
 local Theme = {}
@@ -44,6 +44,8 @@ for index, path in ipairs(util.listFiles("./theme")) do
 	end
 end
 
+local requestCache = {}
+
 ---Get a style
 ---@param class string|GNUI.Box
 ---@param variant string
@@ -71,7 +73,6 @@ function StyleAPI.getStyle(class,variant,key)
 			
 			if variantVal[key] then
 				local key = variantVal[key]
-				
 				return key
 			end
 		end

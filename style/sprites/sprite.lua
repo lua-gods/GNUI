@@ -180,6 +180,9 @@ function Sprite:setStyle(style)
 		self.style = style
 	end
 	self:applyAll(style)
+	if self.box then
+		self.box:update()
+	end
 	return self
 end
 

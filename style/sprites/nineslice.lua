@@ -237,19 +237,6 @@ function Nineslice:applyAll(style)
 end
 
 
----@overload fun(self: GNUI.Sprite.Nineslice)
----@param style GNUI.Sprite.Nineslice.Style
-function Nineslice:setStyle(style)
-	---@cast self GNUI.Sprite.Nineslice
-	if style then
-		if self.style == style then return end
-		self.style = style
-	end
-	self:applyAll(self.style)
-	return self
-end
-
-
 ---@param spriteID integer
 ---@param index integer
 function Nineslice:setParent(spriteID,index)

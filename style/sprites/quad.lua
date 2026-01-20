@@ -109,19 +109,4 @@ function Quad:applyAll(style)
 end
 
 
----@overload fun(self: GNUI.Sprite.Quad)
----@param style GNUI.Sprite.Quad.Style
-function Quad:setStyle(style)
-	---@cast self GNUI.Sprite.Quad
-	if style then
-		if self.style == style then return end
-		self.style = style
-	end
-	self:applyAll(self.style)
-	return self
-end
-
-
-
-
 return Quad
