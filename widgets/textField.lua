@@ -15,7 +15,7 @@ local TextFieldAPI = {}
 
 
 
-TextFieldAPI.verifiers = {
+TextFieldAPI.validators = {
 	decimal = function (field)
 		return tonumber(field) and true or false
 	end,
@@ -45,7 +45,7 @@ TextFieldAPI.verifiers = {
 ---@field editingField string
 ---@field placeholder string
 ---@field validField boolean
----@field verifier fun(field: string):boolean
+---@field validator fun(field: string):boolean
 local TextField = {}
 TextField.__index = function (t,i)
 	return rawget(t,i) or TextField[i] or Button.index(i) or Box.index(i)
@@ -73,6 +73,7 @@ function TextFieldAPI.new(canvas)
 	self.placeholder = ""
 	self.toggle = true
 	self.validField = true
+	self.validator = TextFieldAPI.validators.decimal
 	
 	self.BUTTON_DOWN:register(function ()
 		self.editingField = self.field
@@ -109,7 +110,7 @@ function TextFieldAPI.new(canvas)
 				
 				elseif scancode == 257 then -- enter
 					self:release()
-					if self.verifier and self.verifier(self.editingField) or not self.verifier then
+					if self.validator and self.validator(self.editingField) or not self.validator then
 						self.field = self.editingField
 					end
 				elseif scancode == 256 then -- esc
@@ -170,8 +171,8 @@ function TextField:updateTextField()
 	end
 	
 	local isValid = true
-	if self.verifier then
-		isValid = self.verifier(self.editingField)
+	if self.validator then
+		isValid = self.validator(self.editingField)
 	end
 	
 	if isValid ~= self.validField then
