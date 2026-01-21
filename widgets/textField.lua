@@ -98,13 +98,61 @@ function TextFieldAPI.new(canvas)
 						self.cursor = math.min(self.cursor + 1,#self.editingField)
 					end
 				elseif scancode == 265 then -- up
-					
+					local cursor = self.cursor
+					local lineStart,lineEnd,otherLineStart = cursor,cursor,cursor
+					for i = cursor, 1, -1 do
+						lineStart = i if self.editingField:sub(i,i) == "\n" then break end
+					end
+					for i = cursor, #self.editingField, 1 do lineEnd = i
+						if self.editingField:sub(i,i) == "\n" then break end
+					end
+					for i = lineStart-1, 1, -1 do
+						if self.editingField:sub(i,i) == "\n" then break end
+						otherLineStart = i
+					end
+					if otherLineStart == lineStart then
+						self.cursor = 0
+					else
+						local o = utils.getTextWidth(self.editingField:sub(lineStart,cursor))
+						if o >= utils.getTextWidth(self.editingField:sub(otherLineStart,lineStart)) then
+							self.cursor = lineStart-1
+						else
+							local newCursorPosInNextLine = utils.LengthToCharCount(self.editingField:sub(otherLineStart,lineEnd),o)
+							self.cursor = otherLineStart + newCursorPosInNextLine - 1
+						end
+					end
 				elseif scancode == 264 then -- down
-				
+					local cursor = self.cursor
+					local lineStart,lineEnd,otherLineEnd = cursor,cursor,cursor
+					for i = cursor, 1, -1 do
+						lineStart = i if self.editingField:sub(i,i) == "\n" then break end
+					end
+					for i = cursor+1, #self.editingField, 1 do lineEnd = i
+						if self.editingField:sub(i,i) == "\n" then break end
+					end
+					for i = lineEnd+1, #self.editingField, 1 do
+						if self.editingField:sub(i,i) == "\n" then break end
+						otherLineEnd = i
+					end
+					
+					if otherLineEnd == lineEnd then
+						self.cursor = #self.editingField
+					else
+						local o = utils.getTextWidth(self.editingField:sub(lineStart,cursor))
+						if o == 0 then
+							self.cursor = lineEnd
+						else
+							local newCursorPosInNextLine = utils.LengthToCharCount(self.editingField:sub(lineEnd,otherLineEnd),o)
+							self.cursor = lineEnd + newCursorPosInNextLine - 1
+						end
+					end
+					
 				elseif scancode == 86 then -- v
-					local clipboard = utils.getClipboard()
-					self.editingField = self.editingField:sub(1,self.cursor) .. clipboard .. self.editingField:sub(self.cursor+1,-1)
-					self.cursor = self.cursor + #clipboard
+					if ctrl then
+						local clipboard = utils.getClipboard()
+						self.editingField = self.editingField:sub(1,self.cursor) .. clipboard .. self.editingField:sub(self.cursor+1,-1)
+						self.cursor = self.cursor + #clipboard
+					end
 				elseif scancode == 257 then -- enter
 					if self.multiline then
 						self.editingField = self.editingField .. "\n"

@@ -35,12 +35,18 @@ function util.getTextSize(content, maxWidth, wrap)
 	return client.getTextDimensions(content, maxWidth, wrap)
 end
 
+---@param text string
+---@return integer
+function util.getTextWidth(text)
+	return client.getTextWidth(text)
+end
+
 -- Thankyou 4P5!
 local clampCache = setmetatable({}, { mode = "v" })
 ---@param text string
 ---@param length number
 ---@return number
-function util.splitAtLength(text, length)
+function util.LengthToCharCount(text, length)
 	if not clampCache[length] then clampCache[length] = {} end
 	if clampCache[length][text] then return clampCache[length][text][1] end
 
@@ -48,7 +54,6 @@ function util.splitAtLength(text, length)
 
 	local i = 0
 	if width > length then
-
 		local low, high = 0, #text
 		while low < high do
 			i = i + 1
