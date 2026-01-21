@@ -21,12 +21,53 @@ function util.listFiles(path)
 end
 
 
+---@return string
+function util.getClipboard()
+	return host:getClipboard()
+end
+
+
 ---@param content string
 ---@param maxWidth any
 ---@param wrap any
 ---@return Vector2
 function util.getTextSize(content, maxWidth, wrap)
 	return client.getTextDimensions(content, maxWidth, wrap)
+end
+
+-- Thankyou 4P5!
+local clampCache = setmetatable({}, { mode = "v" })
+---@param text string
+---@param length number
+---@return number
+function util.splitAtLength(text, length)
+	if not clampCache[length] then clampCache[length] = {} end
+	if clampCache[length][text] then return clampCache[length][text][1] end
+
+	local width = client.getTextWidth(text)
+
+	local i = 0
+	if width > length then
+
+		local low, high = 0, #text
+		while low < high do
+			i = i + 1
+			local mid = math.floor((low + high) / 2)
+			local test_text = text:sub(1, mid)
+			local test_width = client.getTextWidth(test_text)
+
+			if test_width > length then
+				high = mid
+			else
+				low = mid + 1
+			end
+		end
+
+		local left = text:sub(1, low - 1)
+		text = left
+	end
+
+	return #text
 end
 
 

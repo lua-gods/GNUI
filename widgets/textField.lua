@@ -4,8 +4,8 @@ local Event = require("../" .. config.EVENT)
 local Button = require("./button") ---@type GNUI.ButtonAPI
 
 local Style = require("../" .. config.STYLE) ---@type GNUI.StyleAPI
-local Layout = require("../" .. config.LAYOUT) ---@class GNUI.LayoutAPI
-
+local Layout = require("../" .. config.LAYOUT) ---@type GNUI.LayoutAPI
+local utils = require("../utils") ---@type GNUI.utils
 
 ---@class GNUI.TextFieldAPI
 local TextFieldAPI = {}
@@ -14,27 +14,17 @@ local TextFieldAPI = {}
 ---@alias GNUI.TextField.Verifier fun(field: string):boolean
 
 
-
 TextFieldAPI.validators = {
-	decimal = function (field)
+	decimal = function (field) 
 		return tonumber(field) and true or false
 	end,
 	integer = function (field)
-		local result = tonumber(field)
-		return result and result % 1 == 0 or false
+		local result = tonumber(field) return result and result % 1 == 0 or false
 	end,
-	hex = function (field)
-		return field:match("#?%x%x%x%x%x%x")
-	end,
-	email = function (field)
-		return field:match("^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+.[a-zA-Z0-9-.]+$")
-	end,
-	username = function (field)
-		return field:match("^[a-zA-Z0-9_]+$")
-	end,
-	url = function (field)
-		return field:match("https?://[%w-_%.%?%.:/%+=&%()%#]+")
-	end
+	hex = function (field) return field:match("#?%x%x%x%x%x%x") and true or false end,
+	email = function (field) return field:match("^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+.[a-zA-Z0-9-.]+$") and true or false end,
+	username = function (field) return field:match("^[a-zA-Z0-9_]+$") and true or false end,
+	url = function (field) return field:match("https?://[%w-_%.%?%.:/%+=&%()%#]+") and true or false end
 }
 
 
@@ -45,6 +35,7 @@ TextFieldAPI.validators = {
 ---@field editingField string
 ---@field placeholder string
 ---@field validField boolean
+---@field multiline boolean
 ---@field validator fun(field: string):boolean
 local TextField = {}
 TextField.__index = function (t,i)
@@ -73,18 +64,20 @@ function TextFieldAPI.new(canvas)
 	self.placeholder = ""
 	self.toggle = true
 	self.validField = true
-	self.validator = TextFieldAPI.validators.decimal
+	self.multiline = true
 	
 	self.BUTTON_DOWN:register(function ()
 		self.editingField = self.field
+		local ctrl = false
+		
 		self.canvas.CHAR_INPUT:register(function (char)
 			self.editingField = self.editingField:sub(1,self.cursor) .. char .. self.editingField:sub(self.cursor+1,-1)
 			self.cursor = self.cursor + 1
+			
 			self:updateTextField()
 			return true
 		end,self.id)
 		
-		local ctrl = false
 		self.canvas.KEY_INPUT:register(function (scancode, state)
 			if scancode == 341 then
 				ctrl = state ~= 0
@@ -98,23 +91,29 @@ function TextFieldAPI.new(canvas)
 						self.cursor = math.max(self.cursor - 1,0)
 					end
 				elseif scancode == 262 then -- right
-				if ctrl then
-					local from,to = self.editingField:sub(self.cursor+1,-1):find("^%s*%S*")
-					self.cursor = self.cursor + to
-				else
-					self.cursor = math.min(self.cursor + 1,#self.editingField)
-				end
+					if ctrl then
+						local from,to = self.editingField:sub(self.cursor+1,-1):find("^%s*%S*")
+						self.cursor = self.cursor + to
+					else
+						self.cursor = math.min(self.cursor + 1,#self.editingField)
+					end
 				elseif scancode == 265 then -- up
-				
+					
 				elseif scancode == 264 then -- down
 				
+				elseif scancode == 86 then -- v
+					local clipboard = utils.getClipboard()
+					self.editingField = self.editingField:sub(1,self.cursor) .. clipboard .. self.editingField:sub(self.cursor+1,-1)
+					self.cursor = self.cursor + #clipboard
 				elseif scancode == 257 then -- enter
-					self:release()
-					if self.validator and self.validator(self.editingField) or not self.validator then
-						self.field = self.editingField
+					if self.multiline then
+						self.editingField = self.editingField .. "\n"
+						self.cursor = self.cursor + 1
+					else
+						self:confirm()
 					end
 				elseif scancode == 256 then -- esc
-					self:release()
+					self:confirm()
 				elseif scancode == 259 then -- backspace
 					if ctrl and self.cursor > 2 then
 						local from = self.editingField:sub(1,self.cursor):find("%s*%S*$")
@@ -140,8 +139,7 @@ function TextFieldAPI.new(canvas)
 		
 		self.canvas.MOUSE_INPUT:register(function (button, state)
 			if not self:isPosInbounds(self.canvas.cursorPos) then
-				self.field = self.editingField
-				self:release()
+				self:confirm()
 			end
 			return true
 		end,self.id)
@@ -156,6 +154,23 @@ function TextFieldAPI.new(canvas)
 	end,"__core")
 	
 	return self
+end
+
+
+function TextField:discard()
+	if self.down then
+		self:release()
+	end
+end
+
+
+function TextField:confirm()
+	if self.down then
+		if self.validator and self.validator(self.editingField) or not self.validator then
+			self.field = self.editingField
+		end
+		self:release()
+	end
 end
 
 
