@@ -161,7 +161,8 @@ end
 
 ---@diagnostic disable: duplicate-doc-field
 ---@class GNUI.Layout
----@field type "textField"?
+---@field type "button"?
+---@field toggle boolean?
 
 ---@param layout any
 ---@param canvas GNUI.Canvas
@@ -170,6 +171,8 @@ end
 function ButtonAPI.parse(layout,canvas,button)
 	local box = button or Box.parse(layout,canvas,ButtonAPI.new(canvas))
 
+	if layout.toggle then box.toggle = layout.toggle end
+	
 	return box
 end
 
