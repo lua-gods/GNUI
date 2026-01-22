@@ -11,8 +11,13 @@ local utils = require("../utils") ---@type GNUI.utils
 local TextFieldAPI = {}
 
 
----@alias GNUI.TextField.Verifier fun(field: string):boolean
-
+---@alias GNUI.TextField.Verifier string|(fun(field: string):boolean)
+---| "decimal"
+---| "integer"
+---| "hex"
+---| "email"
+---| "username"
+---| "url")))
 
 TextFieldAPI.validators = {
 	decimal = function (field) 
@@ -64,7 +69,7 @@ function TextFieldAPI.new(canvas)
 	self.placeholder = ""
 	self.toggle = true
 	self.validField = true
-	self.multiline = true
+	self.multiline = false
 	
 	self.BUTTON_DOWN:register(function ()
 		self.editingField = self.field
@@ -186,7 +191,7 @@ function TextFieldAPI.new(canvas)
 		end,self.id)
 		
 		self.canvas.MOUSE_INPUT:register(function (button, state)
-			if not self:isPosInbounds(self.canvas.cursorPos) then
+			if not self:isPosInbounds(self.canvas.cursorPos) and state == 1 then
 				self:confirm()
 			end
 			return true
@@ -267,20 +272,33 @@ end
 
 ---@diagnostic disable: duplicate-doc-field
 ---@class GNUI.Layout
----@field type "button"?
+---@field type "textField"?
+---@field field string?
+---@field placeholder string?
+---@field multiline boolean?
+---@field validator GNUI.TextField.Verifier?
 
 ---@param layout any
 ---@param canvas GNUI.Canvas
----@param button GNUI.TextField?
+---@param textField GNUI.TextField?
 ---@return GNUI.TextField
-function TextFieldAPI.parse(layout,canvas,button)
-	local box = button or Box.parse(layout,canvas,TextFieldAPI.new(canvas))
+function TextFieldAPI.parse(layout,canvas,textField)
+	local box = textField or Box.parse(layout,canvas,TextFieldAPI.new(canvas))
+	
+	if layout.field then box.field = layout.field end
+	if layout.placeholder then box.placeholder = layout.placeholder end
+	if layout.multiline then box.multiline = layout.multiline end
+	if layout.validator then 
+		if type(layout.validator) == "function" then
+			box.validator = layout.validator
+		else
+			box.validator = TextFieldAPI.validators[layout.validator]
+		end
+	end
 	
 	return box
 end
 
 Layout.registerType("textField", TextFieldAPI.parse)
-
-
 
 return TextFieldAPI
