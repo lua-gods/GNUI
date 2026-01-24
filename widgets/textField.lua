@@ -259,12 +259,12 @@ function TextField:applyApropriateStyle()
 	---@cast self GNUI.TextField
 	if self.down then
 		if self.validField then
-			self.sprite:setStyle(Style.getKey(self,"active"))
+			self.sprites[1]:setStyle(Style.getKey(self,"active"))
 		else
-			self.sprite:setStyle(Style.getKey(self,"invalid"))
+			self.sprites[1]:setStyle(Style.getKey(self,"invalid"))
 		end
 	else
-		self.sprite:setStyle(Style.getKey(self,"normal"))
+		self.sprites[1]:setStyle(Style.getKey(self,"normal"))
 	end
 	return self
 end

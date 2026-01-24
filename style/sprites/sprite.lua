@@ -13,7 +13,7 @@ local gncommon = require("lib.gncommon") ---@type GNCommon
 ---@class GNUI.Sprite
 ---@field style GNUI.Sprite.Style
 ---@field box GNUI.Box?
----@field childIndex integer
+---@field index (integer|string)? # index of the sprite to the box it is attached to
 ---@field parentID integer
 ---@field boxColor Vector3
 ---
@@ -25,8 +25,9 @@ local gncommon = require("lib.gncommon") ---@type GNCommon
 ---@field pos Vector2
 ---@field size Vector2
 ---
----@field render GNUI.RenderInstance
----@field id integer?
+---@field display GNUI.Render.Display
+---@field taskID integer # Task ID
+---@field labelID integer # Task ID
 local Sprite = {}
 Sprite.__index = Sprite
 
@@ -34,7 +35,6 @@ Sprite.__index = Sprite
 ---@param box GNUI.Box
 ---@return GNUI.Sprite
 function Sprite.new(box)
-	assert(box,"no GNUI.Box given")
 	
 	local self = {
 		pos = vec(0,0),
@@ -49,12 +49,12 @@ function Sprite.new(box)
 		boxColor = vec(1,1,1),
 		flagApply = false,
 		
-		render = box.canvas.render,
-		id = box.canvas.render:newVisualQuad()
 	}
-	
 	setmetatable(self, Sprite)
-	box:setSprite(self)
+	if box then
+		self:setBox(box)
+	end
+	
 	return self
 end
 
@@ -68,6 +68,28 @@ end
 
 --────────────────────────-< API >-────────────────────────--
 
+
+---@param box GNUI.Box
+---@param slot (integer|string)?
+function Sprite:setBox(box,slot)
+	if self.taskID then
+		self.display:removeSprite(self.taskID)
+	end
+	self.display = box.canvas.display
+	self.taskID = box.canvas.display:newSprite(box.visualID)
+	self.labelID = box.canvas.display:newLabel(box.visualID)
+	self.box = box
+	
+	self.index = slot or #box.sprites+1
+	
+	box.sprites[self.index] = self
+	
+	if self.box then
+		self:applyAll()
+	end
+end
+
+
 ---@overload fun(self: GNUI.Sprite)
 ---@param x number
 ---@param y number
@@ -79,8 +101,7 @@ function Sprite:setPos(x,y)
 		if self.pos == pos  then return end
 		self.pos = pos - expand
 	end
-	
-	self.render:setPos(self.id, self.pos.x,self.pos.y)
+	self.display:setPos(self.taskID, self.pos.x,self.pos.y)
 end
 
 
@@ -96,7 +117,7 @@ function Sprite:setSize(x,y)
 		if size == self.size then return end
 		self.size = size
 	end
-	self.render:setSize(self.id, self.size.x, self.size.y)
+	self.display:setSpriteSize(self.box.visualID, self.taskID, self.size.x, self.size.y)
 	return self
 end
 
@@ -109,7 +130,7 @@ function Sprite:setText(text)
 		if self.text == text then return end
 		self.text = text
 	end
-	self.render:setText(self.id,self.text)
+	self.display:setText(self.box.visualID,self.labelID,self.text)
 end
 
 
@@ -125,7 +146,7 @@ function Sprite:setTextColor(r,g,b)
 		self.textColor = color
 	end
 	if self.textColor then
-		self.render:setTextColor(self.id,self.textColor.x,self.textColor.y,self.textColor.z)
+		--self.display:setTextColor(self.id,self.textColor.x,self.textColor.y,self.textColor.z) -- FIXME
 	end
 end
 
@@ -146,7 +167,7 @@ function Sprite:setPadding(l,t,r,b)
 	
 	local expand = self.style and self.style.expand or vec(0,0,0,0)
 	
-	self.render:setPadding(self.id, 
+	self.display:setLabelPadding(self.box.visualID,self.labelID,
 		self.padding.x,
 		self.padding.y,
 		self.padding.z+expand.z,
@@ -164,7 +185,7 @@ function Sprite:setTextAlignment(h,v)
 	if h then self.textAlignment.x = h changed = true end
 	if v then self.textAlignment.y = v changed = true end
 	if changed then
-		self.render:setTextAlignment(self.id, self.textAlignment.x, self.textAlignment.y)
+		self.display:setTextAlignment(self.box.visualID,self.labelID, self.textAlignment.x, self.textAlignment.y)
 	end
 	return self
 end
@@ -202,29 +223,5 @@ function Sprite:applyAll(style)
 	end
 end
 
-
----@param box GNUI.Box
----@generic self
----@param self self
----@return self
-function Sprite:setBox(box)
-	---@cast self GNUI.Sprite
-	self.box = box
-	if self.box then
-		self:applyAll()
-	end
-	return self
-end
-
-
----@param id integer
----@param index integer
-function Sprite:setParent(id,index)
-	if self.childIndex ~= index or self.parentID ~= id then
-		self.childIndex = index
-		self.parentID = id
-		self.render:setParent(self.id,id,index)
-	end
-end
 
 return Sprite

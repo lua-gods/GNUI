@@ -30,7 +30,7 @@ function Quad.new(box)
 	local self = Sprite.new(box)
 	---@cast self GNUI.Sprite.Quad
 	
-	self.id = self.render:newVisualQuad()
+	self.taskID = self.render:newVisualQuad()
 	
 	setmetatable(self, Quad)
 	return self
@@ -56,7 +56,7 @@ function Quad:setTexture(path)
 		self.texturePath = path
 	end
 	
-	self.render:setTexture(self.id,self.texturePath)
+	self.render:setTexture(self.taskID,self.texturePath)
 	return self
 end
 
@@ -73,7 +73,7 @@ function Quad:setBoxColor(r,g,b)
 		if self.color == color then return end
 		self.color = color
 	end
-	self.render:setBoxColor(self.id,self.color.x,self.color.y,self.color.z)
+	self.render:setBoxColor(self.taskID,self.color.x,self.color.y,self.color.z)
 
 end
 
@@ -90,7 +90,7 @@ function Quad:setUV(u1,v1,u2,v2)
 		if self.uv == uv then return end
 		self.uv = uv
 	end
-	self.render:setUV(self.id,self.uv.x,self.uv.y,self.uv.z,self.uv.w)
+	self.render:setUV(self.taskID,self.uv.x,self.uv.y,self.uv.z,self.uv.w)
 	return self
 	
 end

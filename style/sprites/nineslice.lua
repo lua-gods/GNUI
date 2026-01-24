@@ -45,17 +45,18 @@ function Nineslice.new(box)
 	local self = Sprite.new(box)
 	---@cast self GNUI.Sprite.Nineslice
 	
-	self.idTopLeft = self.render:newVisualQuad()
-	self.idTop = self.render:newVisualQuad()
-	self.idTopRight = self.render:newVisualQuad()
+	local id = box.visualID
+	self.idTopLeft = self.display:newSprite(id)
+	self.idTop = self.display:newSprite(id)
+	self.idTopRight = self.display:newSprite(id)
 	
-	self.idLeft = self.render:newVisualQuad()
-	self.idCenter = self.render:newVisualQuad()
-	self.idRight = self.render:newVisualQuad()
+	self.idLeft = self.display:newSprite(id)
+	self.idCenter = self.display:newSprite(id)
+	self.idRight = self.display:newSprite(id)
 	
-	self.idBottomRight = self.render:newVisualQuad()
-	self.idBottom = self.render:newVisualQuad()
-	self.idBottomLeft = self.render:newVisualQuad()
+	self.idBottomRight = self.display:newSprite(id)
+	self.idBottom = self.display:newSprite(id)
+	self.idBottomLeft = self.display:newSprite(id)
 	
 	self.ids = {
 		self.idTopLeft,
@@ -71,8 +72,8 @@ function Nineslice.new(box)
 		self.idBottomRight,
 	}
 	
+	self.box = box
 	setmetatable(self, Nineslice)
-	self:setBox(box)
 	return self
 end
 
@@ -119,33 +120,26 @@ function Nineslice:applyDimensions()
 	local size = self.size + expand.xy + expand.zw
 	local pos = self.pos - expand.xy
 	
-	self.render:setSize(self.id,      size.x, size.y)
+	local id = self.box.visualID
+	self.display:setSpriteSize(id,self.idTopLeft,  border.x, border.y)
+	self.display:setSpriteSize(id,self.idTop,      size.x-border.x-border.z, border.y)
+	self.display:setSpriteSize(id,self.idTopRight, border.z, border.y)
+	self.display:setSpriteSize(id,self.idLeft,  border.x, size.y-border.y-border.w)
+	self.display:setSpriteSize(id,self.idCenter,      size.x-border.x-border.z, size.y-border.y-border.w)
+	self.display:setSpriteSize(id,self.idRight, border.z, size.y-border.y-border.w)
+	self.display:setSpriteSize(id,self.idBottomLeft,  border.x, border.w)
+	self.display:setSpriteSize(id,self.idBottom,      size.x-border.x-border.z, border.w)
+	self.display:setSpriteSize(id,self.idBottomRight, border.z, border.w)
 	
-	self.render:setSize(self.idTopLeft,  border.x, border.y)
-	self.render:setSize(self.idTop,      size.x-border.x-border.z, border.y)
-	self.render:setSize(self.idTopRight, border.z, border.y)
-	
-	self.render:setSize(self.idLeft,  border.x, size.y-border.y-border.w)
-	self.render:setSize(self.idCenter,      size.x-border.x-border.z, size.y-border.y-border.w)
-	self.render:setSize(self.idRight, border.z, size.y-border.y-border.w)
-	
-	self.render:setSize(self.idBottomLeft,  border.x, border.w)
-	self.render:setSize(self.idBottom,      size.x-border.x-border.z, border.w)
-	self.render:setSize(self.idBottomRight, border.z, border.w)
-	
-	self.render:setPos(self.id,  self.pos.x,self.pos.y)
-	
-	self.render:setPos(self.idTopLeft,  pos.x, pos.y)
-	self.render:setPos(self.idTop,      pos.x+border.x, pos.y)
-	self.render:setPos(self.idTopRight, pos.x+size.x-border.z, pos.y)
-	
-	self.render:setPos(self.idLeft,  pos.x, pos.y+border.y)
-	self.render:setPos(self.idCenter,      pos.x+border.x, pos.y+border.y)
-	self.render:setPos(self.idRight, pos.x+size.x-border.z, pos.y+border.y)
-	
-	self.render:setPos(self.idBottomLeft,  pos.x, pos.y+size.y-border.w)
-	self.render:setPos(self.idBottom,      pos.x+border.x,pos.y+size.y-border.w)
-	self.render:setPos(self.idBottomRight, pos.x+size.x-border.z,pos.y+size.y-border.w)
+	self.display:setSpritePos(id,self.idTopLeft,  pos.x, pos.y)
+	self.display:setSpritePos(id,self.idTop,      pos.x+border.x, pos.y)
+	self.display:setSpritePos(id,self.idTopRight, pos.x+size.x-border.z, pos.y)
+	self.display:setSpritePos(id,self.idLeft,  pos.x, pos.y+border.y)
+	self.display:setSpritePos(id,self.idCenter,      pos.x+border.x, pos.y+border.y)
+	self.display:setSpritePos(id,self.idRight, pos.x+size.x-border.z, pos.y+border.y)
+	self.display:setSpritePos(id,self.idBottomLeft,  pos.x, pos.y+size.y-border.w)
+	self.display:setSpritePos(id,self.idBottom,      pos.x+border.x,pos.y+size.y-border.w)
+	self.display:setSpritePos(id,self.idBottomRight, pos.x+size.x-border.z,pos.y+size.y-border.w)
 end
 
 
@@ -157,18 +151,21 @@ function Nineslice:setTexture(path)
 		if self.texturePath == path then return end
 		self.texturePath = path
 	end
+	
+	local id = self.box.visualID
+	
 	if self.texturePath then
-		self.render:setTexture(self.idTopLeft,self.texturePath)
-		self.render:setTexture(self.idTop,self.texturePath)
-		self.render:setTexture(self.idTopRight,self.texturePath)
+		self.display:setSpriteTexture(id,self.idTopLeft,self.texturePath)
+		self.display:setSpriteTexture(id,self.idTop,self.texturePath)
+		self.display:setSpriteTexture(id,self.idTopRight,self.texturePath)
 		
-		self.render:setTexture(self.idLeft,self.texturePath)
-		self.render:setTexture(self.idCenter,self.texturePath)
-		self.render:setTexture(self.idRight,self.texturePath)
+		self.display:setSpriteTexture(id,self.idLeft,self.texturePath)
+		self.display:setSpriteTexture(id,self.idCenter,self.texturePath)
+		self.display:setSpriteTexture(id,self.idRight,self.texturePath)
 		
-		self.render:setTexture(self.idBottomLeft,self.texturePath)
-		self.render:setTexture(self.idBottom,self.texturePath)
-		self.render:setTexture(self.idBottomRight,self.texturePath)
+		self.display:setSpriteTexture(id,self.idBottomLeft,self.texturePath)
+		self.display:setSpriteTexture(id,self.idBottom,self.texturePath)
+		self.display:setSpriteTexture(id,self.idBottomRight,self.texturePath)
 	end
 end
 
@@ -180,20 +177,23 @@ function Nineslice:setUV(u1,v1,u2,v2)
 		uv = uv:copy():add(0,0,1,1)
 		self.uv = uv
 	end
+	
+	local id = self.box.visualID
+	
 	if self.uv then
 		local uv = self.uv
 		local border = self.style and self.style.border or vec(0,0,0,0)
-		self.render:setUV(self.idTopLeft,  uv.x,             uv.y,      uv.x+border.x,       uv.y+border.y)
-		self.render:setUV(self.idTop,      uv.x+border.x,    uv.y,      uv.z-border.z,       uv.y+border.y)
-		self.render:setUV(self.idTopRight, uv.z-border.z,    uv.y,      uv.z,                uv.y+border.y)
+		self.display:setSpriteUV(id,self.idTopLeft,  uv.x,             uv.y,      uv.x+border.x,       uv.y+border.y)
+		self.display:setSpriteUV(id,self.idTop,      uv.x+border.x,    uv.y,      uv.z-border.z,       uv.y+border.y)
+		self.display:setSpriteUV(id,self.idTopRight, uv.z-border.z,    uv.y,      uv.z,                uv.y+border.y)
 		
-		self.render:setUV(self.idLeft,  uv.x,                uv.y+border.y,       uv.x+border.x,   uv.w-border.w)
-		self.render:setUV(self.idCenter,      uv.x+border.x, uv.y+border.y,       uv.z-border.z,   uv.w-border.w)
-		self.render:setUV(self.idRight, uv.z-border.z,       uv.y+border.y,       uv.z,            uv.w-border.w)
+		self.display:setSpriteUV(id,self.idLeft,  uv.x,                uv.y+border.y,       uv.x+border.x,   uv.w-border.w)
+		self.display:setSpriteUV(id,self.idCenter,      uv.x+border.x, uv.y+border.y,       uv.z-border.z,   uv.w-border.w)
+		self.display:setSpriteUV(id,self.idRight, uv.z-border.z,       uv.y+border.y,       uv.z,            uv.w-border.w)
 		
-		self.render:setUV(self.idBottomLeft,  uv.x,          uv.w-border.w, uv.x+border.x, uv.w)
-		self.render:setUV(self.idBottom,      uv.x+border.x, uv.w-border.w, uv.z-border.z, uv.w)
-		self.render:setUV(self.idBottomRight, uv.z-border.z, uv.w-border.w, uv.z, uv.w)
+		self.display:setSpriteUV(id,self.idBottomLeft,  uv.x,          uv.w-border.w, uv.x+border.x, uv.w)
+		self.display:setSpriteUV(id,self.idBottom,      uv.x+border.x, uv.w-border.w, uv.z-border.z, uv.w)
+		self.display:setSpriteUV(id,self.idBottomRight, uv.z-border.z, uv.w-border.w, uv.z, uv.w)
 	end
 end
 
@@ -212,7 +212,7 @@ function Nineslice:setBoxColor(r,g,b)
 	end
 	if self.color then
 		for index, id in ipairs(self.ids) do
-			self.render:setBoxColor(id,self.color.x,self.color.y,self.color.z)
+			--self.display:setBoxColor(id,self.color.x,self.color.y,self.color.z)
 		end
 	end
 end
@@ -234,27 +234,6 @@ function Nineslice:applyAll(style)
 		self:setPadding(style.padding:unpack())
 		self:setTextAlignment(style.textAlignment:unpack())
 	end
-end
-
-
----@param spriteID integer
----@param index integer
-function Nineslice:setParent(spriteID,index)
-	assert(spriteID,"no spriteID given")
-	
-	self.render:setParent(self.idTopLeft,spriteID,index)
-	self.render:setParent(self.idTop,spriteID,index)
-	self.render:setParent(self.idTopRight,spriteID,index)
-	
-	self.render:setParent(self.idLeft,spriteID,index)
-	self.render:setParent(self.idCenter,spriteID,index)
-	self.render:setParent(self.idRight,spriteID,index)
-	
-	self.render:setParent(self.idBottomLeft,spriteID,index)
-	self.render:setParent(self.idBottom,spriteID,index)
-	self.render:setParent(self.idBottomRight,spriteID,index)
-	
-	self.render:setParent(self.id,spriteID,index)
 end
 
 

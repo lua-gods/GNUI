@@ -20,7 +20,7 @@ local CanvasAPI = {}
 
 ---A root node for boxes
 ---@class GNUI.Canvas : GNUI.Box
----@field render GNUI.RenderInstance
+---@field display GNUI.Render.Display
 ---@field queueUpdate GNUI.Box[]
 ---@field hoveredBox GNUI.Box
 ---@field pressedButtons GNUI.Box[]
@@ -34,8 +34,6 @@ Canvas.__index = function (t,i)
 end
 
 
-
-
 ---Creates a new canvas for boxes to attach to, this box is special, 
 ---as it acts as the root node of all boxes
 ---@return GNUI.Canvas
@@ -43,7 +41,9 @@ function CanvasAPI.new()
 ---@diagnostic disable-next-line: missing-parameter its literally me!
 	local self = Box.new()
 	---@cast self GNUI.Canvas
-	self.render = Render.new(self)
+	self.display = Render.newDisplay()
+	self.canvas = self
+	self.visualID = 1
 	self.queueUpdate = {}
 	self.pressedButtons = {}
 	setmetatable(self,Canvas)
@@ -54,7 +54,7 @@ end
 ---@return GNUI.Canvas
 function Canvas:flushUpdates()
 	for key, box in pairs(self.queueUpdate) do
-		if box.flaggedUpdate then
+		if box.flags.dim then
 			box:forceUpdate()
 		end
 	end
