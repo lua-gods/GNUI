@@ -228,13 +228,14 @@ function Box:setMargin(left,top,right,bottom)
 	---@cast self GNUI.Box
 	self.margin = gncommon.vec4(left,top,right,bottom)
 	self:recalculateMargin()
+	self:recalculateMinimumSize()
 	self:update()
 	return self
 end
 
 
 function Box:recalculateMargin()
-	local margin = vec(0,0,0,0)
+	local margin = vec(-math.huge,-math.huge,-math.huge,-math.huge)
 	for key, sprite in pairs(self.sprites) do
 		if sprite.style then
 			local m = sprite.style.margin
@@ -267,6 +268,7 @@ function Box:setPadding(left,top,right,bottom)
 	---@cast self GNUI.Box
 	self.padding = gncommon.vec4(left,top,right,bottom)
 	self:recalculatePadding()
+	self:recalculateMinimumSize()
 	self:update()
 	return self
 end
@@ -280,7 +282,7 @@ end
 
 function Box:recalculatePadding()
 	local padding = vec(0,0,0,0)
-	for key, sprite in pairs(self.sprites) do
+	for key, sprite in pairs(self.sprites) do --TODO: fix padding not being calclulatedd
 		if sprite.style then
 			local p = sprite.style.padding
 			padding.x = math.max(padding.x, p.x)
@@ -353,8 +355,8 @@ function Box:recalculateMinimumSize()
 	for key, sprite in pairs(self.sprites) do
 		if sprite.style then
 			local style = sprite.style
-			minSize.x = math.max(minSize.x, style.margin.x + style.margin.z + style.padding.x + style.padding.z)
-			minSize.y = math.max(minSize.y, style.margin.y + style.margin.w + style.padding.y + style.padding.w)
+			minSize.x = math.max(minSize.x,style.padding.x + style.padding.z)
+			minSize.y = math.max(minSize.y,style.padding.y + style.padding.w)
 		end
 	end
 	self.finalMinSize = minSize
@@ -441,34 +443,39 @@ function Box:setSprite(sprite,slot)
 	---@cast self GNUI.Box
 	
 	sprite:setBox(self,slot)
-	
-	self.sprites = {sprite}
+	self:recalculateMargin()
+	self:recalculatePadding()
+	self:recalculateMinimumSize()
 	self:update()
 	return self
 end
 
 
----Sets the style of the sprite of this box, if no sprite exists, it will create one for that given style
----
----if no style is given, it will simply reapply the style of the sprite back to itself
----@generic self
----@param self self
----@return self
----@param style GNUI.Sprite.Style?
-function Box:setStyle(style)
-	---@cast self GNUI.Box
-	if not self.sprites and style then
-		self.sprites = style:newInstance(self)
-	end
-	
-	if self.sprites then
-		if style then
-			self.sprites:setStyle(style)
-		end
-	end
-	self:update()
-	return self
-end
+-----Sets the style of the sprite of this box, if no sprite exists, it will create one for that given style
+-----
+-----if no style is given, it will simply reapply the style of the sprite back to itself
+-----@generic self
+-----@param self self
+-----@return self
+-----@param style GNUI.Sprite.Style?
+--function Box:setStyle(style)
+--	---@cast self GNUI.Box
+--	if not self.sprites and style then
+--		self.sprites = style:newInstance(self)
+--	end
+--	
+--	if self.sprites then
+--		if style then
+--			self.sprites:setStyle(style)
+--		end
+--	end
+--	
+--	self:recalculateMargin()
+--	self:recalculatePadding()
+--	self:recalculateMinimumSize()
+--	self:update()
+--	return self
+--end
 
 
 --────────────────────────-< Children Management >-────────────────────────--
@@ -477,9 +484,6 @@ end
 local function updateChildrenIndexes(box)
 	for id, child in ipairs(box.children) do
 		child.childIndex = id
-		if child and child.sprites and box.sprites then
-			child.canvas.render:setIndex(child.sprites.id, id)
-		end
 		updateChildrenIndexes(child)
 	end
 end
@@ -501,8 +505,6 @@ function Box:addChild(child)
 	end
 	self.canvas.display:addChild(self.visualID,child.visualID)
 	
-	self:recalculateMargin()
-	self:recalculatePadding()
 	self:recalculateMinimumSize()
 	self:update()
 	return child
@@ -612,12 +614,6 @@ function Box:setTextAlignment(h,v)
 end
 
 
----@return Vector2
-function Box:getTextAlignment()
-	return self.textAlignment or (self.sprites and self.sprites.style and self.sprites.style.textAlignment)
-end
-
-
 ---sets if the text should wrap around or not
 ---@generic self
 ---@param self self
@@ -662,18 +658,22 @@ function Box:update(...)
 	for index, flag in ipairs{...} do
 		self.flags[flag] = true
 	end
-	
 	if not self.flags.dim then
-		local parent = self
 		if self.parent then
+			local lastParent = self
+			local parent = self.parent
 			while parent do
 				if not parent.layout then
 					break
+				else
+					lastParent = parent
+					parent = parent.parent
 				end
-				parent = parent.parent
 			end
+			updatePropagate(lastParent)
+		else
+			updatePropagate(self)
 		end
-		updatePropagate(parent)
 	end
 end
 
@@ -728,7 +728,6 @@ function Box:solveForFitSizing(other)
 	local x = (other and "y" or "x")
 	local z = (other and "w" or "z")
 	---@cast self GNUI.Box
-	
 	for _, child in ipairs(self.children) do
 		child.finalSize[x] = 0
 		child:solveForFitSizing(other)
@@ -740,7 +739,6 @@ function Box:solveForFitSizing(other)
 		self.finalSize[x] = math.max(self.finalMinSize[x],self.size[x])
 		
 	elseif self.sizing[x] == "FIT" then
-		
 		if self.layout == (other and "VERTICAL" or "HORIZONTAL") then -- is parallel
 			local totalSize = 0
 			for _, child in ipairs(self.children) do

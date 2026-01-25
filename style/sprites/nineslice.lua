@@ -223,8 +223,6 @@ function Nineslice:applyAll(style)
 	self:setText()
 	self:setPos()
 	self:setSize()
-	self:applyDimensions()
-	self:setPadding()
 	
 	if style then
 		self:setTexture(style.texturePath)
@@ -234,6 +232,8 @@ function Nineslice:applyAll(style)
 		self:setPadding(style.padding:unpack())
 		self:setTextAlignment(style.textAlignment:unpack())
 	end
+	
+	self:applyDimensions()
 end
 
 

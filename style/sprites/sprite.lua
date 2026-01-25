@@ -83,6 +83,9 @@ function Sprite:setBox(box,slot)
 	self.index = slot or #box.sprites+1
 	
 	box.sprites[self.index] = self
+	box:recalculateMargin()
+	box:recalculatePadding()
+	box:recalculateMinimumSize()
 	
 	if self.box then
 		self:applyAll()
@@ -168,8 +171,8 @@ function Sprite:setPadding(l,t,r,b)
 	local expand = self.style and self.style.expand or vec(0,0,0,0)
 	
 	self.display:setLabelPadding(self.box.visualID,self.labelID,
-		self.padding.x,
-		self.padding.y,
+		self.padding.x+expand.x,
+		self.padding.y+expand.y,
 		self.padding.z+expand.z,
 		self.padding.w+expand.w
 	)
@@ -202,6 +205,9 @@ function Sprite:setStyle(style)
 	end
 	self:applyAll(style)
 	if self.box then
+		self.box:recalculateMargin()
+		self.box:recalculatePadding()
+		self.box:recalculateMinimumSize()
 		self.box:update()
 	end
 	return self
