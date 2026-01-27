@@ -59,7 +59,7 @@ return {
 		primary={
 			normal = Nineslice.newStyle()
 			:setTexture(atlas)
-			:setUV(5,0,9,6)
+			:setUV(10,0,14,6)
 			
 			:setBorder(2,2,2,4)
 			:setPadding(6,6,6,4)
@@ -71,10 +71,11 @@ return {
 			,
 			pressed = Nineslice.newStyle()
 			:setTexture(atlas)
-			:setUV(5,7,9,11)
+			:setUV(10,7,14,11)
 			
 			:setBorder(2,2,2,2)
 			:setPadding(6,6,6,4)
+			:setMargin(0,0,0,0)
 			
 			:setTextAlignment(0,0)
 			:setTextColor("#ffffff")
@@ -84,7 +85,7 @@ return {
 		secondary={
 			normal = Nineslice.newStyle()
 			:setTexture(atlas)
-			:setUV(10,0,14,6)
+			:setUV(5,0,9,6)
 			
 			:setBorder(2,2,2,4)
 			:setPadding(6,6,6,4)
@@ -96,11 +97,10 @@ return {
 			,
 			pressed = Nineslice.newStyle()
 			:setTexture(atlas)
-			:setUV(10,7,14,11)
+			:setUV(5,7,9,11)
 			
 			:setBorder(2,2,2,2)
 			:setPadding(6,6,6,4)
-			:setMargin(0,0,0,0)
 			
 			:setTextAlignment(0,0)
 			:setTextColor("#1b1b1b")

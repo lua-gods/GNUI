@@ -149,7 +149,7 @@ function Sprite:setTextColor(r,g,b)
 		self.textColor = color
 	end
 	if self.textColor then
-		--self.display:setTextColor(self.id,self.textColor.x,self.textColor.y,self.textColor.z) -- FIXME
+		self.display:setTextColor(self.box.visualID,self.labelID,self.textColor.x,self.textColor.y,self.textColor.z) -- FIXME
 	end
 end
 
