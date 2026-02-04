@@ -108,6 +108,10 @@ function Sprite:setVisible(visible)
 end
 
 
+function Sprite:setColor(r,g,b)
+end
+
+
 --────────────────────────-< Injected APIs >-────────────────────────--
 
 ---@param visualID integer

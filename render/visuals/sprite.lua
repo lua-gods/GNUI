@@ -46,6 +46,11 @@ function Sprite:setVisible(visible)
 end
 
 
+function Sprite:setColor(r,g,b)
+	self.quad:color(r,g,b)
+end
+
+
 --────────────────────────-< Injected APIs >-────────────────────────--
 
 

@@ -213,9 +213,16 @@ function Nineslice:setColor(r,g,b)
 	end
 	if self.color then
 		for index, id in ipairs(self.ids) do
-			-- TODO: implement method
-			--self.display:setSpriteColor(id,self.color.x,self.color.y,self.color.z)
+			self.display:setSpriteColor(self.box.visualID, id,self.color.x,self.color.y,self.color.z)
 		end
+	end
+end
+
+
+function Nineslice:setVisible(visible)
+	self.visible = visible
+	for index, id in ipairs(self.ids) do
+		self.display:setSpriteVisible(self.box.visualID, id,visible)
 	end
 end
 
