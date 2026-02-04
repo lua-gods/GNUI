@@ -9,6 +9,10 @@ local gncommon = require("../../../gncommon") ---@type GNCommon
 local utils = require("../../utils") ---@type GNUI.utils
 local Event = require("../../"..config.EVENT) ---@type Event
 
+
+local abs = math.abs
+
+
 ---@class GNUI.Primitive.BoxAPI
 local BoxAPI = {}
 
@@ -235,14 +239,14 @@ end
 
 
 function Box:recalculateMargin()
-	local margin = vec(-math.huge,-math.huge,-math.huge,-math.huge)
+	local margin = vec(0,0,0,0)
 	for key, sprite in pairs(self.sprites) do
 		if sprite.style then
 			local m = sprite.style.margin
-			margin.x = math.max(margin.x, m.x)
-			margin.y = math.max(margin.y, m.y)
-			margin.z = math.max(margin.z, m.z)
-			margin.w = math.max(margin.w, m.w)
+			margin.x = (abs(margin.x) <= abs(m.x)) and m.x or margin.x
+			margin.y = (abs(margin.y) <= abs(m.y)) and m.y or margin.y
+			margin.z = (abs(margin.z) <= abs(m.z)) and m.z or margin.z
+			margin.w = (abs(margin.w) <= abs(m.w)) and m.w or margin.w
 		end
 	end
 	self.finalMargin = margin

@@ -48,6 +48,14 @@ return {
 			:setPadding(1,1,3,1)
 			--:setMargin(5,5,5,5)
 			,
+		},
+		highlight={
+			normal = Nineslice.newStyle()
+			:setTexture(atlas)
+			:setUV(26,9,28,11)
+			:setBorder(1,1,1,1)
+			:setExpand(1,1,1,1)
+			,
 		}
 	},
 	

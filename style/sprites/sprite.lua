@@ -33,8 +33,9 @@ Sprite.__index = Sprite
 
 
 ---@param box GNUI.Box
+---@param slot (integer|string)?
 ---@return GNUI.Sprite
-function Sprite.new(box)
+function Sprite.new(box,slot)
 	
 	local self = {
 		pos = vec(0,0),
@@ -52,7 +53,7 @@ function Sprite.new(box)
 	}
 	setmetatable(self, Sprite)
 	if box then
-		self:setBox(box)
+		self:setBox(box,slot)
 	end
 	
 	return self
@@ -104,7 +105,7 @@ function Sprite:setPos(x,y)
 		if self.pos == pos  then return end
 		self.pos = pos - expand
 	end
-	self.display:setPos(self.taskID, self.pos.x,self.pos.y)
+	self.display:setPos(self.box.visualID, self.pos.x,self.pos.y)
 end
 
 

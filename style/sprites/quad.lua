@@ -24,13 +24,14 @@ end
 
 ---A representation of a quad that will get drawn
 ---@param box GNUI.Box
+---@param slot (integer|string)?
 ---@return GNUI.Sprite.Quad
-function Quad.new(box)
+function Quad.new(box,slot)
 	assert(box,"no GNUI.Box given")
-	local self = Sprite.new(box)
+	local self = Sprite.new(box,slot)
 	---@cast self GNUI.Sprite.Quad
 	
-	self.taskID = self.render:newVisualQuad()
+	self.taskID = self.display:newVisual()
 	
 	setmetatable(self, Quad)
 	return self
@@ -56,7 +57,7 @@ function Quad:setTexture(path)
 		self.texturePath = path
 	end
 	
-	self.render:setTexture(self.taskID,self.texturePath)
+	self.display:setSpriteTexture(self.box.visualID, self.taskID, self.texturePath)
 	return self
 end
 
@@ -66,15 +67,15 @@ end
 ---@param g number
 ---@param b number
 ---@return GNUI.Sprite.Quad
-function Quad:setBoxColor(r,g,b)
+function Quad:setColor(r,g,b)
 	if r then
 		local color = vec(r,g,b)
 		if self.style then color = color * self.style.color end
 		if self.color == color then return end
 		self.color = color
 	end
-	self.render:setBoxColor(self.taskID,self.color.x,self.color.y,self.color.z)
-
+	-- TODO: implement method to display
+	self.display:setSpriteColor(self.box.visualID, self.taskID, self.color.x, self.color.y, self.color.z)
 end
 
 
@@ -90,9 +91,8 @@ function Quad:setUV(u1,v1,u2,v2)
 		if self.uv == uv then return end
 		self.uv = uv
 	end
-	self.render:setUV(self.taskID,self.uv.x,self.uv.y,self.uv.z,self.uv.w)
+	self.display:setSpriteUV(self.box.visualID, self.taskID, self.uv.x, self.uv.y, self.uv.z, self.uv.w)
 	return self
-	
 end
 
 
@@ -104,7 +104,7 @@ function Quad:applyAll(style)
 	
 	self:setTexture(style and style.texturePath)
 	self:setUV(style and style.uv:unpack())
-	self:setBoxColor(style and style.color:unpack())
+	self:setColor(style and style.color:unpack())
 	self:setTextColor(style and style.textColor:unpack())
 end
 

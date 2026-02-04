@@ -163,6 +163,10 @@ end
 function ButtonAPI.parse(layout,canvas,button)
 	local box = button or Box.parse(layout,canvas,ButtonAPI.new(canvas))
 
+	-- TODO: find out why this is shifting the entire box renderer
+	local style = Style.getStyle("box", "highlight", "normal")
+	style:newInstance(box,"highlight")
+	
 	if layout.toggle then box.toggle = layout.toggle end
 	
 	return box

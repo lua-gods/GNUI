@@ -26,9 +26,10 @@ end
 
 
 ---@param box GNUI.Box
+---@param slot (integer|string)?
 ---@return GNUI.Sprite
-function SpriteStyle:newInstance(box)
-	return newInstance(box):setStyle(self)
+function SpriteStyle:newInstance(box,slot)
+	return newInstance(box,slot):setStyle(self)
 end
 
 

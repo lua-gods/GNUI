@@ -41,9 +41,10 @@ end
 
 
 ---@param box GNUI.Box
+---@param slot (integer|string)?
 ---@return GNUI.Sprite
-function NinesliceStyle:newInstance(box)
-	local instance = newInstance(box):setStyle(self)
+function NinesliceStyle:newInstance(box,slot)
+	local instance = newInstance(box,slot):setStyle(self)
 	return instance
 end
 

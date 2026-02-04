@@ -38,15 +38,17 @@ end
 
 local newInstance
 
+---@param new any
 function QuadStyleAPI.setInstancer(new)
 	newInstance = new
 end
 
 
 ---@param box GNUI.Box
+---@param slot (integer|string)?
 ---@return GNUI.Sprite
-function QuadStyle:newInstance(box)
-	local instance = newInstance(box):setStyle(self)
+function QuadStyle:newInstance(box,slot)
+	local instance = newInstance(box,slot):setStyle(self)
 	return instance
 end
 

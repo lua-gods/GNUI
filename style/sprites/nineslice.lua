@@ -39,10 +39,11 @@ function Nineslice.getIndex() return Nineslice.__index end
 
 ---A representation of a quad that will get drawn
 ---@param box GNUI.Box
+---@param slot (integer|string)?
 ---@return GNUI.Sprite.Nineslice
-function Nineslice.new(box)
+function Nineslice.new(box,slot)
 	assert(box,"no GNUI.Box given")
-	local self = Sprite.new(box)
+	local self = Sprite.new(box,slot)
 	---@cast self GNUI.Sprite.Nineslice
 	
 	local id = box.visualID
@@ -203,7 +204,7 @@ end
 ---@param g number
 ---@param b number
 ---@return GNUI.Sprite.Quad
-function Nineslice:setBoxColor(r,g,b)
+function Nineslice:setColor(r,g,b)
 	if r then
 		local color = vec(r,g,b)
 		if self.style then color = color * self.style.color end
@@ -212,7 +213,8 @@ function Nineslice:setBoxColor(r,g,b)
 	end
 	if self.color then
 		for index, id in ipairs(self.ids) do
-			--self.display:setBoxColor(id,self.color.x,self.color.y,self.color.z)
+			-- TODO: implement method
+			--self.display:setSpriteColor(id,self.color.x,self.color.y,self.color.z)
 		end
 	end
 end
@@ -227,7 +229,7 @@ function Nineslice:applyAll(style)
 	if style then
 		self:setTexture(style.texturePath)
 		self:setUV(style.uv:unpack())
-		self:setBoxColor(style.color:unpack())
+		self:setColor(style.color:unpack())
 		self:setTextColor(style.textColor:unpack())
 		self:setPadding(style.padding:unpack())
 		self:setTextAlignment(style.textAlignment:unpack())
