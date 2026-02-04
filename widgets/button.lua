@@ -89,6 +89,7 @@ end
 
 
 function Button:applyApropriateStyle()
+	self.sprites.highlight:setVisible(self.isHovered)
 	if self.down then
 		self.sprites[1]:setStyle(Style.getKey(self,"pressed"))
 	else
@@ -165,7 +166,7 @@ function ButtonAPI.parse(layout,canvas,button)
 
 	-- TODO: find out why this is shifting the entire box renderer
 	local style = Style.getStyle("box", "highlight", "normal")
-	style:newInstance(box,"highlight")
+	style:newInstance(box,"highlight"):setVisible(false)
 	
 	if layout.toggle then box.toggle = layout.toggle end
 	

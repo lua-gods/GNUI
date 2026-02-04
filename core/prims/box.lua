@@ -44,8 +44,11 @@ local BoxAPI = {}
 
 
 ---@class GNUI.Box.Flags
----@field dim boolean
----@field extents boolean margin, padding and minSize
+---@field dim boolean?
+---@field extents boolean? margin, padding and minSize
+---@field color boolean?
+---@field text boolean?
+---@field visibility boolean?
 
 
 ---@class GNUI.Box
@@ -77,6 +80,7 @@ local BoxAPI = {}
 ---@field childAlign Vector2
 ---
 ---@field visible boolean
+---@field color Vector3
 ---@field id integer
 ---
 ---@field text string
@@ -88,7 +92,7 @@ local BoxAPI = {}
 ---
 ---@field variant string?
 ---@field visualID integer
----@field sprites GNUI.Sprite[] # middle man style handling
+---@field sprites table<any,GNUI.Sprite> # middle man style handling
 ---
 ---@field isHovered boolean
 ---
@@ -150,8 +154,9 @@ function BoxAPI.new(canvas)
 		namedChildren = {},
 		childAlign = vec(-1,-1),
 		
-		id = nextFree,
 		visible = true,
+		color = vec(1,1,1),
+		id = nextFree,
 		
 		textAlignment = 0,
 		wrapText = true,
@@ -603,7 +608,7 @@ function Box:setText(text,slot)
 	if self.sprites[slot] then
 		self.sprites[slot]:setText(text)
 	end
-	self:update()
+	self:update("text","dim")
 	return self
 end
 
@@ -616,7 +621,7 @@ end
 function Box:setTextAlignment(h,v)
 	---@cast self GNUI.Box
 	self.textAlignment = vec(h,v)
-	self:update()
+	self:update("text")
 	return self
 end
 
@@ -629,7 +634,15 @@ end
 function Box:setWrapText(wrap)
 	---@cast self GNUI.Box
 	self.wrapText = wrap
-	self:update()
+	self:update("text")
+	return self
+end
+
+
+function Box:setColor(r,g,b)
+	local clr = gncommon.vec3(r,g,b)
+	self.color = clr
+	self:update("color")
 	return self
 end
 
@@ -641,7 +654,7 @@ end
 function Box:setVisible(visible)
 	---@cast self GNUI.Box
 	self.visible = visible
-	self:update()
+	self:update("visibility")
 	return self
 end
 
@@ -663,8 +676,9 @@ end
 --────────────────────────-< UPDATERS >-────────────────────────--
 
 ---@param box GNUI.Box
-local function updatePropagate(box)
+local function updatePropagate(box,flags)
 	if box.canvas and not box.flags.dim then
+		-- TODO: propagate flag updating to all children
 		box.flags.dim = true --TODO: unhardcode this by applying it only when its needed
 		box.canvas.queueUpdate[#box.canvas.queueUpdate+1] = box
 	end
@@ -675,6 +689,7 @@ end
 
 ---Updates itself and its relatives that will get affected
 function Box:update(...)
+	self.flags = {}
 	for index, flag in ipairs{...} do
 		self.flags[flag] = true
 	end
@@ -691,18 +706,27 @@ function Box:update(...)
 					parent = parent.parent
 				end
 			end
-			updatePropagate(lastParent)
+			updatePropagate(lastParent,self.flags)
 		else
-			updatePropagate(self)
+			updatePropagate(self,self.flags)
 		end
 	end
 end
 
 
 function Box:updateSprites()
-	self.canvas.display:setVisible(self.visualID, self.visible)
-	self.canvas.display:setPos(self.visualID, self.finalPos.x, self.finalPos.y)
-	self.canvas.display:setSize(self.visualID, self.finalSize.x, self.finalSize.y)
+	--TODO: separate each applying method into its own update flag
+	local flags = self.flags
+	if flags.color then
+		self.canvas.display:setColor(self.visualID, self.color.r, self.color.g, self.color.b)
+	end
+	if flags.visibility then
+		self.canvas.display:setVisible(self.visualID, self.visible)
+	end
+	if flags.dim then
+		self.canvas.display:setPos(self.visualID, self.finalPos.x, self.finalPos.y)
+		self.canvas.display:setSize(self.visualID, self.finalSize.x, self.finalSize.y)
+	end
 	
 	for key, sprite in pairs(self.sprites) do
 		sprite:setSize(self.finalSize.x,self.finalSize.y)

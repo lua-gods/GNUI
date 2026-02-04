@@ -195,6 +195,11 @@ function Sprite:setTextAlignment(h,v)
 end
 
 
+function Sprite:setVisible(visible)
+	self.visible = visible
+	self.display:setSpriteVisible(self.box.visualID, self.taskID, visible)
+end
+
 
 ---@overload fun(self: GNUI.Sprite)
 ---@param style GNUI.Sprite.Style
