@@ -24,14 +24,14 @@ local ButtonAPI = {}
 ---@field PRESSED Event.GNUI.Button.PRESSED
 local Button = {}
 Button.__index = function (t,i)
-	return rawget(t,i) or Button[i] or Box.index(i)
+	return rawget(t,i) or Button[i] or Box.index(t,i)
 end
 Button.__style = "button"
 Button.__type = "Button"
 
 
-function ButtonAPI.index(i)
-	return Button[i]
+function ButtonAPI.index(t,i)
+	return Button.__index(t,i)
 end
 
 

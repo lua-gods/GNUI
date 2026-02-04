@@ -41,6 +41,11 @@ function Sprite:setSize(x,y)
 end
 
 
+function Sprite:setVisible(visible)
+	self.quad:setVisible(visible)
+end
+
+
 --────────────────────────-< Injected APIs >-────────────────────────--
 
 
@@ -50,6 +55,18 @@ function Display:setSpriteSize(visualID,taskID,x,y)
 	local task = self:getTask(visualID,taskID)
 	local size = task.textureSize
 	task.quad:scale(x/size.x,y/size.y,1)
+end
+
+
+function Display:setSpriteVisible(visualID,taskID,visible)
+	local task = self:getTask(visualID,taskID)
+	task.quad:setVisible(visible)
+end
+
+
+function Display:setSpriteColor(visualID,taskID,r,g,b)
+	local task = self:getTask(visualID,taskID)
+	task.quad:color(r,g,b)
 end
 
 

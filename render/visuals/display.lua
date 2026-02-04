@@ -40,6 +40,7 @@ function Display.newDisplay()
 end
 
 
+---@return integer
 function Display:newVisual()
 	local id = #self.visuals+1
 	local visual = {
@@ -188,10 +189,24 @@ function Display:setSize(id,x,y)
 end
 
 
+function Display:setVisible(id,visible)
+	local vis = self.visuals[id]
+	assert(vis,"Visual Quad "..id.." not found")
+	
+	for key, task in pairs(vis.tasks) do
+		task:setVisible(visible)
+	end
+	
+	vis.model:setVisible(visible)
+end
+
+
 ---@param type ModelPart.parentType
 function Display:setParentType(type)
 	self.visuals[1].model:setParentType(type)
 end
+
+
 
 
 return Display

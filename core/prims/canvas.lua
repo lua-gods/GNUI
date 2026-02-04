@@ -30,7 +30,7 @@ local CanvasAPI = {}
 ---@field MOUSE_INPUT GNUI.Canvas.Event.MouseInput
 local Canvas = {}
 Canvas.__index = function (t,i)
-	return rawget(t,i) or Canvas[i] or Box.index(i)
+	return rawget(t,i) or Canvas[i] or Box.index(t,i)
 end
 
 

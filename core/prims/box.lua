@@ -103,15 +103,17 @@ local BoxAPI = {}
 ---@field MOUSE_INPUT GNUI.Box.Event.MouseInput
 local Box = {}
 Box.__index = function (t,i)
-	return rawget(t,i) or Box[i] or rawget(t,"children")[i] or rawget(t,"namedChildren")[i]
+	return rawget(t,i)
+	or Box[i]
+	or rawget(t,"children")[i]
+	or rawget(t,"namedChildren")[i]
 end
 Box.__style = "box"
 
-function BoxAPI.index(i)
-	return Box[i]
-end
 
-local DIM,EXTENTS = 1,2
+function BoxAPI.index(t,i)
+	return Box.__index(t,i)
+end
 
 
 local nextFree = 1
@@ -614,6 +616,7 @@ end
 function Box:setTextAlignment(h,v)
 	---@cast self GNUI.Box
 	self.textAlignment = vec(h,v)
+	self:update()
 	return self
 end
 
@@ -626,6 +629,19 @@ end
 function Box:setWrapText(wrap)
 	---@cast self GNUI.Box
 	self.wrapText = wrap
+	self:update()
+	return self
+end
+
+
+---@generic self
+---@param self self
+---@return self
+---@param visible boolean
+function Box:setVisible(visible)
+	---@cast self GNUI.Box
+	self.visible = visible
+	self:update()
 	return self
 end
 
@@ -649,7 +665,7 @@ end
 ---@param box GNUI.Box
 local function updatePropagate(box)
 	if box.canvas and not box.flags.dim then
-		box.flags.dim = true
+		box.flags.dim = true --TODO: unhardcode this by applying it only when its needed
 		box.canvas.queueUpdate[#box.canvas.queueUpdate+1] = box
 	end
 	for index, child in ipairs(box.children) do
@@ -662,6 +678,7 @@ function Box:update(...)
 	for index, flag in ipairs{...} do
 		self.flags[flag] = true
 	end
+	
 	if not self.flags.dim then
 		if self.parent then
 			local lastParent = self
@@ -683,6 +700,7 @@ end
 
 
 function Box:updateSprites()
+	self.canvas.display:setVisible(self.visualID, self.visible)
 	self.canvas.display:setPos(self.visualID, self.finalPos.x, self.finalPos.y)
 	self.canvas.display:setSize(self.visualID, self.finalSize.x, self.finalSize.y)
 	

@@ -6,16 +6,16 @@
 ---@diagnostic disable: duplicate-doc-field
 
 local config = require("../config") ---@type GNUI.config
-local Box = require("../core/prims/box") ---@type GNUI.Primitive.BoxAPI
-local Layout = require("../" .. config.LAYOUT) ---@class GNUI.LayoutAPI
-local Style = require("../" .. config.STYLE) ---@class GNUI.StyleAPI
+local TrueBoxAPI = require("../core/prims/box") ---@type GNUI.Primitive.BoxAPI
+local Layout = require("../" .. config.LAYOUT) ---@type GNUI.LayoutAPI
+local Style = require("../" .. config.STYLE) ---@type GNUI.StyleAPI
 
 ---@class GNUI.BoxAPI : GNUI.Primitive.BoxAPI
 local BoxAPI = {}
 
 setmetatable(BoxAPI,{
 	__index = function (t,i)
-		return rawget(t,i) or Box[i]
+		return rawget(t,i) or TrueBoxAPI[i] or TrueBoxAPI.index(t,i)
 	end
 })
 
@@ -42,7 +42,7 @@ setmetatable(BoxAPI,{
 ---@param box box
 ---@return box
 function BoxAPI.parse(layout,canvas,box)
-	local box = box or Box.new(canvas)
+	local box = box or TrueBoxAPI.new(canvas)
 
 	local hasSizeX, hasSizeY = false, false
 	if layout.size then

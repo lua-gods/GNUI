@@ -7,6 +7,7 @@ local Style = require("../" .. config.STYLE) ---@type GNUI.StyleAPI
 local Layout = require("../" .. config.LAYOUT) ---@type GNUI.LayoutAPI
 local utils = require("../utils") ---@type GNUI.utils
 
+
 ---@class GNUI.TextFieldAPI
 local TextFieldAPI = {}
 
@@ -44,14 +45,17 @@ TextFieldAPI.validators = {
 ---@field validator fun(field: string):boolean
 local TextField = {}
 TextField.__index = function (t,i)
-	return rawget(t,i) or TextField[i] or Button.index(i) or Box.index(i)
+	return rawget(t,i)
+	or TextField[i]
+	or Button.index(t,i)
+	or Box.index(t,i)
 end
 TextField.__style = "textField"
 TextField.__type = "TextField"
 
 
-function TextField.index(i)
-	return TextField[i]
+function TextField.index(t,i)
+	return TextField.__index(t,i)
 end
 
 

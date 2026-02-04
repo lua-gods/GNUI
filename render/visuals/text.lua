@@ -102,6 +102,12 @@ function Sprite:setSize(x,y)
 end
 
 
+---INTERNAL CALLBACK for Display
+function Sprite:setVisible(visible)
+	self.label:setVisible(visible)
+end
+
+
 --────────────────────────-< Injected APIs >-────────────────────────--
 
 ---@param visualID integer
@@ -116,6 +122,13 @@ function Display:setLabelPadding(visualID,taskID,left,top,right,bottom)
 	updateLabelPos(task)
 end
 
+
+function Display:setLabelVisible(visualID,taskID,visible)
+	local task = self:getTask(visualID,taskID)
+	task.label:setVisible(visible)
+end
+
+
 ---@param visualID integer
 ---@param taskID integer
 ---@param r number
@@ -128,6 +141,7 @@ function Display:setTextColor(visualID,taskID,r,g,b)
 	updateLabelText(task)
 	updateLabelPos(task)
 end
+
 
 ---@param visualID integer
 ---@param taskID integer
