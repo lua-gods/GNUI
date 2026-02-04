@@ -67,9 +67,9 @@ end
 ---@return GNUI.Render.Visual.Task
 function Display:getTask(visualID,spriteID)
 	local visual = self.visuals[visualID]
-	assert(visual,"Visual Quad "..visualID.." not found")
+	assert(visual,"Visual Quad "..tostring(visualID).." not found")
 	local task = visual.tasks[spriteID]
-	assert(task,"Visual Quad "..visualID.." task "..spriteID.." not found")
+	assert(task,"Visual Quad "..tostring(visualID).." task "..tostring(spriteID).." not found")
 	return task
 end
 
@@ -198,6 +198,16 @@ function Display:setVisible(id,visible)
 	end
 	
 	vis.model:setVisible(visible)
+end
+
+
+function Display:setColor(id,r,g,b)
+	local vis = self.visuals[id]
+	assert(vis,"Visual Quad "..id.." not found")
+	
+	for key, task in pairs(vis.tasks) do
+		task:setColor(r,g,b)
+	end
 end
 
 
