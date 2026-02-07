@@ -10,7 +10,8 @@ local util = {}
 
 ---@return Vector2
 function util.getScreenSize()
-	return client:getWindowSize()/client:getGuiScale()
+	local x,y,w,h = love.window.getSafeArea()
+	return vec2(w,h)
 end
 
 
