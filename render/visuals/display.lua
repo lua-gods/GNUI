@@ -18,8 +18,7 @@
 ---@field pos Vector2
 ---@field size Vector2
 ---
----@field model ModelPart
----@field tasks GNUI.Render.Visual.Task[]
+---@field tasks GNUI.Render.Visual[]
 
 
 ---@class GNUI.Render.Display
@@ -64,7 +63,7 @@ end
 ---NOTE: INTERNAL USE ONLY
 ---@param visualID integer
 ---@param spriteID integer
----@return GNUI.Render.Visual.Task
+---@return GNUI.Render.Visual
 function Display:getTask(visualID,spriteID)
 	local visual = self.visuals[visualID]
 	assert(visual,"Visual Quad "..tostring(visualID).." not found")

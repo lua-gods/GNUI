@@ -62,7 +62,7 @@ end
 function QuadStyle:setTexture(path)
 	---@cast self GNUI.Sprite.Quad.Style
 	self.texturePath = path
-	local size = util.getTextSize(path)
+	local size = util.getTextureSize(path)
 	self.uv = vec(0,0,size.x,size.y)
 	return self
 end

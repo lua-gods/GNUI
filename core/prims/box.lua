@@ -779,7 +779,7 @@ function Box:solveForFitSizing(other)
 	end
 	
 	local padding = self:getPadding()
-	local textSize = self.text and utils.getTextSize(self.text, x == "y" and (self.finalSize.x - padding.x - padding.z) or 0, self.wrapText) or vec(0,0)
+	local textSize = self.text and utils.getTextureSize(self.text, x == "y" and (self.finalSize.x - padding.x - padding.z) or 0, self.wrapText) or vec(0,0)
 	if self.sizing[x] == "FIXED" then
 		self.finalSize[x] = math.max(self.finalMinSize[x],self.size[x])
 		

@@ -18,13 +18,22 @@ end
 ---@param path string
 ---@return string[]
 function util.listFiles(path)
-	return listFiles(path)
+	return listFiles(path,false)
 end
 
 
 ---@return string
 function util.getClipboard()
-	return host:getClipboard()
+	return love.system.getClipboardText()
+end
+
+
+
+---@param path string
+---@return Vector2
+function util.getTextureSize(path)
+	local img = love.graphics.newImage(path,{dpiscale=1}) -- force dpi scale
+	return vec(img:getWidth(),img:getHeight())
 end
 
 
