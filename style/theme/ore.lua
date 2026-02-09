@@ -1,13 +1,21 @@
-local Sprite = require("../sprites/sprite") ---@type GNUI.Sprite
-local Quad = require("../sprites/quad") ---@type GNUI.Sprite.Quad
-local Nineslice = require("../sprites/nineslice") ---@type GNUI.Sprite.Nineslice
+local BASE = (...):match(".+[./]GNUI"):gsub("/",".")
+local Sprite = require(BASE..".style.sprites.sprite") ---@type GNUI.Sprite
+local Quad = require(BASE..".style.sprites.quad") ---@type GNUI.Sprite.Quad
+local Nineslice = require(BASE..".style.sprites.nineslice") ---@type GNUI.Sprite.Nineslice
 
 
 local atlas = nil ---@type string
 if figuraMetatables then -- is Figura lmao
 	atlas = (...):gsub("/",".") ..".ore"
 end
+local e = Nineslice.newStyle()
+e:setTexture(atlas)
 
+e:setUV(40,1,42,3)
+
+e:setBorder(1,1,1,1)
+
+e:setPadding(1,1,1,1)
 
 ---@type GNUI.Theme
 return {

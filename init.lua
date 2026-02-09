@@ -4,7 +4,6 @@
 / /_/ / /|  /  desc: 
 \____/_/ |_/ source: link ]]
 local BASE = (...):match(".+%.GNUI")
-
 local config = require(BASE .. ".config") ---@type GNUI.config
 local utils = require(BASE .. ".utils") ---@type GNUI.utils
 
@@ -15,9 +14,12 @@ local Style = require(BASE .. "." .. config.STYLE .. ".style") ---@type GNUI.Sty
 ---@class GNUIAPI
 local GNUIAPI = {}
 
-for index, path in ipairs(utils.listFiles("./widgets")) do
+print("LOADING WIDGETS")
+for index, path in ipairs(utils.listFiles(BASE..".widgets")) do
+	print(path)
 	require(path)
 end
+print("---")
 
 ---@param canvas GNUI.Canvas
 ---@param data GNUI.Layout
@@ -33,6 +35,7 @@ function GNUIAPI.getScreen()
 		return screen
 	else
 		screen = Core.newCanvas()
+		print(utils.getScreenSize())
 		screen:setSize(utils.getScreenSize())
 		return screen
 	end

@@ -5,12 +5,15 @@
 / /_/ / /|  /  desc: an extension of sprite which can display a texture
 \____/_/ |_/ source: link ]]
 
-local gncommon = require("lib.gncommon") ---@type GNCommon
-local Style = require("../styles/nineslice") ---@type GNUI.Sprite.Nineslice.StyleAPI
-local config = require("../../config") ---@type GNUI.config
+local BASE = (...):match(".+[./]GNUI"):gsub("/",".")
+local config = require(BASE..".config") ---@type GNUI.config
 
-local Sprite = require("./sprite") ---@type GNUI.Sprite
-local Quad = require("./quad") ---@type GNUI.Sprite.Quad
+local gncommon = require(config.GN_COMMON) ---@type GNCommon
+local Style = require(BASE..".style.styles.nineslice") ---@type GNUI.Sprite.Nineslice.StyleAPI
+local config = require(BASE..".config") ---@type GNUI.config
+
+local Sprite = require(BASE..".style.sprites.sprite") ---@type GNUI.Sprite
+local Quad = require(BASE..".style.sprites.quad") ---@type GNUI.Sprite.Quad
 
 ---@class GNUI.Sprite.Nineslice : GNUI.Sprite.Quad
 ---@field style GNUI.Sprite.Nineslice.Style 
@@ -175,7 +178,9 @@ function Nineslice:setUV(u1,v1,u2,v2)
 	if u1 then
 		local uv = vec(u1,v1,u2,v2)
 		if uv == self.uv then return end
-		uv = uv:copy():add(0,0,1,1)
+		uv = uv
+		:copy()
+		:add(0,0,1,1)
 		self.uv = uv
 	end
 	

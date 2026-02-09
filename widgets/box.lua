@@ -4,11 +4,12 @@
 / /_/ / /|  /  desc: API for box shinanigans
 \____/_/ |_/ source: link ]]
 ---@diagnostic disable: duplicate-doc-field
+local BASE = (...):match(".+[./]GNUI"):gsub("/",".")
 
-local config = require("../config") ---@type GNUI.config
-local TrueBoxAPI = require("../core/prims/box") ---@type GNUI.Primitive.BoxAPI
-local Layout = require("../" .. config.LAYOUT) ---@type GNUI.LayoutAPI
-local Style = require("../" .. config.STYLE) ---@type GNUI.StyleAPI
+local config = require(BASE..".config") ---@type GNUI.config
+local TrueBoxAPI = require(BASE..".core.prims.box") ---@type GNUI.Primitive.BoxAPI
+local Layout = require(BASE.."."..config.LAYOUT..".layout") ---@type GNUI.LayoutAPI
+local Style = require(BASE.."."..config.STYLE..".style") ---@type GNUI.StyleAPI
 
 ---@class GNUI.BoxAPI : GNUI.Primitive.BoxAPI
 local BoxAPI = {}

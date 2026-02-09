@@ -33,18 +33,14 @@ local function parseEntry(canvas, layout)
 	assert(canvas, "No canvas given")
 	if elements[layout.type or "box"] then
 		local parser = elements[layout.type or "box"]
-		local ok, box = pcall(parser,layout,canvas)
-		if ok then
-			if layout[1] then
-				assert(layout[1][1], "Common mistake, children entry should be an array, not an box entry")
-				for index, childLayout in ipairs(layout[1]) do
-					box:addChild(parseEntry(canvas, childLayout))
-				end
+		local box = parser(layout,canvas)
+		if layout[1] then
+			assert(layout[1][1], "Common mistake, children entry should be an array, not an box entry")
+			for index, childLayout in ipairs(layout[1]) do
+				box:addChild(parseEntry(canvas, childLayout))
 			end
-			return box
-		else
-			error("Failed to parse layout: " .. tostring(layout.type) .. "\n" .. box,2)
 		end
+		return box
 	else
 		error("Unknown layout type: " .. (layout and layout.type or "nil"))
 	end

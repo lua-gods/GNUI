@@ -177,5 +177,10 @@ function Canvas:inputMouse(button,state)
 	end
 end
 
+---Love2D Exclusive
+function Canvas:draw()
+	
+end
+
 
 return CanvasAPI

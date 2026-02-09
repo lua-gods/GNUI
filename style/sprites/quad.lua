@@ -4,10 +4,12 @@
 / /_/ / /|  /  desc: an extension of sprite which can display a texture
 \____/_/ |_/ source: link ]]
 
-local Sprite = require("./sprite") ---@type GNUI.Sprite
-local gncommon = require("lib.gncommon") ---@type GNCommon
-local Style = require("../styles/quad") ---@type GNUI.Sprite.Quad.StyleAPI
-local config = require("../../config") ---@type GNUI.config
+local BASE = (...):match(".+[./]GNUI"):gsub("/",".")
+local config = require(BASE..".config") ---@type GNUI.config
+
+local Sprite = require(BASE..".style.sprites.sprite") ---@type GNUI.Sprite
+local gncommon = require(config.GN_COMMON) ---@type GNCommon
+local Style = require(BASE..".style.styles.quad") ---@type GNUI.Sprite.Quad.StyleAPI
 
 
 ---@class GNUI.Sprite.Quad : GNUI.Sprite

@@ -1,7 +1,8 @@
 ---@diagnostic disable: param-type-mismatch
+local BASE = (...):match(".+[./]GNUI"):gsub("/",".")
 
 ---@class GNUI.Render.Display
-local Display = require("./display") ---@type GNUI.Render.Display
+local Display = require(BASE..".render.visuals.display") ---@type GNUI.Render.Display
 
 
 ---@class GNUI.Text
@@ -16,10 +17,8 @@ local Display = require("./display") ---@type GNUI.Render.Display
 ---@field textColor string
 ---@field textAlignment Vector2
 ---@field wrapText boolean
----
----@field label TextTask
-local Sprite = {}
-Sprite.__index = Sprite
+local Label = {}
+Label.__index = Label
 
 
 local function parseText(text,defaultColor)
@@ -36,7 +35,8 @@ local function parseText(text,defaultColor)
 			tableText = text
 		end
 	end
-	return toJson(tableText)
+	-- TODO: implement coloring
+	return tableText
 end
 
 
@@ -55,10 +55,9 @@ function Display:newLabel(visualID)
 		textAlignment = vec(-1,1),
 		textColor = "ffffff",
 		wrapText = true,
-		label = vis.model:newText("task"..taskID),
 	}
 	
-	setmetatable(self,Sprite)
+	setmetatable(self,Label)
 	
 	vis.tasks[taskID] = self
 	return taskID
@@ -68,27 +67,26 @@ end
 ---@param task GNUI.Render.VisualTask.Label
 local function updateLabelText(task)
 	if task.text then
-		task.jsonText = parseText(task.text,task.textColor)
-		task.label:setText(task.jsonText)
+		task.jsonText = tostring(task.text) --parseText(task.text,task.textColor)
 	end
 end
 
 ---@param task GNUI.Render.VisualTask.Label
 local function updateLabelPos(task)
-	if task.label and task.text then
-		task.label:alignment(task.textAlignment.x == -1 and "LEFT" or task.textAlignment.x == 0 and "CENTER" or "RIGHT")
+	if task.text then
+		--task.label:alignment(task.textAlignment.x == -1 and "LEFT" or task.textAlignment.x == 0 and "CENTER" or "RIGHT")
 		local fineWidth = task.size.x-task.padding.x-task.padding.z
-		task.label:setWidth(fineWidth)
-		local textDim = client.getTextDimensions(task.jsonText, fineWidth, task.wrapText)
-		local align = task.textAlignment*0.5+0.5
-		task.label:setPos(
-			math.floor(math.lerp(-task.padding.x,task.padding.z,align.x) - task.size.x * (align.x)+0.5),
-			math.floor(math.lerp(
-				-task.padding.y,
-				-task.size.y+task.padding.w+textDim.y,
-				align.y
-			)+0.5)
-		)
+		--task.label:setWidth(fineWidth)
+		--local textDim = client.getTextDimensions(task.jsonText, fineWidth, task.wrapText)
+		--local align = task.textAlignment*0.5+0.5
+		--task.label:setPos(
+		--	math.floor(math.lerp(-task.padding.x,task.padding.z,align.x) - task.size.x * (align.x)+0.5),
+		--	math.floor(math.lerp(
+		--		-task.padding.y,
+		--		-task.size.y+task.padding.w+textDim.y,
+		--		align.y
+		--	)+0.5)
+		--)
 	end
 end
 
@@ -96,19 +94,19 @@ end
 ---INTERNAL CALLBACK for Display
 ---@param x number
 ---@param y number
-function Sprite:setSize(x,y)
+function Label:setSize(x,y)
 	self.size = vec(x,y)
 	updateLabelPos(self)
 end
 
 
 ---INTERNAL CALLBACK for Display
-function Sprite:setVisible(visible)
-	self.label:setVisible(visible)
+function Label:setVisible(visible)
+	self.visible = visible
 end
 
 
-function Sprite:setColor(r,g,b)
+function Label:setColor(r,g,b)
 end
 
 
@@ -121,15 +119,15 @@ end
 ---@param right number
 ---@param bottom number
 function Display:setLabelPadding(visualID,taskID,left,top,right,bottom)
-	local task = self:getTask(visualID,taskID)
+	local task = self:getVisual(visualID,taskID)
 	task.padding = vec(left,top,right,bottom)
 	updateLabelPos(task)
 end
 
 
 function Display:setLabelVisible(visualID,taskID,visible)
-	local task = self:getTask(visualID,taskID)
-	task.label:setVisible(visible)
+	local task = self:getVisual(visualID,taskID)
+	task.visible = visible
 end
 
 
@@ -139,8 +137,8 @@ end
 ---@param g number
 ---@param b number
 function Display:setTextColor(visualID,taskID,r,g,b)
-	local task = self:getTask(visualID,taskID)
-	task.textColor = vectors.rgbToHex(r,g,b)
+	local task = self:getVisual(visualID,taskID)
+	--task.textColor = vectors.rgbToHex(r,g,b)
 	task.jsonText = parseText(task.text,task.textColor)
 	updateLabelText(task)
 	updateLabelPos(task)
@@ -151,7 +149,7 @@ end
 ---@param taskID integer
 ---@param text string|GNUI.Text[]
 function Display:setText(visualID,taskID,text)
-	local task = self:getTask(visualID,taskID)
+	local task = self:getVisual(visualID,taskID)
 	task.text = text
 	
 	updateLabelText(task)
@@ -164,7 +162,12 @@ end
 ---@param h -1|0|1
 ---@param v -1|0|1
 function Display:setTextAlignment(visualID,taskID,h,v)
-	local task = self:getTask(visualID,taskID)
+	local task = self:getVisual(visualID,taskID)
 	task.textAlignment = vec(h,v)
 	updateLabelPos(task)
+end
+
+
+function Label:draw()
+	
 end

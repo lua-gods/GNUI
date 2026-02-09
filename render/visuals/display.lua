@@ -5,6 +5,7 @@
 \____/_/ |_/ source: link ]]
 
 ---@class GNUI.Render.Visual.Task
+---@field visible boolean
 ---@field [any] any
 
 
@@ -18,7 +19,7 @@
 ---@field pos Vector2
 ---@field size Vector2
 ---
----@field tasks GNUI.Render.Visual[]
+---@field tasks GNUI.Render.Visual.Task[]
 
 
 ---@class GNUI.Render.Display
@@ -52,7 +53,6 @@ function Display:newVisual()
 		size = vec(0,0),
 		
 		tasks = {},
-		model = models:newPart("GNUI.visual" .. id),
 	}
 	
 	self.visuals[id] = visual
@@ -63,8 +63,8 @@ end
 ---NOTE: INTERNAL USE ONLY
 ---@param visualID integer
 ---@param spriteID integer
----@return GNUI.Render.Visual
-function Display:getTask(visualID,spriteID)
+---@return GNUI.Render.Visual.Task
+function Display:getVisual(visualID,spriteID)
 	local visual = self.visuals[visualID]
 	assert(visual,"Visual Quad "..tostring(visualID).." not found")
 	local task = visual.tasks[spriteID]
@@ -82,13 +82,6 @@ local function updateChildrenIndexes(vis)
 end
 
 
----@param vis GNUI.Render.Visual
-local function updateDimensions(vis)
-	vis.model:pos(-vis.pos.x,-vis.pos.y,-vis.index)
-	vis.model:scale(1,1,1)
-end
-
-
 ---@param id integer
 ---@param childID integer
 ---@return GNUI.Render.Visual
@@ -103,9 +96,6 @@ function Display:addChild(id,childID)
 	local id = #vis.children + 1
 	vis.children[id] = vis
 	child.index = id
-	vis.model:addChild(child.model:remove())
-	updateDimensions(child)
-	updateDimensions(vis)
 	return vis
 end
 
@@ -124,8 +114,6 @@ function Display:removeChild(id,childID)
 		
 		updateChildrenIndexes(vis)
 		child.parent = nil
-		updateDimensions(child)
-		updateDimensions(vis)
 	end
 	return self
 end
@@ -162,7 +150,6 @@ function Display:free(id)
 	local vis = self.visuals[id]
 	assert(vis,"Visual Quad "..id.." not found")
 	
-	vis.model:remove()
 	self.visuals[id] = nil
 end
 
@@ -171,7 +158,6 @@ function Display:setPos(id,x,y)
 	local vis = self.visuals[id]
 	assert(vis,"Visual Quad "..id.." not found")
 	vis.pos = vec(x,y)
-	updateDimensions(vis)
 end
 
 
@@ -184,7 +170,6 @@ function Display:setSize(id,x,y)
 		task:setSize(x,y)
 	end
 	
-	updateDimensions(vis)
 end
 
 
@@ -196,7 +181,6 @@ function Display:setVisible(id,visible)
 		task:setVisible(visible)
 	end
 	
-	vis.model:setVisible(visible)
 end
 
 
@@ -209,13 +193,12 @@ function Display:setColor(id,r,g,b)
 	end
 end
 
-
----@param type ModelPart.parentType
-function Display:setParentType(type)
-	self.visuals[1].model:setParentType(type)
+function Display:draw()
+	for vi, visual in pairs(self.visuals) do
+		for ti, task in pairs(visual.tasks) do
+			task:draw()
+		end
+	end
 end
-
-
-
 
 return Display

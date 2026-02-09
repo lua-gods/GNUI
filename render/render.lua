@@ -8,8 +8,8 @@ local Display = require(BASE.."."..config.RENDER..".visuals.display") ---@type G
 local RenderAPI = {}
 
 
-for index, value in ipairs(utils.listFiles("./visuals")) do
-	require(value)
+for _, visualClass in ipairs(utils.listFiles(BASE..".render.visuals")) do
+	require(visualClass)
 end
 
 
