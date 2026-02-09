@@ -58,7 +58,7 @@ end
 ---@param x number
 ---@param y number
 function Display:setSpriteSize(visualID,taskID,x,y)
-	local task = self:getVisual(visualID,taskID)
+	local task = self:getTask(visualID,taskID)
 	---@cast task GNUI.Render.Visual.Task.Sprite
 	local size = task.textureSize
 	task.size = vec(x,y)
@@ -66,14 +66,14 @@ end
 
 
 function Display:setSpriteVisible(visualID,taskID,visible)
-	local task = self:getVisual(visualID,taskID)
+	local task = self:getTask(visualID,taskID)
 	---@cast task GNUI.Render.Visual.Task.Sprite
 	task.visible = visible
 end
 
 
 function Display:setSpriteColor(visualID,taskID,r,g,b)
-	local task = self:getVisual(visualID,taskID)
+	local task = self:getTask(visualID,taskID)
 	---@cast task GNUI.Render.Visual.Task.Sprite
 	task.color = vec(r,g,b)
 end
@@ -82,7 +82,7 @@ end
 ---@param x number
 ---@param y number
 function Display:setSpritePos(visualID,taskID,x,y)
-	local task = self:getVisual(visualID,taskID)
+	local task = self:getTask(visualID,taskID)
 	---@cast task GNUI.Render.Visual.Task.Sprite
 	
 	task.pos = vec(x,y)
@@ -93,7 +93,7 @@ end
 ---@param taskID integer
 ---@param path string
 function Display:setSpriteTexture(visualID,taskID,path)
-	local task = self:getVisual(visualID,taskID)
+	local task = self:getTask(visualID,taskID)
 	---@cast task GNUI.Render.Visual.Task.Sprite
 	
 	local image = love.graphics.newImage(path)
@@ -113,7 +113,7 @@ end
 ---@param u2 number
 ---@param v2 number
 function Display:setSpriteUV(visualID,taskID,u1,v1,u2,v2)
-	local task = self:getVisual(visualID,taskID)
+	local task = self:getTask(visualID,taskID)
 	---@cast task GNUI.Render.Visual.Task.Sprite
 	
 	
@@ -134,14 +134,15 @@ end
 
 
 function Display:removeSprite(visualID,taskID)
-	local task = self:getVisual(visualID,taskID)
+	local task = self:getTask(visualID,taskID)
 	---@cast task GNUI.Render.Visual.Task.Sprite
 	task.quad:release()
 	self.visuals[visualID].tasks[taskID] = nil
 end
 
+
 ---@param pos Vector2
-function Sprite:draw(pos)
+function Sprite:draw(pos,visual)
 	if self.quad and self.visible then
 		love.graphics.draw(
 			self.image,

@@ -66,7 +66,7 @@ end
 ---@param visualID integer
 ---@param spriteID integer
 ---@return GNUI.Render.Visual.Task
-function Display:getVisual(visualID,spriteID)
+function Display:getTask(visualID,spriteID)
 	local visual = self.visuals[visualID]
 	assert(visual,"Visual Quad "..tostring(visualID).." not found")
 	local task = visual.tasks[spriteID]
@@ -194,17 +194,17 @@ function Display:setColor(id,r,g,b)
 	end
 end
 local e = 0
-local function draw(visual,offset)
+local function drawTasks(visual,offset)
 	for key, task in pairs(visual.tasks) do
-		task:draw(visual,offset + visual.pos)
+		task:draw(offset + visual.pos,visual)
 	end
 	for vi, childVis in pairs(visual.children) do
-		draw(childVis,offset + visual.pos)
+		drawTasks(childVis,offset + visual.pos)
 	end
 end
 
 function Display:draw()
-	draw(self.visuals[1],vec(0,0))
+	drawTasks(self.visuals[1],vec(0,0))
 end
 
 return Display

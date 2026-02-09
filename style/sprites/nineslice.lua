@@ -62,6 +62,8 @@ function Nineslice.new(box,slot)
 	self.idBottom = self.display:newSprite(id)
 	self.idBottomLeft = self.display:newSprite(id)
 	
+	self.labelID = box.canvas.display:newLabel(id)
+	
 	self.ids = {
 		self.idTopLeft,
 		self.idTop,

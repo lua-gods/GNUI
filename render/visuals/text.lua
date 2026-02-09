@@ -1,6 +1,8 @@
 ---@diagnostic disable: param-type-mismatch
 local BASE = (...):match(".+[./]GNUI"):gsub("/",".")
 
+local utils = require(BASE..".utils") ---@type GNUI.utils
+
 ---@class GNUI.Render.Display
 local Display = require(BASE..".render.visuals.display") ---@type GNUI.Render.Display
 
@@ -14,7 +16,7 @@ local Display = require(BASE..".render.visuals.display") ---@type GNUI.Render.Di
 ---@field padding Vector4
 ---@field text string|GNUI.Text[]
 ---@field jsonText string
----@field textColor string
+---@field textColor Vector3
 ---@field textAlignment Vector2
 ---@field wrapText boolean
 local Label = {}
@@ -53,7 +55,7 @@ function Display:newLabel(visualID)
 		padding = vec(0,0,0,0),
 		
 		textAlignment = vec(-1,1),
-		textColor = "ffffff",
+		textColor = vec(1,1,1),
 		wrapText = true,
 	}
 	
@@ -119,14 +121,14 @@ end
 ---@param right number
 ---@param bottom number
 function Display:setLabelPadding(visualID,taskID,left,top,right,bottom)
-	local task = self:getVisual(visualID,taskID)
+	local task = self:getTask(visualID,taskID)
 	task.padding = vec(left,top,right,bottom)
 	updateLabelPos(task)
 end
 
 
 function Display:setLabelVisible(visualID,taskID,visible)
-	local task = self:getVisual(visualID,taskID)
+	local task = self:getTask(visualID,taskID)
 	task.visible = visible
 end
 
@@ -137,8 +139,8 @@ end
 ---@param g number
 ---@param b number
 function Display:setTextColor(visualID,taskID,r,g,b)
-	local task = self:getVisual(visualID,taskID)
-	--task.textColor = vectors.rgbToHex(r,g,b)
+	local task = self:getTask(visualID,taskID)
+	task.textColor = vec(r,g,b)
 	task.jsonText = parseText(task.text,task.textColor)
 	updateLabelText(task)
 	updateLabelPos(task)
@@ -149,7 +151,7 @@ end
 ---@param taskID integer
 ---@param text string|GNUI.Text[]
 function Display:setText(visualID,taskID,text)
-	local task = self:getVisual(visualID,taskID)
+	local task = self:getTask(visualID,taskID)
 	task.text = text
 	
 	updateLabelText(task)
@@ -162,12 +164,22 @@ end
 ---@param h -1|0|1
 ---@param v -1|0|1
 function Display:setTextAlignment(visualID,taskID,h,v)
-	local task = self:getVisual(visualID,taskID)
+	local task = self:getTask(visualID,taskID)
 	task.textAlignment = vec(h,v)
 	updateLabelPos(task)
 end
 
 
-function Label:draw()
-	
+---@param pos Vector2
+---@param visual GNUI.Render.VisualTask.Label
+function Label:draw(pos,visual)
+	if self.text then
+		local size = utils.getTextSize(self.text, self.size.x, self.wrapText)
+		love.graphics.printf({{self.textColor:unpack()},self.text},
+		pos.x,
+		pos.y+visual.size.y/2-size.y/2,
+		self.size.x,
+		self.textAlignment.x == -1 and "left" or self.textAlignment.x == 0 and "center" or "right"
+	)
+	end
 end
