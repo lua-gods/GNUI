@@ -4,11 +4,13 @@
 local Display = require("./display") ---@type GNUI.Render.Display
 
 ---@class GNUI.Render.VisualTask.Sprite : GNUI.Render.Visual
+---@field color Vector3
+---@field visible boolean
+---@field quad love.Quad?
 ---@field texturePath string
 ---@field textureSize Vector2
+---@field image love.Image
 ---@field uv Vector4
----
----@field quad SpriteTask
 local Sprite = {}
 Sprite.__index = Sprite
 
@@ -22,7 +24,8 @@ function Display:newSprite(visualID)
 	local taskID = #vis.tasks+1
 	local self = {
 		textureSize = vec(1,1),
-		quad = vis.model:newSprite("task"..taskID):setRenderType("CUTOUT_EMISSIVE_SOLID")
+		--quad = love.graphics.newQuad(0,0,0,0)
+		visible = true
 	}
 	
 	setmetatable(self,Sprite)
@@ -36,18 +39,16 @@ end
 ---@param x number
 ---@param y number
 function Sprite:setSize(x,y)
-	local size = self.textureSize
-	--self.quad:scale(x/size.x,y/size.y,1)
 end
 
 
 function Sprite:setVisible(visible)
-	self.quad:setVisible(visible)
+	self.visible = visible
 end
 
 
 function Sprite:setColor(r,g,b)
-	self.quad:color(r,g,b)
+	self.color = vec(r,g,b)
 end
 
 
@@ -58,20 +59,23 @@ end
 ---@param y number
 function Display:setSpriteSize(visualID,taskID,x,y)
 	local task = self:getTask(visualID,taskID)
+	---@cast task GNUI.Render.VisualTask.Sprite
 	local size = task.textureSize
-	task.quad:scale(x/size.x,y/size.y,1)
+	task.size = vec(x,y)
 end
 
 
 function Display:setSpriteVisible(visualID,taskID,visible)
 	local task = self:getTask(visualID,taskID)
-	task.quad:setVisible(visible)
+	---@cast task GNUI.Render.VisualTask.Sprite
+	task.visible = visible
 end
 
 
 function Display:setSpriteColor(visualID,taskID,r,g,b)
 	local task = self:getTask(visualID,taskID)
-	task.quad:color(r,g,b)
+	---@cast task GNUI.Render.VisualTask.Sprite
+	task.color = vec(r,g,b)
 end
 
 
@@ -79,7 +83,9 @@ end
 ---@param y number
 function Display:setSpritePos(visualID,taskID,x,y)
 	local task = self:getTask(visualID,taskID)
-	task.quad:pos(-x,-y)
+	---@cast task GNUI.Render.VisualTask.Sprite
+	
+	task.pos = vec(x,y)
 end
 
 
@@ -88,19 +94,17 @@ end
 ---@param path string
 function Display:setSpriteTexture(visualID,taskID,path)
 	local task = self:getTask(visualID,taskID)
-	local texture = textures[path]
-	local textureSize = texture:getDimensions()
+	---@cast task GNUI.Render.VisualTask.Sprite
+	
+	local image = love.graphics.newImage(path)
+	local textureSize = vec(image:getWidth(),image:getHeight())
 	local uv = vec(0,0,1,1)
 	task.texturePath = path
 	task.textureSize = textureSize
 	task.uv = uv
-	task.quad
-	:texture(textures[path],textureSize.x,textureSize.y)
-	:setUV(uv.xy / task.textureSize)
-	:setRegion(uv.zw * task.textureSize)
+	task.image = image
+	task.quad = love.graphics.newQuad(0,0,textureSize.x,textureSize.y,image)
 end
-
-
 
 ---Sets the UV of the visual
 ---@param visualID integer
@@ -110,16 +114,27 @@ end
 ---@param v2 number
 function Display:setSpriteUV(visualID,taskID,u1,v1,u2,v2)
 	local task = self:getTask(visualID,taskID)
+	---@cast task GNUI.Render.VisualTask.Sprite
+	
+	
 	local uv = vec(u1,v1,u2,v2)
 	task.uv = uv
-	task.quad
-	:setUV(uv.xy/task.textureSize)
-	:setRegion((uv.zw-uv.xy))
+	
+	if task.quad then
+		task.quad:release()
+	end
+	
+	task.quad = love.graphics.newQuad(
+		uv.x,
+		uv.y,
+	uv.z,
+	uv.w,task.image)
 end
 
 
 function Display:removeSprite(visualID,taskID)
 	local task = self:getTask(visualID,taskID)
-	task.quad:remove()
+	---@cast task GNUI.Render.VisualTask.Sprite
+	task.quad:release()
 	self.visuals[visualID].tasks[taskID] = nil
 end
