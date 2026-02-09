@@ -42,13 +42,17 @@ end
 ---@param wrap any
 ---@return Vector2
 function util.getTextSize(content, maxWidth, wrap)
-	return client.getTextDimensions(content, maxWidth, wrap)
+	local text = love.graphics.newText(love.graphics.getFont())
+	text:setf(content, maxWidth, "left")
+	return vec(text:getDimensions())
 end
 
 ---@param text string
 ---@return integer
 function util.getTextWidth(text)
-	return client.getTextWidth(text)
+	local text = love.graphics.newText(love.graphics.getFont())
+	text:set(text)
+	return text:getWidth()
 end
 
 -- Thankyou 4P5!
@@ -60,7 +64,7 @@ function util.LengthToCharCount(text, length)
 	if not clampCache[length] then clampCache[length] = {} end
 	if clampCache[length][text] then return clampCache[length][text][1] end
 
-	local width = client.getTextWidth(text)
+	local width = util.getTextWidth(text)
 
 	local i = 0
 	if width > length then
@@ -69,7 +73,7 @@ function util.LengthToCharCount(text, length)
 			i = i + 1
 			local mid = math.floor((low + high) / 2)
 			local test_text = text:sub(1, mid)
-			local test_width = client.getTextWidth(test_text)
+			local test_width = util.getTextWidth(test_text)
 
 			if test_width > length then
 				high = mid
@@ -84,6 +88,5 @@ function util.LengthToCharCount(text, length)
 
 	return #text
 end
-
 
 return util

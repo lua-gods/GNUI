@@ -179,7 +179,7 @@ end
 
 ---Love2D Exclusive
 function Canvas:draw()
-	
+	self.display:draw()
 end
 
 

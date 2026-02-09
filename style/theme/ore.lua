@@ -5,8 +5,11 @@ local Nineslice = require(BASE..".style.sprites.nineslice") ---@type GNUI.Sprite
 
 
 local atlas = nil ---@type string
+---@diagnostic disable-next-line: undefined-global
 if figuraMetatables then -- is Figura lmao
 	atlas = (...):gsub("/",".") ..".ore"
+else
+	atlas = BASE:gsub("%.","/") .. "/style/theme/ore.png"
 end
 local e = Nineslice.newStyle()
 e:setTexture(atlas)

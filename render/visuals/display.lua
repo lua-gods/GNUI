@@ -6,6 +6,8 @@
 
 ---@class GNUI.Render.Visual.Task
 ---@field visible boolean
+---@field pos Vector2
+---@field size Vector2
 ---@field [any] any
 
 
@@ -91,10 +93,9 @@ function Display:addChild(id,childID)
 	assert(vis,"Visual Quad "..tostring(id).." not found")
 	assert(child,"Visual Quad "..tostring(childID).." not found")
 	
-	
 	child.parent = vis
 	local id = #vis.children + 1
-	vis.children[id] = vis
+	vis.children[id] = child
 	child.index = id
 	return vis
 end
@@ -192,13 +193,18 @@ function Display:setColor(id,r,g,b)
 		task:setColor(r,g,b)
 	end
 end
+local e = 0
+local function draw(visual,offset)
+	for key, task in pairs(visual.tasks) do
+		task:draw(visual,offset + visual.pos)
+	end
+	for vi, childVis in pairs(visual.children) do
+		draw(childVis,offset + visual.pos)
+	end
+end
 
 function Display:draw()
-	for vi, visual in pairs(self.visuals) do
-		for ti, task in pairs(visual.tasks) do
-			task:draw()
-		end
-	end
+	draw(self.visuals[1],vec(0,0))
 end
 
 return Display

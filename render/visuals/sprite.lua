@@ -30,7 +30,6 @@ function Display:newSprite(visualID)
 	}
 	
 	setmetatable(self,Sprite)
-	
 	vis.tasks[taskID] = self
 	return taskID
 end
@@ -104,7 +103,7 @@ function Display:setSpriteTexture(visualID,taskID,path)
 	task.textureSize = textureSize
 	task.uv = uv
 	task.image = image
-	task.quad = love.graphics.newQuad(0,0,textureSize.x,textureSize.y,image)
+	task.quad = love.graphics.newQuad(0,0,1,1,image)
 end
 
 ---Sets the UV of the visual
@@ -119,15 +118,15 @@ function Display:setSpriteUV(visualID,taskID,u1,v1,u2,v2)
 	
 	
 	local uv = vec(u1,v1,u2,v2)
+	-- TODO: This is stupid
 	task.uv = uv
-	
 	if task.quad then
 		task.quad:release()
 	end
 	if task.image then
 		task.quad = love.graphics.newQuad(
 			uv.x,uv.y,
-			uv.z,uv.w,
+			uv.z-uv.x,uv.w-uv.y,
 			task.image
 		)
 	end
@@ -141,6 +140,17 @@ function Display:removeSprite(visualID,taskID)
 	self.visuals[visualID].tasks[taskID] = nil
 end
 
-function Sprite:draw()
-	
+---@param visual GNUI.Render.Visual
+function Sprite:draw(visual,offset)
+	if self.quad and self.visible then
+		love.graphics.draw(
+			self.image,
+			self.quad,
+			self.pos.x+offset.x,
+			self.pos.y+offset.y,
+			0,
+			self.size.x/(self.uv.z-self.uv.x),
+			self.size.y/(self.uv.w-self.uv.y)
+		)
+	end
 end

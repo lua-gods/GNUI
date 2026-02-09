@@ -157,7 +157,6 @@ function Nineslice:setTexture(path)
 	end
 	
 	local id = self.box.visualID
-	
 	if self.texturePath then
 		self.display:setSpriteTexture(id,self.idTopLeft,self.texturePath)
 		self.display:setSpriteTexture(id,self.idTop,self.texturePath)

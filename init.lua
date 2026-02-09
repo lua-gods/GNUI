@@ -14,12 +14,9 @@ local Style = require(BASE .. "." .. config.STYLE .. ".style") ---@type GNUI.Sty
 ---@class GNUIAPI
 local GNUIAPI = {}
 
-print("LOADING WIDGETS")
 for index, path in ipairs(utils.listFiles(BASE..".widgets")) do
-	print(path)
 	require(path)
 end
-print("---")
 
 ---@param canvas GNUI.Canvas
 ---@param data GNUI.Layout
