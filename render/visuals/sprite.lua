@@ -140,14 +140,14 @@ function Display:removeSprite(visualID,taskID)
 	self.visuals[visualID].tasks[taskID] = nil
 end
 
----@param visual GNUI.Render.Visual
-function Sprite:draw(visual,offset)
+---@param pos Vector2
+function Sprite:draw(pos)
 	if self.quad and self.visible then
 		love.graphics.draw(
 			self.image,
 			self.quad,
-			self.pos.x+offset.x,
-			self.pos.y+offset.y,
+			self.pos.x+pos.x,
+			self.pos.y+pos.y,
 			0,
 			self.size.x/(self.uv.z-self.uv.x),
 			self.size.y/(self.uv.w-self.uv.y)
