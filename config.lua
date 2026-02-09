@@ -7,7 +7,9 @@ LAYOUT = "layout.layout",
 CORE = "core.core",
 STYLE = "style.style",
 
-EVENT = "../event",
+GN_COMMON = "lib.gncommon",
+
+EVENT = "lib.event",
 --────────────────────────-< END OF CONFIG >-────────────────────────--
 }
 
