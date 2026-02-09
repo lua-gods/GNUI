@@ -4,10 +4,12 @@
 / /_/ / /|  /  desc: meant to be used by widgets, use the Widget Box API for anything else
 \____/_/ |_/ source: link ]]
 ---@diagnostic disable: duplicate-doc-field
-local config = require("../../config") ---@type GNUI.config
-local gncommon = require("../../../gncommon") ---@type GNCommon
-local utils = require("../../utils") ---@type GNUI.utils
-local Event = require("../../"..config.EVENT) ---@type Event
+local BASE = (...):match(".+%.GNUI")
+
+local config = require(BASE..".config") ---@type GNUI.config
+local gncommon = require(config.GN_COMMON) ---@type GNCommon
+local utils = require(BASE..".utils") ---@type GNUI.utils
+local Event = require(config.EVENT) ---@type Event
 
 
 local abs = math.abs
@@ -412,10 +414,7 @@ end
 ---@return Vector2
 function Box:getSize()
 	local minSize = self:getMinimumSize()
-	return vec(
-		math.clamp(self.size.x,minSize.x,self.maxSize.x),
-		math.clamp(self.size.y,minSize.y,self.maxSize.y)
-	)
+	return math.clamp(self.size,minSize,self.maxSize)
 end
 
 
@@ -718,7 +717,7 @@ function Box:updateSprites()
 	--TODO: separate each applying method into its own update flag
 	local flags = self.flags
 	if flags.color then
-		self.canvas.display:setColor(self.visualID, self.color.r, self.color.g, self.color.b)
+		self.canvas.display:setColor(self.visualID, self.color.x, self.color.y, self.color.z)
 	end
 	if flags.visibility then
 		self.canvas.display:setVisible(self.visualID, self.visible)
