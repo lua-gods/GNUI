@@ -1,8 +1,10 @@
 ---@diagnostic disable: return-type-mismatch
+local BASE = (...):match(".+%.GNUI")
+
 local gncommon = require("lib.gncommon") ---@type GNCommon
-local Box = require("./box") ---@type GNUI.Primitive.BoxAPI
-local config = require("../../config") ---@type GNUI.config
-local Render = require("../../"..config.RENDER) ---@type GNUI.RenderAPI
+local config = require(BASE..".config") ---@type GNUI.config
+local Box = require(BASE.."."..config.CORE..".prims.box") ---@type GNUI.Primitive.BoxAPI
+local Render = require(BASE.."."..config.RENDER .. ".render") ---@type GNUI.RenderAPI
 
 
 ---@class GNUI.Canvas.Event.CharInput : Event

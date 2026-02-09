@@ -2,10 +2,10 @@
 local config = {
 --────────────────────────-< CONFIG >-────────────────────────--
 --────────-< PATHS >-────────--
-RENDER = "render.render",
-LAYOUT = "layout.layout",
-CORE = "core.core",
-STYLE = "style.style",
+RENDER = "render",
+LAYOUT = "layout",
+CORE = "core",
+STYLE = "style",
 
 GN_COMMON = "lib.gncommon",
 

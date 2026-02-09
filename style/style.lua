@@ -1,4 +1,5 @@
-local util =  require("../utils") ---@type GNUI.utils
+local BASE = (...):match(".+%.GNUI")
+local util =  require(BASE..".utils") ---@type GNUI.utils
 
 
 ---@class GNUI.Theme

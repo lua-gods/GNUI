@@ -1,5 +1,8 @@
-local utils = require("../utils") ---@type GNUI.utils
-local Display = require("./visuals/display") ---@type GNUI.Render.Display
+local BASE = (...):match(".+%.GNUI")
+
+local utils = require(BASE..".utils") ---@type GNUI.utils
+local config = require(BASE..".config") ---@type GNUI.config
+local Display = require(BASE.."."..config.RENDER..".visuals.display") ---@type GNUI.Render.Display
 
 ---@class GNUI.RenderAPI
 local RenderAPI = {}

@@ -3,14 +3,15 @@
  / / __/  |/ / name: GN's User Interface Library
 / /_/ / /|  /  desc: 
 \____/_/ |_/ source: link ]]
+local BASE = (...):match(".+%.GNUI")
 
-local config = require(... .. ".config") ---@type GNUI.config
-local utils = require(... .. ".utils") ---@type GNUI.utils
+local config = require(BASE .. ".config") ---@type GNUI.config
+local utils = require(BASE .. ".utils") ---@type GNUI.utils
 
-local Core = require(... .. "." .. config.CORE) ---@type GNUI.CoreAPI
-local Layout = require(... .. "." .. config.LAYOUT) ---@type GNUI.LayoutAPI
-local Render = require(... .. "." .. config.RENDER) ---@type GNUI.RenderAPI
-local Style = require(... .. "." .. config.STYLE) ---@type GNUI.StyleAPI
+local Core = require(BASE .. "." .. config.CORE .. ".core") ---@type GNUI.CoreAPI
+local Layout = require(BASE .. "." .. config.LAYOUT .. ".layout") ---@type GNUI.LayoutAPI
+local Render = require(BASE .. "." .. config.RENDER .. ".render") ---@type GNUI.RenderAPI
+local Style = require(BASE .. "." .. config.STYLE .. ".style") ---@type GNUI.StyleAPI
 ---@class GNUIAPI
 local GNUIAPI = {}
 

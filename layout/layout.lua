@@ -1,7 +1,9 @@
 ---@diagnostic disable: param-type-mismatch
-local config = require("../config")
 
-local Style = require("../style/style") ---@type GNUI.StyleAPI
+local BASE = (...):match(".+%.GNUI")
+
+local config = require(BASE..".config")
+local Style = require(BASE.."."..config.STYLE..".style") ---@type GNUI.StyleAPI
 
 ---@class GNUI.LayoutAPI
 local LayoutAPI = {}
