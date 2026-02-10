@@ -30,6 +30,8 @@ setmetatable(BoxAPI,{
 ---@field sizing ({[1]:GNUI.Box.SizingMode,[2]:GNUI.Box.SizingMode}|GNUI.Box.SizingMode)?
 ---@field pos Vector2?
 ---@field gap number?
+---@field padding Vector4?
+---@field margin Vector4?
 ---@field layout GNUI.Box.LayoutMode?
 ---@field childAlign Vector2?
 ---@field text string?
@@ -76,6 +78,8 @@ function BoxAPI.parse(layout,canvas,box)
 	style:newInstance(box)
 
 	if layout.text then box:setText(layout.text) end
+	if layout.padding then box:setPadding(layout.padding:unpack()) end
+	if layout.margin then box:setMargin(layout.margin:unpack()) end
 	if layout.textAlign then box:setTextAlignment(layout.textAlign[1],layout.textAlign[2]) end
 	if layout.wrap then box:setWrapText(layout.wrap) end
 

@@ -86,7 +86,7 @@ local BoxAPI = {}
 ---@field id integer
 ---
 ---@field text string
----@field textAlignmnet -1|0|1
+---@field textAlignment Vector2
 ---@field wrapText boolean
 ---
 ---@field flaggedUpdate boolean
@@ -160,7 +160,6 @@ function BoxAPI.new(canvas)
 		color = vec(1,1,1),
 		id = nextFree,
 		
-		textAlignment = 0,
 		wrapText = true,
 		
 		canvas = canvas,
@@ -192,6 +191,8 @@ function Box:setName(name)
 	self.name = name
 	return self
 end
+
+
 
 
 ---Sets the position of the box,
@@ -283,6 +284,11 @@ function Box:setPadding(left,top,right,bottom)
 	self:recalculatePadding()
 	self:recalculateMinimumSize()
 	self:update()
+	for key, value in pairs(self.sprites) do
+		if value.labelID then
+			self.canvas.display:setLabelPadding(self.visualID,value.labelID,self.padding:unpack())
+		end
+	end
 	return self
 end
 
@@ -515,6 +521,7 @@ function Box:addChild(child)
 	end
 	self.canvas.display:addChild(self.visualID,child.visualID)
 	
+	
 	self:recalculateMinimumSize()
 	self:update()
 	return child
@@ -548,18 +555,27 @@ function Box:removeChild(box)
 end
 
 
+---@param box GNUI.Box
+---@param name string
+local function searchChild(box,name)
+	if box == nil then return nil end
+	if box.name == name then
+		return box
+	end
+	for index, value in ipairs(box.children) do
+		local result = searchChild(value,name)
+		if result then
+			return result
+		end
+	end
+end
+
+
+---Returns the first box with that given name, through its entirey hierarchy.
 ---@param name string
 ---@return GNUI.Box?
 function Box:getChild(name)
-	if tonumber(name) then
-		return self.children[name]
-	else
-		for index, child in ipairs(self.children) do
-			if child.name == name then
-				return child
-			end
-		end
-	end
+	return searchChild(self,name)
 end
 
 
@@ -621,6 +637,9 @@ function Box:setTextAlignment(h,v)
 	---@cast self GNUI.Box
 	self.textAlignment = vec(h,v)
 	self:update("text")
+	for key, value in pairs(self.sprites) do
+		value:setTextAlignment(h,v)
+	end
 	return self
 end
 
@@ -726,7 +745,9 @@ function Box:updateSprites()
 		self.canvas.display:setPos(self.visualID, self.finalPos.x, self.finalPos.y)
 		self.canvas.display:setSize(self.visualID, self.finalSize.x, self.finalSize.y)
 	end
-	
+	--if flags.text then
+	--	self.canvas.display:setTextAlignment(self.visualID,1, self.textAlignment.x, self.textAlignment.y)
+	--end
 	for key, sprite in pairs(self.sprites) do
 		sprite:setSize(self.finalSize.x,self.finalSize.y)
 	end

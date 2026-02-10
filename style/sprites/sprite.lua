@@ -190,7 +190,7 @@ function Sprite:setTextAlignment(h,v)
 	if h then self.textAlignment.x = h changed = true end
 	if v then self.textAlignment.y = v changed = true end
 	if changed then
-		self.display:setTextAlignment(self.box.visualID,self.labelID, self.textAlignment.x, self.textAlignment.y)
+		self.display:setTextAlignment(self.box.visualID,self.labelID, self.textAlignment.x, self.textAlignment.y or 0)
 	end
 	return self
 end

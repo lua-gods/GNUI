@@ -63,7 +63,7 @@ end
 ---@param button integer
 ---@param state integer
 function Button:applyButtonAction(button,state)
-	if button == 0 then
+	if button == 1 then
 		local lastDown = self.down
 		if state == 1 then
 			if self.toggle then
@@ -132,9 +132,9 @@ function Button:release()
 	---@cast self GNUI.Button
 	if self.down then
 		if self.toggle then
-			self:applyButtonAction(0,1)
+			self:applyButtonAction(1,1)
 		else
-			self:applyButtonAction(0,0)
+			self:applyButtonAction(1,0)
 		end
 	end
 	return self

@@ -14,7 +14,7 @@ local utils = require(BASE.."."..".utils") ---@type GNUI.utils
 local TextFieldAPI = {}
 
 
----@alias GNUI.TextField.Verifier string|(fun(field: string):boolean)
+---@alias GNUI.TextField.Verifier string|(fun(field: string)):boolean
 ---| "decimal"
 ---| "integer"
 ---| "hex"
@@ -230,6 +230,77 @@ function TextField:confirm()
 		end
 		self:release()
 	end
+end
+
+
+function TextField:appendText(text)
+	if self.down then
+		self.editingField = self.editingField:sub(1,self.cursor) .. text .. self.editingField:sub(self.cursor+1,-1)
+		self.cursor = self.cursor + #text
+	else
+		self.field = self.field .. text
+	end
+	self:updateTextField()
+end
+
+
+---@param batch boolean?
+function TextField:erase(batch)
+	if batch then
+		if self.down then
+			if self.cursor > 2 then
+				local from = self.editingField:sub(1,self.cursor):find("%s*%S*$")
+				self.editingField = self.editingField:sub(1,from-1)..self.editingField:sub(self.cursor+1,-1)
+				self.cursor = from-1
+			end
+		else
+			if self.cursor > 2 then
+				local from = self.field:sub(1,#self.field):find("%s*%S*$")
+				self.field = self.field:sub(1,from-1)..self.field:sub(self.cursor+1,-1)
+				self.cursor = #self.field
+			end
+		end
+	else
+		if self.down then
+			self.editingField = self.editingField:sub(1,self.cursor-1) .. self.editingField:sub(self.cursor+1,-1)
+			self.cursor = self.cursor - 1
+		else
+			self.field = self.field:sub(1,-2)
+		end
+	end
+	
+	self:updateTextField()
+end
+
+
+function TextField:clear()
+	if self.down then
+		self.editingField = ""
+		self.cursor = 0
+	else
+		self.field = ""
+	end
+	self:updateTextField()
+end
+
+
+function TextField:getText()
+	if self.down then
+		return self.editingField
+	else
+		return self.field
+	end
+end
+
+
+function TextField:setPlaceholder(text)
+	self.placeholder = text
+	self:updateTextField()
+end
+
+
+function TextField:getPlaceholder()
+	return self.placeholder
 end
 
 

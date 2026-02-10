@@ -174,11 +174,13 @@ end
 ---@param visual GNUI.Render.VisualTask.Label
 function Label:draw(pos,visual)
 	if self.text then
-		local size = utils.getTextSize(self.text, self.size.x, self.wrapText)
+		local padding = self.padding
+		local finalWidth = self.size.x-2-padding.x-padding.z
+		local size = utils.getTextSize(self.text, self.size.x, self.wrapText and finalWidth > 20)
 		love.graphics.printf({{self.textColor:unpack()},self.text},
-		pos.x+2,
-		pos.y+visual.size.y/2-size.y/2+2,
-		self.size.x,
+		pos.x+2+padding.x,
+		math.lerp(pos.y+size.y*0.5, pos.y + self.size.y - size.y+1, self.textAlignment.y*0.5+0.5),
+		finalWidth,
 		self.textAlignment.x == -1 and "left" or self.textAlignment.x == 0 and "center" or "right"
 	)
 	end

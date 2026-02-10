@@ -245,7 +245,7 @@ function Nineslice:applyAll(style)
 		self:setColor(style.color:unpack())
 		self:setTextColor(style.textColor:unpack())
 		self:setPadding(style.padding:unpack())
-		self:setTextAlignment(style.textAlignment:unpack())
+		self:setTextAlignment(self.box.textAlignment or style.textAlignment:unpack())
 	end
 	
 	self:applyDimensions()
