@@ -176,8 +176,8 @@ function Label:draw(pos,visual)
 	if self.text then
 		local size = utils.getTextSize(self.text, self.size.x, self.wrapText)
 		love.graphics.printf({{self.textColor:unpack()},self.text},
-		pos.x,
-		pos.y+visual.size.y/2-size.y/2,
+		pos.x+2,
+		pos.y+visual.size.y/2-size.y/2+2,
 		self.size.x,
 		self.textAlignment.x == -1 and "left" or self.textAlignment.x == 0 and "center" or "right"
 	)
