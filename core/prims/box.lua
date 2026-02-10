@@ -827,12 +827,12 @@ function Box:sovleForFillSizing(other)
 			if child.sizing[x] == "FILL"then
 				fillers[#fillers+1] = child
 				child.finalSize[x] = math.max(child.minSize[x], 0)
-				local margin = child:getMargin()
-				local padding = child:getPadding()
-				remainingSpace = remainingSpace - child.finalSize[x] - margin[x] - margin[z]
 			elseif child.sizing[x] == "FIT" then
 				fitters[#fitters+1] = child
 			end
+			local margin = child:getMargin()
+			local padding = child:getPadding()
+			remainingSpace = remainingSpace - child.finalSize[x] - margin[x] - margin[z]
 		end
 		remainingSpace = remainingSpace - self.childGap * (#self.children - 1)
 		
