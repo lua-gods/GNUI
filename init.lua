@@ -32,7 +32,6 @@ function GNUIAPI.getScreen()
 		return screen
 	else
 		screen = Core.newCanvas()
-		print(utils.getScreenSize())
 		screen:setSize(utils.getScreenSize())
 		return screen
 	end

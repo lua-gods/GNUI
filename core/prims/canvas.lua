@@ -48,6 +48,7 @@ function CanvasAPI.new()
 	self.visualID = 1
 	self.queueUpdate = {}
 	self.pressedButtons = {}
+	self:setSizing("FIXED","FIXED")
 	setmetatable(self,Canvas)
 	return self
 end
