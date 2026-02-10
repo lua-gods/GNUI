@@ -11,25 +11,17 @@ if figuraMetatables then -- is Figura lmao
 else
 	atlas = BASE:gsub("%.","/") .. "/style/theme/ore.png"
 end
-local e = Nineslice.newStyle()
-e:setTexture(atlas)
-
-e:setUV(40,1,42,3)
-
-e:setBorder(1,1,1,1)
-
-e:setPadding(1,1,1,1)
 
 ---@type GNUI.Theme
 return {
 	box={
-		default="glass",
+		default="opaque",
 		opaque={
 			normal = Nineslice.newStyle()
 			:setTexture(atlas)
 			:setUV(40,1,42,3)
 			:setBorder(1,1,1,1)
-			:setPadding(1,1,1,1)
+			
 			--:setMargin(5,5,5,5)
 			,
 		},

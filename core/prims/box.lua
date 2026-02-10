@@ -827,17 +827,18 @@ function Box:sovleForFillSizing(other)
 			if child.sizing[x] == "FILL"then
 				fillers[#fillers+1] = child
 				child.finalSize[x] = math.max(child.minSize[x], 0)
+				local margin = child:getMargin()
+				local padding = child:getPadding()
+				remainingSpace = remainingSpace - child.finalSize[x] - margin[x] - margin[z]
 			elseif child.sizing[x] == "FIT" then
 				fitters[#fitters+1] = child
 			end
-			local margin = child:getMargin()
-			remainingSpace = remainingSpace - child.finalSize[x] - margin[x] - margin[z]
 		end
 		remainingSpace = remainingSpace - self.childGap * (#self.children - 1)
 		
 		if #fillers > 0 then
-			for i = 1, 10, 1 do
-				if remainingSpace < 0.01 then break end
+			for i = 1, 1000, 1 do
+				if remainingSpace < 0.001 then break end
 				local smallest = fillers[1]
 				local secondSmallest = fillers[1]
 				local spaceToAdd = remainingSpace
@@ -852,7 +853,6 @@ function Box:sovleForFillSizing(other)
 					
 					-- set space to add to the difference between the smallest to the 2nd smallest
 					if child.finalSize[x] > smallest.finalSize[x] then 
-						secondSmallest.finalSize[x] = math.max(secondSmallest.finalSize[x], child.finalSize[x])
 						spaceToAdd = secondSmallest.finalSize[x] - smallest.finalSize[x]
 					end
 				end
