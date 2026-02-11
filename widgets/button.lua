@@ -7,14 +7,14 @@ local Style = require("../" .. config.STYLE) ---@type GNUI.StyleAPI
 local Layout = require("../" .. config.LAYOUT) ---@class GNUI.LayoutAPI
 
 
----@class GNUI.ButtonAPI
+---@class GNUI.Widget.ButtonAPI
 local ButtonAPI = {}
 
 
 ---@class Event.GNUI.Button.PRESSED : Event
 ---@field register fun(self,func:fun(down: boolean))|fun(func:fun(toggle: boolean))
 
----@class GNUI.Button : GNUI.Box
+---@class GNUI.Widget.Button : GNUI.Box
 ---@field down boolean
 ---@field toggle boolean
 ---
@@ -36,10 +36,10 @@ end
 
 
 ---@param canvas GNUI.Canvas
----@return GNUI.Button
+---@return GNUI.Widget.Button
 function ButtonAPI.new(canvas)
 	local self = Box.new(canvas)
-	---@cast self GNUI.Button
+	---@cast self GNUI.Widget.Button
 	
 	self.down = false
 	self.toggle = false
@@ -102,7 +102,7 @@ end
 ---@param self self
 ---@return self
 function Button:interact()
-	---@cast self GNUI.Button
+	---@cast self GNUI.Widget.Button
 	self:applyButtonAction(0,1)
 	if not self.toggle then
 		self:applyButtonAction(0,0)
@@ -115,7 +115,7 @@ end
 ---@param self self
 ---@return self
 function Button:press()
-	---@cast self GNUI.Button
+	---@cast self GNUI.Widget.Button
 	if not self.down then
 		self:applyButtonAction(0,1)
 	end
@@ -127,7 +127,7 @@ end
 ---@param self self
 ---@return self
 function Button:release()
-	---@cast self GNUI.Button
+	---@cast self GNUI.Widget.Button
 	if self.down then
 		if self.toggle then
 			self:applyButtonAction(0,1)
@@ -144,7 +144,7 @@ end
 ---@param self self
 ---@return self
 function Button:setToggle(toggle)
-	---@cast self GNUI.Button
+	---@cast self GNUI.Widget.Button
 	self.toggle = toggle
 	return self
 end
@@ -159,8 +159,8 @@ end
 
 ---@param layout any
 ---@param canvas GNUI.Canvas
----@param button GNUI.Button?
----@return GNUI.Button
+---@param button GNUI.Widget.Button?
+---@return GNUI.Widget.Button
 function ButtonAPI.parse(layout,canvas,button)
 	local box = button or Box.parse(layout,canvas,ButtonAPI.new(canvas))
 

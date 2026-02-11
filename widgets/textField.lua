@@ -1,11 +1,21 @@
 local config = require("../config") ---@type GNUI.config
 local Box = require("./box") ---@type GNUI.BoxAPI
 local Event = require("../" .. config.EVENT)
-local Button = require("./button") ---@type GNUI.ButtonAPI
+local Button = require("./button") ---@type GNUI.Widget.ButtonAPI
 
 local Style = require("../" .. config.STYLE) ---@type GNUI.StyleAPI
 local Layout = require("../" .. config.LAYOUT) ---@type GNUI.LayoutAPI
 local utils = require("../utils") ---@type GNUI.utils
+
+
+---@class GNUI.Widget.TextFieldAPI.Event.Confirmed : Event
+---@field register fun(self,func:fun(field: string))
+
+---@class GNUI.Widget.TextFieldAPI.Event.Discard : Event
+---@field register fun(self,func:fun(discarded: string))
+
+---@class GNUI.Widget.TextFieldAPI.Event.FieldChanged : Event
+---@field register fun(self,func:fun(field: string))
 
 
 ---@class GNUI.TextFieldAPI
@@ -34,7 +44,7 @@ TextFieldAPI.validators = {
 }
 
 
----@class GNUI.TextField : GNUI.Button
+---@class GNUI.TextField : GNUI.Widget.Button
 ---@field toggle true
 ---@field cursor integer
 ---@field field string
@@ -43,6 +53,9 @@ TextFieldAPI.validators = {
 ---@field validField boolean
 ---@field multiline boolean
 ---@field validator fun(field: string):boolean
+---@field CONFIRMED GNUI.Widget.TextFieldAPI.Event.Confirmed
+---@field DISCARDED GNUI.Widget.TextFieldAPI.Event.Discard
+---@field FIELD_CHANGED GNUI.Widget.TextFieldAPI.Event.FieldChanged
 local TextField = {}
 TextField.__index = function (t,i)
 	return rawget(t,i)
@@ -74,6 +87,10 @@ function TextFieldAPI.new(canvas)
 	self.toggle = true
 	self.validField = true
 	self.multiline = false
+	
+	self.CONFIRMED = Event.new()
+	self.DISCARDED = Event.new()
+	self.FIELD_CHANGED = Event.new()
 	
 	self.BUTTON_DOWN:register(function ()
 		self.editingField = self.field
@@ -216,6 +233,7 @@ end
 
 function TextField:discard()
 	if self.down then
+		self.DISCARDED:invoke(self.editingField)
 		self:release()
 	end
 end
@@ -225,6 +243,7 @@ function TextField:confirm()
 	if self.down then
 		if self.validator and self.validator(self.editingField) or not self.validator then
 			self.field = self.editingField
+			self.CONFIRMED:invoke(self.field)
 		end
 		self:release()
 	end
