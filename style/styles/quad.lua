@@ -1,6 +1,9 @@
-local SpriteStyle = require("../styles/sprite") ---@type GNUI.Sprite.StyleAPI
-local gncommon = require("lib.gncommon") ---@type GNCommon
-local util = require("../../utils") ---@type GNUI.utils
+local BASE = (...):match(".+[./]GNUI"):gsub("/",".")
+local config = require(BASE..".config") ---@type GNUI.config
+
+local SpriteStyle = require(BASE..".style.styles.sprite") ---@type GNUI.Sprite.StyleAPI
+local gncommon = require(config.GN_COMMON) ---@type GNCommon
+local util = require(BASE..".utils") ---@type GNUI.utils
 
 
 ---@class GNUI.Sprite.Quad.StyleAPI
@@ -62,8 +65,10 @@ end
 function QuadStyle:setTexture(path)
 	---@cast self GNUI.Sprite.Quad.Style
 	self.texturePath = path
-	local size = util.getTextSize(path)
-	self.uv = vec(0,0,size.x,size.y)
+	if path then
+		local size = util.getTextureSize(path)
+		self.uv = vec(0,0,size.x,size.y)
+	end
 	return self
 end
 

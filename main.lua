@@ -7,10 +7,10 @@
 local config = require("./config") ---@type GNUI.config
 local utils = require("./utils") ---@type GNUI.utils
 
-local Core = require("./"..config.CORE) ---@type GNUI.CoreAPI
-local Layout = require("./"..config.LAYOUT) ---@type GNUI.LayoutAPI
-local Render = require("./"..config.RENDER) ---@type GNUI.RenderAPI
-local Style = require("./"..config.STYLE) ---@type GNUI.StyleAPI
+local Core = require("./"..config.CORE..".core") ---@type GNUI.CoreAPI
+local Layout = require("./"..config.LAYOUT..".layout") ---@type GNUI.LayoutAPI
+local Render = require("./"..config.RENDER..".render") ---@type GNUI.RenderAPI
+local Style = require("./"..config.STYLE..".style") ---@type GNUI.StyleAPI
 ---@class GNUIAPI
 local GNUIAPI = {}
 

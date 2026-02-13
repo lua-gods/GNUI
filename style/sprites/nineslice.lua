@@ -5,12 +5,15 @@
 / /_/ / /|  /  desc: an extension of sprite which can display a texture
 \____/_/ |_/ source: link ]]
 
-local gncommon = require("lib.gncommon") ---@type GNCommon
-local Style = require("../styles/nineslice") ---@type GNUI.Sprite.Nineslice.StyleAPI
-local config = require("../../config") ---@type GNUI.config
+local BASE = (...):match(".+[./]GNUI"):gsub("/",".")
+local config = require(BASE..".config") ---@type GNUI.config
 
-local Sprite = require("./sprite") ---@type GNUI.Sprite
-local Quad = require("./quad") ---@type GNUI.Sprite.Quad
+local gncommon = require(config.GN_COMMON) ---@type GNCommon
+local Style = require(BASE..".style.styles.nineslice") ---@type GNUI.Sprite.Nineslice.StyleAPI
+local config = require(BASE..".config") ---@type GNUI.config
+
+local Sprite = require(BASE..".style.sprites.sprite") ---@type GNUI.Sprite
+local Quad = require(BASE..".style.sprites.quad") ---@type GNUI.Sprite.Quad
 
 ---@class GNUI.Sprite.Nineslice : GNUI.Sprite.Quad
 ---@field style GNUI.Sprite.Nineslice.Style 
@@ -58,6 +61,8 @@ function Nineslice.new(box,slot)
 	self.idBottomRight = self.display:newSprite(id)
 	self.idBottom = self.display:newSprite(id)
 	self.idBottomLeft = self.display:newSprite(id)
+	
+	self.labelID = box.canvas.display:newLabel(id)
 	
 	self.ids = {
 		self.idTopLeft,
@@ -154,7 +159,6 @@ function Nineslice:setTexture(path)
 	end
 	
 	local id = self.box.visualID
-	
 	if self.texturePath then
 		self.display:setSpriteTexture(id,self.idTopLeft,self.texturePath)
 		self.display:setSpriteTexture(id,self.idTop,self.texturePath)
@@ -175,7 +179,9 @@ function Nineslice:setUV(u1,v1,u2,v2)
 	if u1 then
 		local uv = vec(u1,v1,u2,v2)
 		if uv == self.uv then return end
-		uv = uv:copy():add(0,0,1,1)
+		uv = uv
+		:copy()
+		:add(0,0,1,1)
 		self.uv = uv
 	end
 	
@@ -239,7 +245,7 @@ function Nineslice:applyAll(style)
 		self:setColor(style.color:unpack())
 		self:setTextColor(style.textColor:unpack())
 		self:setPadding(style.padding:unpack())
-		self:setTextAlignment(style.textAlignment:unpack())
+		self:setTextAlignment(self.box.textAlignment or style.textAlignment:unpack())
 	end
 	
 	self:applyDimensions()

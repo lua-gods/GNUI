@@ -1,4 +1,5 @@
-local util =  require("../utils") ---@type GNUI.utils
+local BASE = (...):match(".+[./]GNUI"):gsub("/",".")
+local util =  require(BASE..".utils") ---@type GNUI.utils
 
 
 ---@class GNUI.Theme
@@ -18,7 +19,7 @@ local StyleAPI = {}
 
 
 --────────────────────────-< Theme Loader >-────────────────────────--
-for index, path in ipairs(util.listFiles("./theme")) do
+for index, path in ipairs(util.listFiles(BASE..".style.theme")) do
 	local package = require(path)
 	for keyClass, class in pairs(package) do
 		if not Theme[keyClass] then

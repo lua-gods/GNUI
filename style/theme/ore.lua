@@ -1,24 +1,27 @@
-local Sprite = require("../sprites/sprite") ---@type GNUI.Sprite
-local Quad = require("../sprites/quad") ---@type GNUI.Sprite.Quad
-local Nineslice = require("../sprites/nineslice") ---@type GNUI.Sprite.Nineslice
+local BASE = (...):match(".+[./]GNUI"):gsub("/",".")
+local Sprite = require(BASE..".style.sprites.sprite") ---@type GNUI.Sprite
+local Quad = require(BASE..".style.sprites.quad") ---@type GNUI.Sprite.Quad
+local Nineslice = require(BASE..".style.sprites.nineslice") ---@type GNUI.Sprite.Nineslice
 
 
 local atlas = nil ---@type string
+---@diagnostic disable-next-line: undefined-global
 if figuraMetatables then -- is Figura lmao
 	atlas = (...):gsub("/",".") ..".ore"
+else
+	atlas = BASE:gsub("%.","/") .. "/style/theme/ore.png"
 end
-
 
 ---@type GNUI.Theme
 return {
 	box={
-		default="glass",
+		default="opaque",
 		opaque={
 			normal = Nineslice.newStyle()
 			:setTexture(atlas)
 			:setUV(40,1,42,3)
 			:setBorder(1,1,1,1)
-			:setPadding(1,1,1,1)
+			
 			--:setMargin(5,5,5,5)
 			,
 		},
@@ -70,7 +73,7 @@ return {
 			:setUV(10,0,14,6)
 			
 			:setBorder(2,2,2,4)
-			:setPadding(6,6,6,4)
+			:setPadding(2,2,2,0)
 			:setExpand(0,0,0,2)
 			:setMargin(0,-2,0,2)
 			
@@ -82,7 +85,7 @@ return {
 			:setUV(10,7,14,11)
 			
 			:setBorder(2,2,2,2)
-			:setPadding(6,6,6,4)
+			:setPadding(2,2,2,0)
 			:setMargin(0,0,0,0)
 			
 			:setTextAlignment(0,0)
@@ -96,7 +99,7 @@ return {
 			:setUV(5,0,9,6)
 			
 			:setBorder(2,2,2,4)
-			:setPadding(6,6,6,4)
+			:setPadding(2,2,2,0)
 			:setExpand(0,0,0,2)
 			:setMargin(0,-2,0,2)
 			
@@ -108,16 +111,91 @@ return {
 			:setUV(5,7,9,11)
 			
 			:setBorder(2,2,2,2)
-			:setPadding(6,6,6,4)
+			:setPadding(2,2,2,0)
 			
 			:setTextAlignment(0,0)
 			:setTextColor("#1b1b1b")
 			,
 		},
+		tertiary={
+			normal = Nineslice.newStyle()
+			:setTexture(atlas)
+			:setUV(0,0,4,6)
+			
+			:setBorder(2,2,2,4)
+			:setPadding(2,2,2,0)
+			:setExpand(0,0,0,2)
+			:setMargin(0,-2,0,2)
+			
+			:setTextAlignment(0,0)
+			:setTextColor("#ffffff")
+			,
+			pressed = Nineslice.newStyle()
+			:setTexture(atlas)
+			:setUV(0,7,4,11)
+			
+			:setBorder(2,2,2,2)
+			:setPadding(2,2,2,0)
+			:setMargin(0,0,0,0)
+			
+			:setTextAlignment(0,0)
+			:setTextColor("#ffffff")
+			,
+		},
+		destructive={
+			normal = Nineslice.newStyle()
+			:setTexture(atlas)
+			:setUV(15,0,19,6)
+			
+			:setBorder(2,2,2,4)
+			:setPadding(2,2,2,0)
+			:setExpand(0,0,0,2)
+			:setMargin(0,-2,0,2)
+			
+			:setTextAlignment(0,0)
+			:setTextColor("#ffffff")
+			,
+			pressed = Nineslice.newStyle()
+			:setTexture(atlas)
+			:setUV(15,7,19,11)
+			
+			:setBorder(2,2,2,2)
+			:setPadding(2,2,2,0)
+			:setMargin(0,0,0,0)
+			
+			:setTextAlignment(0,0)
+			:setTextColor("#ffffff")
+			,
+		},
+		blue={
+			normal = Nineslice.newStyle()
+			:setTexture(atlas)
+			:setUV(20,0,24,6)
+			
+			:setBorder(2,2,2,4)
+			:setPadding(2,2,2,0)
+			:setExpand(0,0,0,2)
+			:setMargin(0,-2,0,2)
+			
+			:setTextAlignment(0,0)
+			:setTextColor("#ffffff")
+			,
+			pressed = Nineslice.newStyle()
+			:setTexture(atlas)
+			:setUV(20,7,24,11)
+			
+			:setBorder(2,2,2,2)
+			:setPadding(2,2,2,0)
+			:setMargin(0,0,0,0)
+			
+			:setTextAlignment(0,0)
+			:setTextColor("#ffffff")
+			,
+		},
 		bevel={
 			normal = Nineslice.newStyle()
 			:setTexture(atlas)
-			:setUV(36,1,38,3)
+			:setUV(26,1,28,3)
 			
 			:setBorder(1,1,1,1)
 			:setPadding(3,3,3,3)
@@ -127,7 +205,7 @@ return {
 			,
 			pressed = Quad.newStyle()
 			:setTexture(atlas)
-			:setUV(36,11,38,13)
+			:setUV(26,5,28,7)
 			:setPadding(3,3,3,3)
 			
 			:setTextAlignment(0,0)
@@ -137,22 +215,12 @@ return {
 		flat={
 			normal = Quad.newStyle()
 			:setTexture(atlas)
-			:setUV(7,32,7,32)
+			:setUV(30,1,30,1)
 			:setTextColor("#ffffff")
-			,
-			pressedHovered = Quad.newStyle()
-			:setTexture(atlas)
-			:setUV(7,34,7,34)
-			:setTextColor("#ffffff")
-			,
-			hovered = Quad.newStyle()
-			:setTexture(atlas)
-			:setUV(7,32,7,32)
-			:setTextColor("#1b1b1b")
 			,
 			pressed = Quad.newStyle()
 			:setTexture(atlas)
-			:setUV(7,32,7,32)
+			:setUV(30,5,30,5)
 			:setTextColor("#1b1b1b")
 			,
 		},

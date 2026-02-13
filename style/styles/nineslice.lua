@@ -1,7 +1,10 @@
-local SpriteStyle = require("../styles/sprite") ---@type GNUI.Sprite.StyleAPI
-local QuadStyle = require("../styles/quad") ---@type GNUI.Sprite.Quad.StyleAPI
-local gncommon = require("lib.gncommon") ---@type GNCommon
-local util = require("../../utils") ---@type GNUI.utils
+local BASE = (...):match(".+[./]GNUI"):gsub("/",".")
+local config = require(BASE..".config") ---@type GNUI.config
+
+local SpriteStyle = require(BASE..".style.styles.sprite") ---@type GNUI.Sprite.StyleAPI
+local QuadStyle = require(BASE..".style.styles.quad") ---@type GNUI.Sprite.Quad.StyleAPI
+local gncommon = require(config.GN_COMMON) ---@type GNCommon
+local util = require(BASE..".utils") ---@type GNUI.utils
 
 
 ---@class GNUI.Sprite.Nineslice.StyleAPI

@@ -1,5 +1,7 @@
-local box = require("./prims/box") ---@type GNUI.Primitive.BoxAPI
-local canvas = require("./prims/canvas") ---@type GNUI.CanvasAPI
+local BASE = ((...):gsub("/",".")):match(".+%.GNUI")
+
+local box = require(BASE ..".core.prims.box") ---@type GNUI.Primitive.BoxAPI
+local canvas = require(BASE ..".core.prims.canvas") ---@type GNUI.CanvasAPI
 
 ---Holds all instantiations for elements in GNUI
 ---and utility functions with them

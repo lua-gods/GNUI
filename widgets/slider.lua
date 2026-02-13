@@ -1,10 +1,12 @@
-local config = require("../config") ---@type GNUI.config
-local Box = require("./box") ---@type GNUI.BoxAPI
-local Event = require("../" .. config.EVENT)
-local Button = require("./button") ---@type GNUI.Widget.ButtonAPI
+local BASE = ((...):gsub("/",".")):match(".+%.GNUI")
 
-local Style = require("../" .. config.STYLE) ---@type GNUI.StyleAPI
-local Layout = require("../" .. config.LAYOUT) ---@type GNUI.LayoutAPI
+local config = require(BASE..".config") ---@type GNUI.config
+local Box = require(BASE..".widgets.box") ---@type GNUI.BoxAPI
+local Event = require(config.EVENT)
+local Button = require(BASE..".widgets.button") ---@type GNUI.Widget.ButtonAPI
+
+local Style = require(BASE .. ".".. config.STYLE..".style") ---@type GNUI.StyleAPI
+local Layout = require(BASE ..".".. config.LAYOUT..".layout") ---@type GNUI.LayoutAPI
 local utils = require("../utils") ---@type GNUI.utils
 
 ---@class Event.GNUI.Button.ValueChanged : Event

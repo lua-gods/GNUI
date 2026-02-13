@@ -14,6 +14,11 @@ function util.getScreenSize()
 end
 
 
+function util.getTextureSize(path)
+	return textures[path]:getDimensions()
+end
+
+
 ---@param path string
 ---@return string[]
 function util.listFiles(path)

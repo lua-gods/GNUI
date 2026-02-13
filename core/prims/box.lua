@@ -4,10 +4,12 @@
 / /_/ / /|  /  desc: meant to be used by widgets, use the Widget Box API for anything else
 \____/_/ |_/ source: link ]]
 ---@diagnostic disable: duplicate-doc-field
-local config = require("../../config") ---@type GNUI.config
-local gncommon = require("../../../gncommon") ---@type GNCommon
-local utils = require("../../utils") ---@type GNUI.utils
-local Event = require("../../"..config.EVENT) ---@type Event
+local BASE = ((...):gsub("/",".")):match(".+%.GNUI")
+
+local config = require(BASE..".config") ---@type GNUI.config
+local gncommon = require(config.GN_COMMON) ---@type GNCommon
+local utils = require(BASE..".utils") ---@type GNUI.utils
+local Event = require(config.EVENT) ---@type Event
 
 
 local abs = math.abs
@@ -84,7 +86,7 @@ local BoxAPI = {}
 ---@field id integer
 ---
 ---@field text string
----@field textAlignmnet -1|0|1
+---@field textAlignment Vector2
 ---@field wrapText boolean
 ---
 ---@field flaggedUpdate boolean
@@ -158,7 +160,6 @@ function BoxAPI.new(canvas)
 		color = vec(1,1,1),
 		id = nextFree,
 		
-		textAlignment = 0,
 		wrapText = true,
 		
 		canvas = canvas,
@@ -190,6 +191,8 @@ function Box:setName(name)
 	self.name = name
 	return self
 end
+
+
 
 
 ---Sets the position of the box,
@@ -281,6 +284,11 @@ function Box:setPadding(left,top,right,bottom)
 	self:recalculatePadding()
 	self:recalculateMinimumSize()
 	self:update()
+	for key, value in pairs(self.sprites) do
+		if value.labelID then
+			self.canvas.display:setLabelPadding(self.visualID,value.labelID,self.padding:unpack())
+		end
+	end
 	return self
 end
 
@@ -412,10 +420,7 @@ end
 ---@return Vector2
 function Box:getSize()
 	local minSize = self:getMinimumSize()
-	return vec(
-		math.clamp(self.size.x,minSize.x,self.maxSize.x),
-		math.clamp(self.size.y,minSize.y,self.maxSize.y)
-	)
+	return math.clamp(self.size,minSize,self.maxSize)
 end
 
 
@@ -516,6 +521,7 @@ function Box:addChild(child)
 	end
 	self.canvas.display:addChild(self.visualID,child.visualID)
 	
+	
 	self:recalculateMinimumSize()
 	self:update()
 	return child
@@ -549,18 +555,27 @@ function Box:removeChild(box)
 end
 
 
+---@param box GNUI.Box
+---@param name string
+local function searchChild(box,name)
+	if box == nil then return nil end
+	if box.name == name then
+		return box
+	end
+	for index, value in ipairs(box.children) do
+		local result = searchChild(value,name)
+		if result then
+			return result
+		end
+	end
+end
+
+
+---Returns the first box with that given name, through its entirey hierarchy.
 ---@param name string
 ---@return GNUI.Box?
 function Box:getChild(name)
-	if tonumber(name) then
-		return self.children[name]
-	else
-		for index, child in ipairs(self.children) do
-			if child.name == name then
-				return child
-			end
-		end
-	end
+	return searchChild(self,name)
 end
 
 
@@ -622,6 +637,9 @@ function Box:setTextAlignment(h,v)
 	---@cast self GNUI.Box
 	self.textAlignment = vec(h,v)
 	self:update("text")
+	for key, value in pairs(self.sprites) do
+		value:setTextAlignment(h,v)
+	end
 	return self
 end
 
@@ -718,7 +736,7 @@ function Box:updateSprites()
 	--TODO: separate each applying method into its own update flag
 	local flags = self.flags
 	if flags.color then
-		self.canvas.display:setColor(self.visualID, self.color.r, self.color.g, self.color.b)
+		self.canvas.display:setColor(self.visualID, self.color.x, self.color.y, self.color.z)
 	end
 	if flags.visibility then
 		self.canvas.display:setVisible(self.visualID, self.visible)
@@ -727,7 +745,9 @@ function Box:updateSprites()
 		self.canvas.display:setPos(self.visualID, self.finalPos.x, self.finalPos.y)
 		self.canvas.display:setSize(self.visualID, self.finalSize.x, self.finalSize.y)
 	end
-	
+	--if flags.text then
+	--	self.canvas.display:setTextAlignment(self.visualID,1, self.textAlignment.x, self.textAlignment.y)
+	--end
 	for key, sprite in pairs(self.sprites) do
 		sprite:setSize(self.finalSize.x,self.finalSize.y)
 	end
@@ -780,7 +800,7 @@ function Box:solveForFitSizing(other)
 	end
 	
 	local padding = self:getPadding()
-	local textSize = self.text and utils.getTextSize(self.text, x == "y" and (self.finalSize.x - padding.x - padding.z) or 0, self.wrapText) or vec(0,0)
+	local textSize = self.text and utils.getTextSize(self.text, x == "y" and (self.finalSize.x - padding.x - padding.z) or math.huge, self.wrapText) or vec(0,0)
 	if self.sizing[x] == "FIXED" then
 		self.finalSize[x] = math.max(self.finalMinSize[x],self.size[x])
 		
@@ -832,13 +852,14 @@ function Box:sovleForFillSizing(other)
 				fitters[#fitters+1] = child
 			end
 			local margin = child:getMargin()
+			local padding = child:getPadding()
 			remainingSpace = remainingSpace - child.finalSize[x] - margin[x] - margin[z]
 		end
 		remainingSpace = remainingSpace - self.childGap * (#self.children - 1)
 		
 		if #fillers > 0 then
-			for i = 1, 10, 1 do
-				if remainingSpace < 0.01 then break end
+			for i = 1, 1000, 1 do
+				if remainingSpace < 0.001 then break end
 				local smallest = fillers[1]
 				local secondSmallest = fillers[1]
 				local spaceToAdd = remainingSpace
@@ -853,7 +874,6 @@ function Box:sovleForFillSizing(other)
 					
 					-- set space to add to the difference between the smallest to the 2nd smallest
 					if child.finalSize[x] > smallest.finalSize[x] then 
-						secondSmallest.finalSize[x] = math.max(secondSmallest.finalSize[x], child.finalSize[x])
 						spaceToAdd = secondSmallest.finalSize[x] - smallest.finalSize[x]
 					end
 				end

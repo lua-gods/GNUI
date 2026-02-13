@@ -3,10 +3,11 @@
  / / __/  |/ / name: GNUI Sprite Module
 / /_/ / /|  /  desc: base class for all sprites
 \____/_/ |_/ source: link ]]
+local BASE = (...):match(".+[./]GNUI"):gsub("/",".")
+local config = require(BASE..".config") ---@type GNUI.config
 
-
-local SpriteStyle = require("../styles/sprite") ---@type GNUI.Sprite.StyleAPI
-local gncommon = require("lib.gncommon") ---@type GNCommon
+local SpriteStyle = require(BASE..".style.styles.sprite") ---@type GNUI.Sprite.StyleAPI
+local gncommon = require(config.GN_COMMON) ---@type GNCommon
 
 
 ---A base class for all sprites for boxes
@@ -189,7 +190,7 @@ function Sprite:setTextAlignment(h,v)
 	if h then self.textAlignment.x = h changed = true end
 	if v then self.textAlignment.y = v changed = true end
 	if changed then
-		self.display:setTextAlignment(self.box.visualID,self.labelID, self.textAlignment.x, self.textAlignment.y)
+		self.display:setTextAlignment(self.box.visualID,self.labelID, self.textAlignment.x, self.textAlignment.y or 0)
 	end
 	return self
 end
