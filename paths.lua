@@ -2,14 +2,17 @@
 local config = {
 --────────────────────────-< CONFIG >-────────────────────────--
 --────────-< PATHS >-────────--
-RENDER = "render",
-LAYOUT = "layout",
-CORE = "core",
-STYLE = "style",
+RENDER = "",
+LAYOUT = "",
+CORE = "",
+THEME = "",
 
-GN_COMMON = "lib.gncommon",
+WIDGETS = "",
 
-EVENT = "lib.event",
+GN_COMMON = "",
+UTILS = "",
+
+EVENT = "",
 --────────────────────────-< END OF CONFIG >-────────────────────────--
 }
 

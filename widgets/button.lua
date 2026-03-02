@@ -1,12 +1,12 @@
 local BASE = ((...):gsub("/",".")):match(".+%.GNUI")
+local paths = require(BASE..".paths") ---@type GNUI.config
 
-local config = require(BASE..".config") ---@type GNUI.config
 local Box = require(BASE..".widgets.box") ---@type GNUI.BoxAPI
-local Event = require(config.EVENT)
+local Event = require(paths.EVENT)
 
-local Style = require(BASE .. ".".. config.STYLE..".style") ---@type GNUI.StyleAPI
-local Layout = require(BASE ..".".. config.LAYOUT..".layout") ---@type GNUI.LayoutAPI
-local utils = require(BASE..".utils")
+local Style = require(paths.THEME..".init") ---@type GNUI.ThemeAPI
+local Layout = require(paths.LAYOUT..".init") ---@type GNUI.LayoutAPI
+local utils = require(paths.UTILS)
 
 ---@class GNUI.Widget.ButtonAPI
 local ButtonAPI = {}
@@ -92,9 +92,9 @@ end
 function Button:applyApropriateStyle()
 	self.sprites.highlight:setVisible(self.isHovered)
 	if self.down then
-		self.sprites[1]:setStyle(Style.getKey(self,"pressed"))
+		self.sprites[1]:setStyle(Style.getStyleFromBox(self,"pressed"))
 	else
-		self.sprites[1]:setStyle(Style.getKey(self,"normal"))
+		self.sprites[1]:setStyle(Style.getStyleFromBox(self,"normal"))
 	end
 end
 

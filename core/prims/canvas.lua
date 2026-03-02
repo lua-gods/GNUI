@@ -2,9 +2,9 @@
 local BASE = ((...):gsub("/",".")):match(".+%.GNUI")
 
 local gncommon = require("lib.gncommon") ---@type GNCommon
-local config = require(BASE..".config") ---@type GNUI.config
-local Box = require(BASE.."."..config.CORE..".prims.box") ---@type GNUI.Primitive.BoxAPI
-local Render = require(BASE.."."..config.RENDER .. ".render") ---@type GNUI.RenderAPI
+local path = require(BASE..".paths") ---@type GNUI.config
+local Box = require(path.CORE..".prims.box") ---@type GNUI.Primitive.BoxAPI
+local Render = require(path.RENDER .. ".init") ---@type GNUI.RenderAPI
 
 
 ---@class GNUI.Canvas.Event.CharInput : Event

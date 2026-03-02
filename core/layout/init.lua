@@ -1,8 +1,3 @@
----@diagnostic disable: param-type-mismatch
-local config = require("../config")
-
-local Style = require("../style/style") ---@type GNUI.StyleAPI
-
 ---@class GNUI.LayoutAPI
 local LayoutAPI = {}
 
@@ -11,7 +6,6 @@ local LayoutAPI = {}
 ---@class GNUI.Layout
 ---@field [1] GNUI.Layout[]?
 ---@field variant string?
-
 
 
 local elements = {}
@@ -46,7 +40,6 @@ local function parseEntry(canvas, layout)
 	else
 		error("Unknown layout type: " .. (layout and layout.type or "nil"))
 	end
-	
 end
 
 ---@param canvas GNUI.Canvas

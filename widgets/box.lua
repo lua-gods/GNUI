@@ -6,11 +6,11 @@
 ---@diagnostic disable: duplicate-doc-field
 
 local BASE = ((...):gsub("/",".")):match(".+%.GNUI")
+local paths = require(BASE..".paths") ---@type GNUI.config
 
-local config = require(BASE..".config") ---@type GNUI.config
 local TrueBoxAPI = require(BASE..".core.prims.box") ---@type GNUI.Primitive.BoxAPI
-local Layout = require(BASE ..".".. config.LAYOUT..".layout") ---@type GNUI.LayoutAPI
-local Style = require(BASE .. ".".. config.STYLE..".style") ---@type GNUI.StyleAPI
+local Layout = require(paths.LAYOUT..".init") ---@type GNUI.LayoutAPI
+local Style = require(paths.THEME..".init") ---@type GNUI.ThemeAPI
 
 ---@class GNUI.BoxAPI : GNUI.Primitive.BoxAPI
 local BoxAPI = {}

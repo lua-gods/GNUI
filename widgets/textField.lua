@@ -1,13 +1,14 @@
 local BASE = ((...):gsub("/",".")):match(".+%.GNUI")
+local paths = require(BASE..".paths") ---@type GNUI.config
 
-local config = require(BASE..".config") ---@type GNUI.config
-local Box = require(BASE..".widgets.box") ---@type GNUI.BoxAPI
-local Event = require(config.EVENT)
-local Button = require(BASE..".widgets.button") ---@type GNUI.Widget.ButtonAPI
+local Box = require(paths.WIDGETS..".box") ---@type GNUI.BoxAPI
+local Event = require(paths.EVENT)
+local Button = require(paths.WIDGETS..".button") ---@type GNUI.Widget.ButtonAPI
 
-local Style = require(BASE .. ".".. config.STYLE..".style") ---@type GNUI.StyleAPI
-local Layout = require(BASE ..".".. config.LAYOUT..".layout") ---@type GNUI.LayoutAPI
-local utils = require("../utils") ---@type GNUI.utils
+local Style = require(paths.THEME..".init") ---@type GNUI.ThemeAPI
+local Layout = require(paths.LAYOUT..".init") ---@type GNUI.LayoutAPI
+
+local utils = require(paths.UTILS) ---@type GNUI.utils
 
 
 ---@class GNUI.Widget.TextFieldAPI.Event.Confirmed : Event
@@ -284,12 +285,12 @@ function TextField:applyApropriateStyle()
 	---@cast self GNUI.TextField
 	if self.down then
 		if self.validField then
-			self.sprites[1]:setStyle(Style.getKey(self,"active"))
+			self.sprites[1]:setStyle(Style.getStyleFromBox(self,"active"))
 		else
-			self.sprites[1]:setStyle(Style.getKey(self,"invalid"))
+			self.sprites[1]:setStyle(Style.getStyleFromBox(self,"invalid"))
 		end
 	else
-		self.sprites[1]:setStyle(Style.getKey(self,"normal"))
+		self.sprites[1]:setStyle(Style.getStyleFromBox(self,"normal"))
 	end
 	return self
 end

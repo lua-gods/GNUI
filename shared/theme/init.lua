@@ -14,12 +14,13 @@ local util =  require(BASE..".utils") ---@type GNUI.utils
 ---@type GNUI.Theme
 local Theme = {}
 
----@class GNUI.StyleAPI
-local StyleAPI = {}
+---@class GNUI.ThemeAPI
+local ThemeAPI = {}
 
 
---────────────────────────-< Theme Loader >-────────────────────────--
-for index, path in ipairs(util.listFiles(BASE..".style.theme")) do
+---NOTE: the theme only applies to future instantiated elements, and wont be affecting existing ones.
+---@param path string
+function ThemeAPI.applyTheme(path)
 	local package = require(path)
 	for keyClass, class in pairs(package) do
 		if not Theme[keyClass] then
@@ -45,14 +46,14 @@ for index, path in ipairs(util.listFiles(BASE..".style.theme")) do
 	end
 end
 
-local requestCache = {}
 
----Get a style
+--────────────────────────-< Theme Loader >-────────────────────────--
+
 ---@param class string|GNUI.Box
 ---@param variant string
 ---@param key any
 ---@return GNUI.Sprite.Style
-function StyleAPI.getStyle(class,variant,key)
+function ThemeAPI.getStyle(class,variant,key)
 	if type(class) ~= "string" then
 		class = class.__style
 		assert(class,"No class found")
@@ -83,11 +84,11 @@ end
 
 
 ---@param box GNUI.Box
----@param key string
+---@param key any
 ---@return GNUI.Sprite.Style
-function StyleAPI.getKey(box,key)
-	return StyleAPI.getStyle(box.__style,box.variant,key)
+function ThemeAPI.getStyleFromBox(box,key)
+	return ThemeAPI.getStyle(box.__style,box.variant,key)
 end
 
 
-return StyleAPI
+return ThemeAPI
