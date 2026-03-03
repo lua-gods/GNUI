@@ -20,7 +20,7 @@ local ThemeAPI = {}
 
 ---NOTE: the theme only applies to future instantiated elements, and wont be affecting existing ones.
 ---@param path string
-function ThemeAPI.applyTheme(path)
+function ThemeAPI.loadTheme(path)
 	local package = require(path)
 	for keyClass, class in pairs(package) do
 		if not Theme[keyClass] then
@@ -89,6 +89,10 @@ end
 function ThemeAPI.getStyleFromBox(box,key)
 	return ThemeAPI.getStyle(box.__style,box.variant,key)
 end
+
+
+ThemeAPI.loadTheme(BASE..".shared.theme.defaults.ore")
+
 
 
 return ThemeAPI

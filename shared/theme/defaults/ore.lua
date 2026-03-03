@@ -1,7 +1,7 @@
 local BASE = (...):match(".+[./]GNUI"):gsub("/",".")
-local Sprite = require(BASE..".style.sprites.sprite") ---@type GNUI.Sprite
-local Quad = require(BASE..".style.sprites.quad") ---@type GNUI.Sprite.Quad
-local Nineslice = require(BASE..".style.sprites.nineslice") ---@type GNUI.Sprite.Nineslice
+local Sprite = require(BASE..".shared.theme.sprites.sprite") ---@type GNUI.Sprite
+local Quad = require(BASE..".shared.theme.sprites.quad") ---@type GNUI.Sprite.Quad
+local Nineslice = require(BASE..".shared.theme.sprites.nineslice") ---@type GNUI.Sprite.Nineslice
 
 --TODO: convert everything here into a table
 local atlas = nil ---@type string

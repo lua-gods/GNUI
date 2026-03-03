@@ -1,7 +1,7 @@
 local BASE = (...):match(".+[./]GNUI"):gsub("/",".")
 local path = require(BASE..".paths") ---@type GNUI.config
 
-local SpriteStyle = require(BASE..".style.styles.sprite") ---@type GNUI.Sprite.StyleAPI
+local SpriteStyle = require(BASE..".shared.theme.styles.sprite") ---@type GNUI.Sprite.StyleAPI
 local gncommon = require(path.GN_COMMON) ---@type GNCommon
 local util = require(BASE..".utils") ---@type GNUI.utils
 

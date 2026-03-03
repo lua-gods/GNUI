@@ -6,7 +6,7 @@
 local BASE = (...):match(".+[./]GNUI"):gsub("/",".")
 local path = require(BASE..".paths") ---@type GNUI.config
 
-local SpriteStyle = require(BASE..".style.styles.sprite") ---@type GNUI.Sprite.StyleAPI
+local SpriteStyle = require(BASE..".shared.theme.styles.sprite") ---@type GNUI.Sprite.StyleAPI
 local gncommon = require(path.GN_COMMON) ---@type GNCommon
 
 
@@ -37,7 +37,7 @@ Sprite.__index = Sprite
 ---@param slot (integer|string)?
 ---@return GNUI.Sprite
 function Sprite.new(box,slot)
-	
+	assert(box,"no GNUI.Box given")
 	local self = {
 		pos = vec(0,0),
 		size = vec(0,0),
@@ -53,10 +53,7 @@ function Sprite.new(box,slot)
 		
 	}
 	setmetatable(self, Sprite)
-	if box then
-		self:setBox(box,slot)
-	end
-	
+	self:setBox(box,slot)
 	return self
 end
 
