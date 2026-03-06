@@ -114,4 +114,25 @@ function ThemeAPI.getStyleFromBox(box,key)
 end
 
 
+---@param class any
+---@return string[]
+function ThemeAPI.getVariantNames(class)
+	local list = {}
+	for variantIndex, variant in pairs(Theme[class]) do
+		list[#list+1] = variantIndex
+	end
+	return list
+end
+
+
+---@return string[]
+function ThemeAPI.getClassNames()
+	local list = {}
+	for classIndex, class in pairs(Theme) do
+		list[#list+1] = classIndex
+	end
+	return list
+end
+
+
 return ThemeAPI

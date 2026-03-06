@@ -60,6 +60,11 @@ function GNUIAPI.setup(customPresetName)
 	local Render = require(paths.RENDER..".init") ---@type GNUI.RenderAPI
 	local Theme = require(paths.THEME..".init") ---@type GNUI.ThemeAPI
 	
+	GNUIAPI.Core = Core
+	GNUIAPI.Layout = Layout
+	GNUIAPI.Render = Render
+	GNUIAPI.Theme = Theme
+	
 	
 	for index, path in ipairs(utils.listFiles(paths.WIDGETS)) do
 		require(path)
