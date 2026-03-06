@@ -137,13 +137,16 @@ end
 
 
 ---@overload fun(self: GNUI.Sprite)
+---@overload fun(self: GNUI.Sprite, rgb: Vector3)
 ---@param r number
 ---@param g number
 ---@param b number
 function Sprite:setTextColor(r,g,b)
 	if r then
-		local color = vec(r,g,b)
-		if self.style then color = color * self.style.textColor end
+		local color = gncommon.color(r,g,b).xyz
+		if self.style and self.style.textColor then
+			color = color * self.style.textColor
+		end
 		if self.textColor == color then return end
 		self.textColor = color
 	end
@@ -219,16 +222,16 @@ end
 
 
 --TODO: make reactive and only apply when a property is changed
+---@param style GNUI.Sprite.Style?
 function Sprite:applyAll(style)
+	style = style or self.style
 	self:setPos()
 	self:setSize()
 	self:setText()
 	self:setPadding()
 	
-	self:setTextColor()
 	if style then
-		self:setPadding(style)
-		self:setTextColor(style.textColor:unpack())
+		self:setTextColor(style.textColor and gncommon.color(style.textColor).xyz or self.textColor)
 		self:setTextAlignment(style.textAlignment:unpack())
 	end
 end

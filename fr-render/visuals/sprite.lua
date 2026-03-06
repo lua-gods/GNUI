@@ -88,16 +88,21 @@ end
 ---@param path string
 function Display:setSpriteTexture(visualID,taskID,path)
 	local task = self:getTask(visualID,taskID)
-	local texture = textures[path]
-	local textureSize = texture:getDimensions()
-	local uv = vec(0,0,1,1)
-	task.texturePath = path
-	task.textureSize = textureSize
-	task.uv = uv
-	task.quad
-	:texture(textures[path],textureSize.x,textureSize.y)
-	:setUV(uv.xy / task.textureSize)
-	:setRegion(uv.zw * task.textureSize)
+	if path then
+		local texture = textures[path]
+		local textureSize = texture:getDimensions()
+		local uv = vec(0,0,1,1)
+		task.texturePath = path
+		task.textureSize = textureSize
+		task.uv = uv
+		task.quad
+		:texture(textures[path],textureSize.x,textureSize.y)
+		:setUV(uv.xy / task.textureSize)
+		:setRegion(uv.zw * task.textureSize)
+		:setVisible(true)
+	else
+		task:setVisible(false)
+	end
 end
 
 

@@ -12,6 +12,14 @@ end
 return {
 	box = {
 		default = "opaque",
+
+		empty = {
+			normal = {
+				type = "sprite",
+				textAlignment = vec(0, 0),
+			},
+		},
+
 		opaque = {
 			normal = {
 				type = "nineslice",

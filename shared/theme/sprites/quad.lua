@@ -6,10 +6,10 @@
 
 local BASE = (...):match(".+[./]GNUI"):gsub("/",".")
 local path = require(BASE..".paths") ---@type GNUI.config
-
-local Sprite = require(BASE..".shared.theme.styles.sprite") ---@type GNUI.Sprite
 local gncommon = require(path.GN_COMMON) ---@type GNCommon
-local Style = require(BASE..".shared.theme.styles.quad") ---@type GNUI.Sprite.Quad.StyleAPI
+
+local Sprite = require(path.THEME..".sprites.sprite") ---@type GNUI.Sprite
+local Style = require(path.THEME..".styles.quad") ---@type GNUI.Sprite.Quad.StyleAPI
 
 
 ---@class GNUI.Sprite.Quad : GNUI.Sprite
@@ -24,6 +24,7 @@ Quad.__index = function (t,i)
 end
 
 
+
 ---A representation of a quad that will get drawn
 ---@param box GNUI.Box
 ---@param slot (integer|string)?
@@ -32,15 +33,14 @@ function Quad.new(box,slot)
 	assert(box,"no GNUI.Box given")
 	local self = Sprite.new(box,slot)
 	---@cast self GNUI.Sprite.Quad
-	
-	self.taskID = self.display:newVisual()
+	self.id = self.display:newSprite(box.visualID)
 	
 	setmetatable(self, Quad)
 	return self
 end
-
-
 Style.setInstancer(Quad.new)
+
+
 ---@return GNUI.Sprite.Quad.Style
 function Quad.newStyle()
 	return Style.new()
@@ -65,14 +65,15 @@ end
 
 
 ---@overload fun(self: GNUI.Sprite.Quad)
+---@overload fun(self: GNUI.Sprite.Quad, rgb: Vector3)
 ---@param r number
 ---@param g number
 ---@param b number
 ---@return GNUI.Sprite.Quad
 function Quad:setColor(r,g,b)
 	if r then
-		local color = vec(r,g,b)
-		if self.style then color = color * self.style.color end
+		local color = gncommon.color(r,g,b).xyz
+		if self.style and self.style.color then color = color * self.style.color end
 		if self.color == color then return end
 		self.color = color
 	end
@@ -104,10 +105,10 @@ function Quad:applyAll(style)
 	self:setPos()
 	self:setSize()
 	
-	self:setTexture(style and style.texturePath)
-	self:setUV(style and style.uv:unpack())
-	self:setColor(style and style.color:unpack())
-	self:setTextColor(style and style.textColor:unpack())
+	if style.texturePath then self:setTexture(style and style.texturePath) end
+	if style.uv then self:setUV(style.uv:unpack())end
+	if style.color then self:setColor(style and style.color) end
+	if style.textColor then self:setTextColor(style and style.textColor) end
 end
 
 
