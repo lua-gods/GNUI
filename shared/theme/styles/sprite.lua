@@ -1,8 +1,34 @@
-local util = require("lib.gncommon") ---@type GNCommon
+---@diagnostic disable: duplicate-doc-field
+local BASE = (...):match(".+[./]GNUI"):gsub("/",".")
+local utils = require("lib.gncommon") ---@type GNCommon
 local gncommon = require("lib.gncommon") ---@type GNCommon
+local paths = require(BASE..".paths") ---@type GNUI.config
+local Theme = require(paths.THEME..".theme") ---@type GNUI.ThemeAPI
+
 
 ---@class GNUI.Sprite.StyleAPI
 local SpriteSTyleAPI = {}
+
+
+---@class GNUI.StyleEntry
+---@field type "sprite"
+---@field padding Vector4?
+---@field expand Vector4?
+---@field textColor Vector3|string?
+---@field textAlignment Vector2?
+---@field margin Vector4?
+
+Theme._registerImporter("sprite",function (style)
+	local sprite = SpriteSTyleAPI.new()
+	
+	sprite.padding = style.padding or sprite.padding
+	sprite.expand = style.expand or sprite.expand
+	sprite.textColor = style.textColor and gncommon.color(style.textColor).xyz or sprite.textColor
+	sprite.textAlignment = style.textAlignment or sprite.textAlignment
+	sprite.margin = style.margin or sprite.margin
+	
+	return sprite
+end)
 
 ---@class GNUI.Sprite.Style
 ---@field padding Vector4
@@ -36,9 +62,9 @@ end
 ---@return GNUI.Sprite.Style
 function SpriteSTyleAPI.new()
 	local self = {
-		padding = util.vec4(0,0,0,0),
+		padding = utils.vec4(0,0,0,0),
 		expand = vec(0,0,0,0),
-		margin = util.vec4(0,0,0,0),
+		margin = utils.vec4(0,0,0,0),
 		textAlignment = vec(-1,-1),
 	}
 	setmetatable(self,SpriteStyle)
@@ -73,7 +99,7 @@ end
 ---@return self
 function SpriteStyle:setPadding(left,top,right,bottom)
 	---@cast self GNUI.Sprite
-	self.padding = util.vec4(left,top,right,bottom)
+	self.padding = utils.vec4(left,top,right,bottom)
 	return self
 end
 
@@ -89,7 +115,7 @@ end
 ---@return self
 function SpriteStyle:setMargin(left,top,right,bottom)
 	---@cast self GNUI.Sprite
-	self.margin = util.vec4(left,top,right,bottom)
+	self.margin = utils.vec4(left,top,right,bottom)
 	return self
 end
 

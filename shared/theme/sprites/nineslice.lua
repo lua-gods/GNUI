@@ -232,7 +232,7 @@ function Nineslice:setVisible(visible)
 end
 
 
----@param style GNUI.Sprite.Quad.Style
+---@param style GNUI.Sprite.Nineslice.Style
 function Nineslice:applyAll(style)
 	self:setText()
 	self:setPos()

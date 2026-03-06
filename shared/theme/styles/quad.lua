@@ -1,13 +1,44 @@
+---@diagnostic disable: duplicate-doc-field
 local BASE = (...):match(".+[./]GNUI"):gsub("/",".")
 local path = require(BASE..".paths") ---@type GNUI.config
 
 local SpriteStyle = require(BASE..".shared.theme.styles.sprite") ---@type GNUI.Sprite.StyleAPI
 local gncommon = require(path.GN_COMMON) ---@type GNCommon
 local util = require(BASE..".utils") ---@type GNUI.utils
+local paths = require(BASE..".paths") ---@type GNUI.config
+local Theme = require(paths.THEME..".theme") ---@type GNUI.ThemeAPI
 
 
 ---@class GNUI.Sprite.Quad.StyleAPI
 local QuadStyleAPI = {}
+
+
+---@class GNUI.StyleEntry
+---@field type "quad"
+---@field padding Vector4?
+---@field expand Vector4?
+---@field textColor Vector3|string?
+---@field textAlignment Vector2?
+---@field margin Vector4?
+---@field texturePath string?
+---@field color Vector3|string?
+---@field uv Vector4?
+
+
+Theme._registerImporter("quad",function (style)
+	local quad = QuadStyleAPI.new()
+	
+	quad.padding = style.padding or quad.padding
+	quad.expand = style.expand or quad.expand
+	quad.textAlignment = style.textAlignment or quad.textAlignment
+	quad.margin = style.margin or quad.margin
+	quad.texturePath = style.texturePath or quad.texturePath
+	quad.color = style.color and gncommon.color(style.color).xyz or quad.color
+	quad.textColor = style.textColor and gncommon.color(style.textColor).xyz or quad.textColor
+	quad.uv = style.uv or quad.uv
+	
+	return quad
+end)
 
 
 ---@class GNUI.Sprite.Quad.Style : GNUI.Sprite.Style
