@@ -1,6 +1,5 @@
 # GNUI
 
-### 🚧 Project Status
 > [!CAUTION]
 > There are absolutely no instructions yet on how to properly set this up. this message will disappear once there is, meaning its ready for public testing.
 
@@ -11,7 +10,7 @@ It is designed to separate layout logic, styling, and rendering into clean, inte
 
 ---
 
-## ✨ Philosophy
+## Philosophy
 
 GNUI is built around one core idea:
 
@@ -34,7 +33,7 @@ Each module has a clear responsibility.
 
 ---
 
-# 📦 Architecture Overview
+# Architecture Overview
 
 ```
 GNUI-Core  <---->  GNUI-Shared  <---->  GNUI-Renderer
@@ -44,9 +43,9 @@ Layout + Input   Styling + Theme     Framework Rendering
 
 ---
 
-# 🧠 GNUI-Core
+# GNUI-Core
 
-**Responsibility:** Layout engine & input system
+The Layout engine & input system
 
 GNUI-Core:
 
@@ -60,13 +59,13 @@ GNUI-Core:
 * **GNUI Core Lua**
 
 GNUI-Core does **not** know anything about rendering.
-It calculates *what* should be displayed and *where* — not *how* it is drawn.
+It calculates *what* should be displayed and *where*, not *how* it is drawn.
 
 ---
 
-# 🎨 GNUI-Shared
+# GNUI-Shared
 
-**Responsibility:** Styling & theming
+The Styling & theming
 
 GNUI-Shared:
 
@@ -87,9 +86,9 @@ This layer allows:
 
 ---
 
-# 🖥️ GNUI-Renderer
+# GNUI-Renderer
 
-**Responsibility:** Rendering backend
+The Rendering backend
 
 The renderer is framework-specific.
 It takes instructions from Core + Shared and draws the UI.
@@ -119,7 +118,7 @@ Each renderer:
 
 ---
 
-##  Why This Exists ❤️
+##  Why This Exists
 This is not meant to compete with large-scale UI frameworks.
 It is primarily a personal UI library I use for my projects
 
