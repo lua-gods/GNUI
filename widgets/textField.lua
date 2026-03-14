@@ -1,3 +1,11 @@
+--[[______   __
+  / ____/ | / /  by: GNanimates / https://gnon.top / Discord: @gn68s
+ / / __/  |/ / name: GNUI TextField Class
+/ /_/ / /|  /  desc: the text field widget for GNUI
+\____/_/ |_/ source: link ]]
+
+--TODO: fix text selection from being per byte to per unicode character.
+
 local BASE = ((...):gsub("/",".")):match(".+%.GNUI")
 local cfg = require(BASE..".config") ---@type GNUI.config
 
@@ -234,15 +242,51 @@ function TextFieldAPI.new(canvas)
 end
 
 
+---@param field string
+---@generic self
+---@param self self
+---@return self
+function TextField:setField(field)
+	---@cast self GNUI.TextField
+	self.field = field
+	self.cursor = #self.field
+	self:updateTextField()
+	return self
+end
+
+---@param field string
+---@generic self
+---@param self self
+---@return self
+function TextField:setEditingField(field)
+	---@cast self GNUI.TextField
+	if self.down then
+		self.editingField = field
+		self.cursor = #self.field
+		self:updateTextField()
+	end
+	return self
+end
+
+
+---@generic self
+---@param self self
+---@return self
 function TextField:discard()
+	---@cast self GNUI.TextField
 	if self.down then
 		self.DISCARDED:invoke(self.editingField)
 		self:release()
 	end
+	return self
 end
 
 
+---@generic self
+---@param self self
+---@return self
 function TextField:confirm()
+	---@cast self GNUI.TextField
 	if self.down then
 		if self.validator and self.validator(self.editingField) or not self.validator then
 			self.field = self.editingField
@@ -250,6 +294,7 @@ function TextField:confirm()
 		end
 		self:release()
 	end
+	return self
 end
 
 
