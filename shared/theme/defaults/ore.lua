@@ -16,7 +16,6 @@ return {
 		empty = {
 			normal = {
 				type = "sprite",
-				textAlignment = vec(0, 0),
 			},
 		},
 
@@ -25,6 +24,7 @@ return {
 				type = "nineslice",
 				texturePath = atlas,
 				uv = vec(40, 1, 42, 3),
+				border  = vec(1, 1, 1, 1),
 				padding = vec(1, 1, 1, 1),
 			},
 		},
@@ -36,24 +36,6 @@ return {
 				uv = vec(40, 5, 42, 7),
 				padding = vec(1, 1, 1, 1),
 				border = vec(1, 1, 1, 1),
-			},
-		},
-		header = {
-			normal = {
-				type = "nineslice",
-				texturePath = atlas,
-				uv = vec(52, 11, 54, 13),
-				border = vec(1, 1, 1, 1),
-			},
-		},
-		ribbon = {
-			normal = {
-				type = "nineslice",
-				texturePath = atlas,
-				uv = vec(52, 5, 54, 9),
-				border = vec(0, 0, 0, 2),
-				padding = vec(1, 1, 3, 1),
-				--margin = vec(5,5,5,5)
 			},
 		},
 		highlight = {
@@ -70,8 +52,33 @@ return {
 
 	button = {
 		default = "secondary",
-		green = "primary",
+		danger = {
+			normal = {
+				type = "nineslice",
+				texturePath = atlas,
+				uv = vec(15,0,19,6),
 
+				border = vec(2, 2, 2, 4),
+				padding = vec(2, 2, 2, 0),
+				expand = vec(0, 0, 0, 2),
+				margin = vec(0, -2, 0, 2),
+
+				textAlignment = vec(0, 0),
+				textColor = "#ffffff",
+			},
+			pressed = {
+				type = "nineslice",
+				texturePath = atlas,
+				uv = vec(15,7,19,11),
+
+				border = vec(2, 2, 2, 2),
+				padding = vec(2, 2, 2, 0),
+				margin = vec(0, 0, 0, 0),
+
+				textAlignment = vec(0, 0),
+				textColor = "#ffffff",
+			},
+		},
 		primary = {
 			normal = {
 				type = "nineslice",
@@ -99,7 +106,6 @@ return {
 				textColor = "#ffffff",
 			},
 		},
-		white = "secondary",
 		secondary = {
 			normal = {
 				type = "nineslice",
@@ -153,92 +159,20 @@ return {
 				textColor = "#ffffff",
 			},
 		},
-		destructive = {
-			normal = {
-				type = "nineslice",
-				texturePath = atlas,
-				uv = vec(15, 0, 19, 6),
-
-				border = vec(2, 2, 2, 4),
-				padding = vec(2, 2, 2, 0),
-				expand = vec(0, 0, 0, 2),
-				margin = vec(0, -2, 0, 2),
-
-				textAlignment = vec(0, 0),
-				textColor = "#ffffff",
-			},
-			pressed = {
-				type = "nineslice",
-				texturePath = atlas,
-				uv = vec(15, 7, 19, 11),
-
-				border = vec(2, 2, 2, 2),
-				padding = vec(2, 2, 2, 0),
-				margin = vec(0, 0, 0, 0),
-
-				textAlignment = vec(0, 0),
-				textColor = "#ffffff",
-			},
-		},
-		blue = {
-			normal = {
-				type = "nineslice",
-				texturePath = atlas,
-				uv = vec(20, 0, 24, 6),
-
-				border = vec(2, 2, 2, 4),
-				padding = vec(2, 2, 2, 0),
-				expand = vec(0, 0, 0, 2),
-				margin = vec(0, -2, 0, 2),
-
-				textAlignment = vec(0, 0),
-				textColor = "#ffffff",
-			},
-			pressed = {
-				type = "nineslice",
-				texturePath = atlas,
-				uv = vec(20, 7, 24, 11),
-
-				border = vec(2, 2, 2, 2),
-				padding = vec(2, 2, 2, 0),
-				margin = vec(0, 0, 0, 0),
-
-				textAlignment = vec(0, 0),
-				textColor = "#ffffff",
-			},
-		},
-		bevel = {
-			normal = {
-				type = "nineslice",
-				texturePath = atlas,
-				uv = vec(26, 1, 28, 3),
-
-				border = vec(1, 1, 1, 1),
-				padding = vec(3, 3, 3, 3),
-				textAlignment = vec(0, 0),
-				textColor = "#ffffff",
-			},
-			pressed = {
-				type = "quad",
-				texturePath = atlas,
-				uv = vec(26, 5, 28, 7),
-				padding = vec(3, 3, 3, 3),
-				textAlignment = vec(0, 0),
-				textColor = "#ffffff",
-			},
-		},
 		flat = {
 			normal = {
 				type = "quad",
 				texturePath = atlas,
 				uv = vec(30, 1, 30, 1),
 				textColor = "#ffffff",
+				textAlignment = vec(0, 0),
 			},
 			pressed = {
 				type = "quad",
 				texturePath = atlas,
 				uv = vec(30, 5, 30, 5),
-				textColor = "#1b1b1b",
+				textAlignment = vec(0, 0),
+				textColor = "#ffffff",
 			},
 		},
 	},
