@@ -1,10 +1,15 @@
+--[[______   __
+  / ____/ | / /  by: GNanimates / https://gnon.top / Discord: @gn68s
+ / / __/  |/ / name: GNUI Canvas Class
+/ /_/ / /|  /  desc: The root box and the Input Interface for its children.
+\____/_/ |_/ source: link ]]
 ---@diagnostic disable: return-type-mismatch
 local BASE = ((...):gsub("/",".")):match(".+%.GNUI")
 
 local gncommon = require("lib.gncommon") ---@type GNCommon
-local path = require(BASE..".paths") ---@type GNUI.config
-local Box = require(path.CORE..".prims.box") ---@type GNUI.Primitive.BoxAPI
-local Render = require(path.RENDER .. ".init") ---@type GNUI.RenderAPI
+local cfg = require(BASE..".config") ---@type GNUI.config
+local Box = require(cfg.CORE..".prims.box") ---@type GNUI.Primitive.BoxAPI
+local Render = require(cfg.RENDER .. ".init") ---@type GNUI.RenderAPI
 
 
 ---@class GNUI.Canvas.Event.CharInput : Event
@@ -17,10 +22,25 @@ local Render = require(path.RENDER .. ".init") ---@type GNUI.RenderAPI
 ---@field register fun(self,func:(fun(button:integer,state:integer):boolean),id:any?)
 
 
+---@alias GNUI.InputButton.Type integer
+---| [0]  SCROLL
+---| [1]  LEFT
+---| [2]  RIGHT
+---| [3]  MIDDLE
+
+
+---@alias GNUI.InputButton.State integer
+---| [0]  PRESSED
+---| [1]  RELEASED
+---| [2]  HOLD
+
+
+---API for instantiating a Canvas object
 ---@class GNUI.CanvasAPI
 local CanvasAPI = {}
 
----A root node for boxes
+---A root node for boxes, 
+---this class also exposes all the input methods for the framework to connect to
 ---@class GNUI.Canvas : GNUI.Box
 ---@field display GNUI.Render.Display
 ---@field queueUpdate GNUI.Box[]
@@ -54,6 +74,7 @@ function CanvasAPI.new()
 end
 
 
+---Forces an immidiate update to all the boxes in the queue
 ---@return GNUI.Canvas
 function Canvas:flushUpdates()
 	for key, box in pairs(self.queueUpdate) do
@@ -66,6 +87,8 @@ function Canvas:flushUpdates()
 end
 
 
+---TODO: replace with a method that allows selecting boxes outside parent bounds.
+---Finds the box being hovered by the cursor
 ---@param box GNUI.Box
 ---@param pos Vector2
 local function findHoveredBox(box,pos)
@@ -79,6 +102,7 @@ local function findHoveredBox(box,pos)
 end
 
 
+---Sets the position of the cursor in the Canvas.
 ---@overload fun(self: GNUI.Canvas ,xy: Vector2): GNUI.Canvas
 ---@param x any
 ---@param y any

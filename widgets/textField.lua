@@ -1,14 +1,14 @@
 local BASE = ((...):gsub("/",".")):match(".+%.GNUI")
-local paths = require(BASE..".paths") ---@type GNUI.config
+local cfg = require(BASE..".config") ---@type GNUI.config
 
-local Box = require(paths.WIDGETS..".box") ---@type GNUI.BoxAPI
-local Event = require(paths.EVENT)
-local Button = require(paths.WIDGETS..".button") ---@type GNUI.Widget.ButtonAPI
+local Box = require(cfg.WIDGETS..".box") ---@type GNUI.BoxAPI
+local Event = require(cfg.EVENT)
+local Button = require(cfg.WIDGETS..".button") ---@type GNUI.Widget.ButtonAPI
 
-local Style = require(paths.THEME..".init") ---@type GNUI.ThemeAPI
-local Layout = require(paths.LAYOUT..".init") ---@type GNUI.LayoutAPI
+local Style = require(cfg.THEME..".init") ---@type GNUI.ThemeAPI
+local Layout = require(cfg.LAYOUT..".init") ---@type GNUI.LayoutAPI
 
-local utils = require(paths.UTILS) ---@type GNUI.utils
+local utils = require(cfg.UTILS) ---@type GNUI.utils
 
 
 ---@class GNUI.Widget.TextFieldAPI.Event.Confirmed : Event

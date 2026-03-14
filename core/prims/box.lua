@@ -6,10 +6,10 @@
 ---@diagnostic disable: duplicate-doc-field
 local BASE = ((...):gsub("/",".")):match(".+%.GNUI")
 
-local path = require(BASE..".paths") ---@type GNUI.config
-local gncommon = require(path.GN_COMMON) ---@type GNCommon
-local utils = require(path.UTILS) ---@type GNUI.utils -- TODO: add a path
-local Event = require(path.EVENT) ---@type Event
+local cfg = require(BASE..".config") ---@type GNUI.config
+local gncommon = require(cfg.GN_COMMON) ---@type GNCommon
+local utils = require(cfg.UTILS) ---@type GNUI.utils -- TODO: add a path
+local Event = require(cfg.EVENT) ---@type Event
 
 
 local abs = math.abs

@@ -4,10 +4,10 @@
 / /_/ / /|  /  desc: base class for all sprites
 \____/_/ |_/ source: link ]]
 local BASE = (...):match(".+[./]GNUI"):gsub("/",".")
-local path = require(BASE..".paths") ---@type GNUI.config
+local cfg = require(BASE..".config") ---@type GNUI.config
 
 local SpriteStyle = require(BASE..".shared.theme.styles.sprite") ---@type GNUI.Sprite.StyleAPI
-local gncommon = require(path.GN_COMMON) ---@type GNCommon
+local gncommon = require(cfg.GN_COMMON) ---@type GNCommon
 
 
 ---A base class for all sprites for boxes

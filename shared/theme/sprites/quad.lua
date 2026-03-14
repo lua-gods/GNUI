@@ -5,11 +5,11 @@
 \____/_/ |_/ source: link ]]
 
 local BASE = (...):match(".+[./]GNUI"):gsub("/",".")
-local path = require(BASE..".paths") ---@type GNUI.config
-local gncommon = require(path.GN_COMMON) ---@type GNCommon
+local cfg = require(BASE..".config") ---@type GNUI.config
+local gncommon = require(cfg.GN_COMMON) ---@type GNCommon
 
-local Sprite = require(path.THEME..".sprites.sprite") ---@type GNUI.Sprite
-local Style = require(path.THEME..".styles.quad") ---@type GNUI.Sprite.Quad.StyleAPI
+local Sprite = require(cfg.THEME..".sprites.sprite") ---@type GNUI.Sprite
+local Style = require(cfg.THEME..".styles.quad") ---@type GNUI.Sprite.Quad.StyleAPI
 
 
 ---@class GNUI.Sprite.Quad : GNUI.Sprite

@@ -5,7 +5,7 @@
 \____/_/ |_/ source: link ]]
 local BASE = (...):match(".+[./]GNUI"):gsub("/",".")
 
-local paths = require(BASE..".paths") ---@type GNUI.config
+local cfg = require(BASE..".config") ---@type GNUI.config
 
 local utils = require(BASE..".utils") ---@type GNUI.utils
 
@@ -45,28 +45,29 @@ function GNUIAPI.setup(customPresetName)
 	---@type GNUI.config
 	local preset = require(PRESETS[customPresetName])
 	
-	paths.CORE = preset.CORE:format(BASE)
-	paths.LAYOUT = preset.LAYOUT:format(BASE)
-	paths.RENDER = preset.RENDER:format(BASE)
-	paths.THEME = preset.THEME:format(BASE)
-	paths.WIDGETS = preset.WIDGETS:format(BASE)
-	paths.GN_COMMON = preset.GN_COMMON:format(BASE)
-	paths.UTILS = preset.UTILS:format(BASE)
-	paths.EVENT = preset.EVENT:format(BASE)
+	cfg.CORE = preset.CORE:format(BASE)
+	cfg.LAYOUT = preset.LAYOUT:format(BASE)
+	cfg.RENDER = preset.RENDER:format(BASE)
+	cfg.THEME = preset.THEME:format(BASE)
+	cfg.WIDGETS = preset.WIDGETS:format(BASE)
+	cfg.GN_COMMON = preset.GN_COMMON:format(BASE)
+	cfg.UTILS = preset.UTILS:format(BASE)
+	cfg.EVENT = preset.EVENT:format(BASE)
 	
 	-- load selected modules
-	local Core = require(paths.CORE..".init") ---@type GNUI.CoreAPI
-	local Layout = require(paths.LAYOUT..".init") ---@type GNUI.LayoutAPI
-	local Render = require(paths.RENDER..".init") ---@type GNUI.RenderAPI
-	local Theme = require(paths.THEME..".init") ---@type GNUI.ThemeAPI
+	local Core = require(cfg.CORE..".init") ---@type GNUI.CoreAPI
+	local Layout = require(cfg.LAYOUT..".init") ---@type GNUI.LayoutAPI
+	local Render = require(cfg.RENDER..".init") ---@type GNUI.RenderAPI
+	local Theme = require(cfg.THEME..".init") ---@type GNUI.ThemeAPI
 	
 	GNUIAPI.Core = Core
 	GNUIAPI.Layout = Layout
 	GNUIAPI.Render = Render
 	GNUIAPI.Theme = Theme
+	cfg.PRESET_TYPE = customPresetName
 	
 	
-	for index, path in ipairs(utils.listFiles(paths.WIDGETS)) do
+	for index, path in ipairs(utils.listFiles(cfg.WIDGETS)) do
 		require(path)
 	end
 	

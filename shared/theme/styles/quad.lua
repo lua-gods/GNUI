@@ -1,12 +1,12 @@
 ---@diagnostic disable: duplicate-doc-field
 local BASE = (...):match(".+[./]GNUI"):gsub("/",".")
-local path = require(BASE..".paths") ---@type GNUI.config
+local cfg = require(BASE..".config") ---@type GNUI.config
 
 local SpriteStyle = require(BASE..".shared.theme.styles.sprite") ---@type GNUI.Sprite.StyleAPI
-local gncommon = require(path.GN_COMMON) ---@type GNCommon
+local gncommon = require(cfg.GN_COMMON) ---@type GNCommon
 local util = require(BASE..".utils") ---@type GNUI.utils
-local paths = require(BASE..".paths") ---@type GNUI.config
-local Theme = require(paths.THEME..".theme") ---@type GNUI.ThemeAPI
+local cfg = require(BASE..".config") ---@type GNUI.config
+local Theme = require(cfg.THEME..".theme") ---@type GNUI.ThemeAPI
 
 
 ---@class GNUI.Sprite.Quad.StyleAPI

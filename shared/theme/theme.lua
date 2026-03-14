@@ -1,5 +1,5 @@
 local BASE = (...):match(".+[./]GNUI"):gsub("/",".")
-local paths = require(BASE..".paths") ---@type GNUI.config
+local cfg = require(BASE..".config") ---@type GNUI.config
 local utils =  require(BASE..".utils") ---@type GNUI.utils
 local gncommon = require("lib.gncommon") ---@type GNCommon
 

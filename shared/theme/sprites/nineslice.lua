@@ -6,9 +6,9 @@
 \____/_/ |_/ source: link ]]
 
 local BASE = (...):match(".+[./]GNUI"):gsub("/",".")
-local path = require(BASE..".paths") ---@type GNUI.config
+local cfg = require(BASE..".config") ---@type GNUI.config
 
-local gncommon = require(path.GN_COMMON) ---@type GNCommon
+local gncommon = require(cfg.GN_COMMON) ---@type GNCommon
 local Style = require(BASE..".shared.theme.styles.nineslice") ---@type GNUI.Sprite.Nineslice.StyleAPI
 
 local Sprite = require(BASE..".shared.theme.sprites.sprite") ---@type GNUI.Sprite
