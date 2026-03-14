@@ -1,7 +1,7 @@
 --[[______   __
   / ____/ | / /  by: GNanimates / https://gnon.top / Discord: @gn68s
- / / __/  |/ / name: BoxAPI
-/ /_/ / /|  /  desc: API for box shinanigans
+ / / __/  |/ / name: GNUI Box Widget
+/ /_/ / /|  /  desc: The API for instantiating a box
 \____/_/ |_/ source: link ]]
 ---@diagnostic disable: duplicate-doc-field
 
