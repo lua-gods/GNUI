@@ -1,12 +1,18 @@
+--[[______   __
+  / ____/ | / /  by: GNanimates / https://gnon.top / Discord: @gn68s
+ / / __/  |/ / name: GNUI Button Class
+/ /_/ / /|  /  desc: the button widget for GNUI
+\____/_/ |_/ source: link ]]
+
 local BASE = ((...):gsub("/",".")):match(".+%.GNUI")
-local paths = require(BASE..".paths") ---@type GNUI.config
+local cfg = require(BASE..".config") ---@type GNUI.config
 
 local Box = require(BASE..".widgets.box") ---@type GNUI.BoxAPI
-local Event = require(paths.EVENT)
+local Event = require(cfg.EVENT)
 
-local Style = require(paths.THEME..".init") ---@type GNUI.ThemeAPI
-local Layout = require(paths.LAYOUT..".init") ---@type GNUI.LayoutAPI
-local utils = require(paths.UTILS)
+local Style = require(cfg.THEME..".init") ---@type GNUI.ThemeAPI
+local Layout = require(cfg.LAYOUT..".init") ---@type GNUI.LayoutAPI
+local utils = require(cfg.UTILS)
 
 ---@class GNUI.Widget.ButtonAPI
 local ButtonAPI = {}
@@ -59,9 +65,14 @@ function ButtonAPI.new(canvas)
 end
 
 
----@param button integer
----@param state integer
+---Applies the given button action to this button.
+---@param button GNUI.InputButton.Type
+---@param state GNUI.InputButton.State
+---@generic self
+---@param self self
+---@return self
 function Button:applyButtonAction(button,state)
+	---@cast self GNUI.Widget.Button
 	if button == 0 then
 		local lastDown = self.down
 		if state == 1 then
@@ -86,19 +97,29 @@ function Button:applyButtonAction(button,state)
 		end
 		self:applyApropriateStyle()
 	end
+	return self
 end
 
 
+---Applies the appropriate style to the button, based on its state.
+---
+---this is called automatically by built in events
+---@generic self
+---@param self self
+---@return self
 function Button:applyApropriateStyle()
+	---@cast self GNUI.Widget.Button
 	self.sprites.highlight:setVisible(self.isHovered)
 	if self.down then
 		self.sprites[1]:setStyle(Style.getStyleFromBox(self,"pressed"))
 	else
 		self.sprites[1]:setStyle(Style.getStyleFromBox(self,"normal"))
 	end
+	return self
 end
 
 
+---Presses the button and immidiately unpresses it.
 ---@generic self
 ---@param self self
 ---@return self
@@ -112,6 +133,7 @@ function Button:interact()
 end
 
 
+---Presses the button, holding it down.
 ---@generic self
 ---@param self self
 ---@return self
@@ -124,6 +146,7 @@ function Button:press()
 end
 
 
+---Releases the button, if it was pressed down in the first place.
 ---@generic self
 ---@param self self
 ---@return self
@@ -140,6 +163,7 @@ function Button:release()
 end
 
 
+---Sets if the button should act as a toggle or not.
 ---@param toggle boolean
 ---@generic self
 ---@param self self
@@ -165,7 +189,7 @@ end
 function ButtonAPI.parse(layout,canvas,button)
 	local box = button or Box.parse(layout,canvas,ButtonAPI.new(canvas))
 
-	-- TODO: find out why this is shifting the entire box renderer
+	
 	local style = Style.getStyle("box", "highlight", "normal")
 	style:newInstance(box,"highlight"):setVisible(false)
 	
