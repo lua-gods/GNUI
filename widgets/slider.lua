@@ -163,6 +163,26 @@ function Slider:setSuffix(suffix)
 end
 
 
+--TODO: replace method with slider stuffs, right now its a direct copy from the Button class
+
+---Applies the appropriate style to the button, based on its state.
+---
+---this is called automatically by built in events
+---@generic self
+---@param self self
+---@return self
+function Button:applyApropriateStyle()
+	---@cast self GNUI.Widget.Button
+	self.sprites.highlight:setVisible(self.isHovered)
+	if self.down then
+		self.sprites[1]:setStyle(Style.getStyleFromBox(self,"pressed"))
+	else
+		self.sprites[1]:setStyle(Style.getStyleFromBox(self,"normal"))
+	end
+	return self
+end
+
+
 --────────────────────────-< Layout Parser >-────────────────────────--
 
 
