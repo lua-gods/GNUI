@@ -228,4 +228,36 @@ return {
 			},
 		},
 	},
+	slider = {
+		default = {
+			normal = {
+				type = "nineslice",
+				texturePath = atlas,
+				uv = vec(40, 5, 42, 7),
+				padding = vec(1, 1, 1, 1),
+				border = vec(1, 1, 1, 1),
+			},
+			pressed = {
+				type = "nineslice",
+				texturePath = atlas,
+				uv = vec(40, 5, 42, 7),
+				padding = vec(1, 1, 1, 1),
+				border = vec(1, 1, 1, 1),
+			},
+			knob = {
+				type = "nineslice",
+				texturePath = atlas,
+				uv = vec(40, 5, 42, 7),
+				padding = vec(1, 1, 1, 1),
+				border = vec(1, 1, 1, 1),
+			},
+			knobPressed = {
+				type = "nineslice",
+				texturePath = atlas,
+				uv = vec(40, 5, 42, 7),
+				padding = vec(1, 1, 1, 1),
+				border = vec(1, 1, 1, 1),
+			},
+		},
+	}
 }

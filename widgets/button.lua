@@ -47,6 +47,7 @@ end
 function ButtonAPI.new(canvas)
 	local self = Box.new(canvas)
 	---@cast self GNUI.Widget.Button
+	setmetatable(self, Button)
 	
 	self.down = false
 	self.toggle = false
@@ -60,7 +61,7 @@ function ButtonAPI.new(canvas)
 	self.CURSOR_PRESENCE_CHANGED:register(function (inside)
 		self:applyApropriateStyle()
 	end)
-	setmetatable(self, Button)
+	
 	return self
 end
 

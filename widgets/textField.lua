@@ -340,6 +340,7 @@ function TextField:applyApropriateStyle()
 	return self
 end
 
+--────────────────────────-< Layout Parser >-────────────────────────--
 
 ---@diagnostic disable: duplicate-doc-field
 ---@class GNUI.Layout
