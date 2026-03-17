@@ -102,7 +102,7 @@ function ThemeAPI.getStyle(class,variant,key)
 			end
 		end
 	end
-	error("Unknown style: " .. class .. "." .. variant .. "." .. key)
+	error("Unknown style: " .. tostring(class) .. "." .. tostring(variant) .. "." .. tostring(key))
 end
 
 
