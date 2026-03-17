@@ -5,8 +5,10 @@
 \____/_/ |_/ source: link ]]
 ---@diagnostic disable: duplicate-doc-field
 local BASE = ((...):gsub("/",".")):match(".+%.GNUI")
-
 local cfg = require(BASE..".config") ---@type GNUI.config
+
+local Style = require(cfg.THEME..".init") ---@type GNUI.ThemeAPI
+
 local gncommon = require(cfg.GN_COMMON) ---@type GNCommon
 local utils = require(cfg.UTILS) ---@type GNUI.utils
 local Event = require(cfg.EVENT) ---@type Event
@@ -420,6 +422,7 @@ end
 ---@return Vector2
 function Box:getSize()
 	local minSize = self:getMinimumSize()
+---@diagnostic disable-next-line: return-type-mismatch, param-type-mismatch
 	return math.clamp(self.size,minSize,self.maxSize)
 end
 
@@ -467,31 +470,29 @@ function Box:setSprite(sprite,slot)
 end
 
 
------Sets the style of the sprite of this box, if no sprite exists, it will create one for that given style
------
------if no style is given, it will simply reapply the style of the sprite back to itself
------@generic self
------@param self self
------@return self
------@param style GNUI.Sprite.Style?
---function Box:setStyle(style)
---	---@cast self GNUI.Box
---	if not self.sprites and style then
---		self.sprites = style:newInstance(self)
---	end
---	
---	if self.sprites then
---		if style then
---			self.sprites:setStyle(style)
---		end
---	end
---	
---	self:recalculateMargin()
---	self:recalculatePadding()
---	self:recalculateMinimumSize()
---	self:update()
---	return self
---end
+---Sets the style of the sprite of this box, if no sprite exists, it will create one for that given style
+---
+---@generic self
+---@param self self
+---@return self
+---@param variant string?
+function Box:setStyle(variant)
+	variant = variant or "default"
+	---@cast self GNUI.Box
+	
+	self.variant = variant
+	local style = Style.getStyle(self, variant, "normal")
+	if self.sprites then
+		
+	end
+	style:newInstance(self)
+	
+	self:recalculateMargin()
+	self:recalculatePadding()
+	self:recalculateMinimumSize()
+	self:update()
+	return self
+end
 
 
 --────────────────────────-< Children Management >-────────────────────────--
@@ -763,6 +764,20 @@ local function unflag(box)
 		unflag(child)
 	end
 end
+
+
+--deletes this element and all its children.
+function Box:free()
+	for _, child in ipairs(self.children) do
+		child:free()
+	end
+	
+	self:removeParent()
+	for index, sprite in pairs(self.sprites) do
+		sprite:free()
+	end
+end
+
 
 ---Forces this element to update
 ---@generic self
