@@ -1,13 +1,14 @@
 --[[______   __
   / ____/ | / /  by: GNanimates / https://gnon.top / Discord: @gn68s
  / / __/  |/ / name: Display API
-/ /_/ / /|  /  desc: handles all the updating for all visuals
+/ /_/ / /|  /  desc: handles all the updating for all visuals,
 \____/_/ |_/ source: link ]]
 
 ---@class GNUI.Render.Visual.Task
 ---@field [any] any
 
 
+---A render representation of a box, which contains multiple tasks and child visuals.
 ---@class GNUI.Render.Visual
 ---@field id integer
 ---
@@ -22,12 +23,15 @@
 ---@field tasks GNUI.Render.Visual.Task[]
 
 
+---A collection of visuals
 ---@class GNUI.Render.Display
 ---@field visuals GNUI.Render.Visual[]
 local Display = {}
 Display.__index = Display
 
 
+---Creates a new Display.
+---@return GNUI.Render.Display
 function Display.newDisplay()
 	local self = {}
 	setmetatable(self,Display)
@@ -40,6 +44,8 @@ function Display.newDisplay()
 end
 
 
+---Creates a new Visual from that given display, 
+---returns an ID that can be used to identify it in other functions.
 ---@return integer
 function Display:newVisual()
 	local id = #self.visuals+1
@@ -74,6 +80,7 @@ function Display:getTask(visualID,spriteID)
 end
 
 
+---Recalculates all the children indexes.
 ---@param vis GNUI.Render.Visual
 local function updateChildrenIndexes(vis)
 	for i, child in ipairs(vis.children) do
@@ -83,21 +90,23 @@ local function updateChildrenIndexes(vis)
 end
 
 
----@param vis GNUI.Render.Visual
-local function updateDimensions(vis)
-	vis.model:pos(-vis.pos.x,-vis.pos.y,-vis.index)
-	vis.model:scale(1,1,1)
+---Updates the dimensions of the visual
+---@param visual GNUI.Render.Visual
+local function updateDimensions(visual)
+	visual.model:pos(-visual.pos.x,-visual.pos.y,-visual.index)
+	visual.model:scale(1,1,1)
 end
 
 
----@param id integer
----@param childID integer
+---Adds the given child Visual to the given parent Visual
+---@param visualID integer
+---@param childVisualID integer
 ---@return GNUI.Render.Visual
-function Display:addChild(id,childID)
-	local vis = self.visuals[id]
-	local child = self.visuals[childID]
-	assert(vis,"Visual Quad "..tostring(id).." not found")
-	assert(child,"Visual Quad "..tostring(childID).." not found")
+function Display:addChild(visualID,childVisualID)
+	local vis = self.visuals[visualID]
+	local child = self.visuals[childVisualID]
+	assert(vis,"Visual Quad "..tostring(visualID).." not found")
+	assert(child,"Visual Quad "..tostring(childVisualID).." not found")
 	
 	
 	child.parent = vis
@@ -112,16 +121,16 @@ end
 
 
 ---Removes a child from the box
----@param id integer
----@param childID integer
-function Display:removeChild(id,childID)
-	local vis = self.visuals[id]
-	local child = self.visuals[childID]
-	assert(vis,"Visual Quad "..id.." not found")
-	assert(child,"Visual Quad "..id.." not found")
+---@param visualID integer
+---@param childVisualID integer
+function Display:removeChild(visualID,childVisualID)
+	local vis = self.visuals[visualID]
+	local child = self.visuals[childVisualID]
+	assert(vis,"Visual Quad "..visualID.." not found")
+	assert(child,"Visual Quad "..visualID.." not found")
 	
 	if vis.children[child.id] == child then
-		table.remove(vis.children, childID)
+		table.remove(vis.children, childVisualID)
 		
 		updateChildrenIndexes(vis)
 		child.parent = nil
@@ -133,10 +142,10 @@ end
 
 
 ---Removes the parent of the box
----@param id integer
-function Display:removeParent(id)
-	local vis = self.visuals[id]
-	assert(vis,"Visual Quad "..id.." not found")
+---@param visualID integer
+function Display:removeParent(visualID)
+	local vis = self.visuals[visualID]
+	assert(vis,"Visual Quad "..visualID.." not found")
 	
 	if vis.parent then
 		self:removeChild(vis.parent.id,vis.id)
@@ -146,39 +155,38 @@ end
 
 
 ---Sets the parent of the box
----@param id integer
+---@param visualID integer
 ---@param parentID integer
-function Display:setParent(id,parentID)
-	local vis = self.visuals[id]
+function Display:setParent(visualID,parentID)
+	local vis = self.visuals[visualID]
 	local parent = self.visuals[parentID]
-	assert(vis,"Visual Quad "..id.." not found")
+	assert(vis,"Visual Quad "..visualID.." not found")
 	assert(parent,"Visual Quad "..parentID.." not found")
 	
-	self:removeParent(id)
-	self:addChild(parentID,id)
+	self:removeParent(visualID)
+	self:addChild(parentID,visualID)
 end
 
 
-function Display:free(id)
-	local vis = self.visuals[id]
-	assert(vis,"Visual Quad "..id.." not found")
-	
-	vis.model:remove()
-	self.visuals[id] = nil
-end
-
-
-function Display:setPos(id,x,y)
-	local vis = self.visuals[id]
-	assert(vis,"Visual Quad "..id.." not found")
+---Sets the position of this visual
+---@param visualID integer
+---@param x number
+---@param y number
+function Display:setPos(visualID,x,y)
+	local vis = self.visuals[visualID]
+	assert(vis,"Visual Quad "..visualID.." not found")
 	vis.pos = vec(x,y)
 	updateDimensions(vis)
 end
 
 
-function Display:setSize(id,x,y)
-	local vis = self.visuals[id]
-	assert(vis,"Visual Quad "..id.." not found")
+---Applies the size to all the tasks of the given visual.
+---@param visualID integer
+---@param x number
+---@param y number
+function Display:setSize(visualID,x,y)
+	local vis = self.visuals[visualID]
+	assert(vis,"Visual Quad "..visualID.." not found")
 	
 	vis.size = vec(x,y)
 	for key, task in pairs(vis.tasks) do
@@ -189,9 +197,12 @@ function Display:setSize(id,x,y)
 end
 
 
-function Display:setVisible(id,visible)
-	local vis = self.visuals[id]
-	assert(vis,"Visual Quad "..id.." not found")
+---Sets the visibility of the visual
+---@param visualID integer
+---@param visible boolean
+function Display:setVisible(visualID,visible)
+	local vis = self.visuals[visualID]
+	assert(vis,"Visual Quad "..visualID.." not found")
 	
 	for key, task in pairs(vis.tasks) do
 		task:setVisible(visible)
@@ -201,6 +212,11 @@ function Display:setVisible(id,visible)
 end
 
 
+---Sets the tint color for all the tasks in this visual
+---@param id integer
+---@param r number
+---@param g number
+---@param b number
 function Display:setColor(id,r,g,b)
 	local vis = self.visuals[id]
 	assert(vis,"Visual Quad "..id.." not found")
@@ -211,12 +227,25 @@ function Display:setColor(id,r,g,b)
 end
 
 
+---Sets the parent type.
+---
+---NOTE: This is Figura exclusive.
 ---@param type ModelPart.parentType
 function Display:setParentType(type)
 	self.visuals[1].model:setParentType(type)
 end
 
 
+--- Voids the display entirely.
+function Display:free()
+	for index, visual in ipairs(self.visuals) do
+		visual.model:remove()
+	end
+	self.visuals = {}
+	for index, value in ipairs(self) do
+		self[index] = nil
+	end
+end
 
 
 return Display

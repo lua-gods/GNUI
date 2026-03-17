@@ -18,8 +18,8 @@ local Display = require("./display") ---@type GNUI.Render.Display
 ---@field wrapText boolean
 ---
 ---@field label TextTask
-local Sprite = {}
-Sprite.__index = Sprite
+local Label = {}
+Label.__index = Label
 
 
 local function parseText(text,defaultColor)
@@ -58,7 +58,7 @@ function Display:newLabel(visualID)
 		label = vis.model:newText("task"..taskID),
 	}
 	
-	setmetatable(self,Sprite)
+	setmetatable(self,Label)
 	
 	vis.tasks[taskID] = self
 	return taskID
@@ -93,27 +93,32 @@ local function updateLabelPos(task)
 end
 
 
----INTERNAL CALLBACK for Display
+
 ---@param x number
 ---@param y number
-function Sprite:setSize(x,y)
+function Label:setSize(x,y)
 	self.size = vec(x,y)
 	updateLabelPos(self)
 end
 
 
----INTERNAL CALLBACK for Display
-function Sprite:setVisible(visible)
+
+function Label:setVisible(visible)
 	self.label:setVisible(visible)
 end
 
 
-function Sprite:setColor(r,g,b)
+---Sets the label color
+---TODO: investigate label set color method
+function Label:setColor(r,g,b)
+	self.textColor = vectors.rgbToHex(r,g,b)
 end
 
 
 --────────────────────────-< Injected APIs >-────────────────────────--
 
+
+---Sets the padding of the given label
 ---@param visualID integer
 ---@param taskID integer
 ---@param left number
@@ -127,18 +132,20 @@ function Display:setLabelPadding(visualID,taskID,left,top,right,bottom)
 end
 
 
+---Sets the visibility of the given label
 function Display:setLabelVisible(visualID,taskID,visible)
 	local task = self:getTask(visualID,taskID)
 	task.label:setVisible(visible)
 end
 
 
+---Sets the color of the given label
 ---@param visualID integer
 ---@param taskID integer
 ---@param r number
 ---@param g number
 ---@param b number
-function Display:setTextColor(visualID,taskID,r,g,b)
+function Display:setLabelColor(visualID,taskID,r,g,b)
 	local task = self:getTask(visualID,taskID)
 	task.textColor = vectors.rgbToHex(r,g,b)
 	task.jsonText = parseText(task.text,task.textColor)
@@ -147,10 +154,11 @@ function Display:setTextColor(visualID,taskID,r,g,b)
 end
 
 
+---Sets the text of the given label
 ---@param visualID integer
 ---@param taskID integer
 ---@param text string|GNUI.Text[]
-function Display:setText(visualID,taskID,text)
+function Display:setLabelText(visualID,taskID,text)
 	local task = self:getTask(visualID,taskID)
 	task.text = text
 	
@@ -159,12 +167,23 @@ function Display:setText(visualID,taskID,text)
 end
 
 
+---Sets the alignment of the given label
 ---@param visualID integer
 ---@param taskID integer
 ---@param h -1|0|1
 ---@param v -1|0|1
-function Display:setTextAlignment(visualID,taskID,h,v)
+function Display:setLabelAlignment(visualID,taskID,h,v)
 	local task = self:getTask(visualID,taskID)
 	task.textAlignment = vec(h,v)
 	updateLabelPos(task)
+end
+
+
+---Removes the given label
+---@param visualID integer
+---@param taskID integer
+function Display:removeLabel(visualID,taskID)
+	local task = self:getTask(visualID,taskID)
+	task.label:remove()
+	self.visuals[visualID].tasks[taskID] = nil
 end

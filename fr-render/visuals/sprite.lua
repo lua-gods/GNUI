@@ -13,6 +13,7 @@ local Sprite = {}
 Sprite.__index = Sprite
 
 
+---Creates a new sprite
 ---@param visualID integer
 ---@return integer
 function Display:newSprite(visualID)
@@ -31,8 +32,8 @@ function Display:newSprite(visualID)
 	return taskID
 end
 
+--────────────────────────-< Callbacks for general display calls >-────────────────────────--
 
----INTERNAL CALLBACK for Display
 ---@param x number
 ---@param y number
 function Sprite:setSize(x,y)
@@ -41,11 +42,17 @@ function Sprite:setSize(x,y)
 end
 
 
+---Sets this given task visibility.
+---@param visible boolean
 function Sprite:setVisible(visible)
 	self.quad:setVisible(visible)
 end
 
 
+---Sets the color of this task.
+---@param r number
+---@param g number
+---@param b number
 function Sprite:setColor(r,g,b)
 	self.quad:color(r,g,b)
 end
@@ -54,6 +61,7 @@ end
 --────────────────────────-< Injected APIs >-────────────────────────--
 
 
+---Sets the size of the given task.
 ---@param x number
 ---@param y number
 function Display:setSpriteSize(visualID,taskID,x,y)
@@ -63,18 +71,32 @@ function Display:setSpriteSize(visualID,taskID,x,y)
 end
 
 
+---Sets the visibility of the given task
+---@param visualID integer
+---@param taskID integer
+---@param visible boolean
 function Display:setSpriteVisible(visualID,taskID,visible)
 	local task = self:getTask(visualID,taskID)
 	task.quad:setVisible(visible)
 end
 
 
+---Sets the color of the given task
+---
+---The difference between this and `Display:setColor(r,g,bar)` is that
+---this sets the color for the given task only, not for the entire display.
+---@param visualID integer
+---@param taskID integer
+---@param r number
+---@param g number
+---@param b number
 function Display:setSpriteColor(visualID,taskID,r,g,b)
 	local task = self:getTask(visualID,taskID)
 	task.quad:color(r,g,b)
 end
 
 
+---Sets the position of the given task
 ---@param x number
 ---@param y number
 function Display:setSpritePos(visualID,taskID,x,y)
@@ -83,6 +105,7 @@ function Display:setSpritePos(visualID,taskID,x,y)
 end
 
 
+---Sets the texture of the given task
 ---@param visualID integer
 ---@param taskID integer
 ---@param path string
@@ -107,7 +130,7 @@ end
 
 
 
----Sets the UV of the visual
+---Sets the UV of the given task
 ---@param visualID integer
 ---@param u1 number
 ---@param v1 number
@@ -123,6 +146,9 @@ function Display:setSpriteUV(visualID,taskID,u1,v1,u2,v2)
 end
 
 
+---Removes the given task
+---@param visualID integer
+---@param taskID integer
 function Display:removeSprite(visualID,taskID)
 	local task = self:getTask(visualID,taskID)
 	task.quad:remove()
