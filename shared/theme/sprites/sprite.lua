@@ -132,7 +132,7 @@ function Sprite:setText(text)
 		if self.text == text then return end
 		self.text = text
 	end
-	self.display:setText(self.box.visualID,self.labelID,self.text)
+	self.display:setLabelText(self.box.visualID,self.labelID,self.text)
 end
 
 
@@ -151,7 +151,7 @@ function Sprite:setTextColor(r,g,b)
 		self.textColor = color
 	end
 	if self.textColor then
-		self.display:setTextColor(self.box.visualID,self.labelID,self.textColor.x,self.textColor.y,self.textColor.z) -- FIXME
+		self.display:setLabelColor(self.box.visualID,self.labelID,self.textColor.x,self.textColor.y,self.textColor.z) -- FIXME
 	end
 end
 
@@ -190,7 +190,7 @@ function Sprite:setTextAlignment(h,v)
 	if h then self.textAlignment.x = h changed = true end
 	if v then self.textAlignment.y = v changed = true end
 	if changed then
-		self.display:setTextAlignment(self.box.visualID,self.labelID, self.textAlignment.x, self.textAlignment.y or 0)
+		self.display:setLabelAlignment(self.box.visualID,self.labelID, self.textAlignment.x, self.textAlignment.y or 0)
 	end
 	return self
 end
@@ -234,6 +234,12 @@ function Sprite:applyAll(style)
 		self:setTextColor(style.textColor and gncommon.color(style.textColor).xyz or self.textColor)
 		self:setTextAlignment(style.textAlignment:unpack())
 	end
+end
+
+
+function Sprite:free()
+	self.display:removeSprite(self.box.visualID, self.taskID)
+	self.display:removeLabel(self.box.visualID, self.labelID)
 end
 
 
