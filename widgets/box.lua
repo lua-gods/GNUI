@@ -72,9 +72,7 @@ function BoxAPI.parse(layout,canvas,box)
 	if layout.childAlign then box:setChildAlign(layout.childAlign) end
 	if layout.gap then box:setChildGap(layout.gap) end
 	
-	box.variant = layout.variant or "default"
-	local style = Style.getStyle(box, box.variant, "normal")
-	style:newInstance(box)
+	box:setStyle(layout.variant)
 
 	if layout.text then box:setText(layout.text) end
 	if layout.textAlign then box:setTextAlignment(layout.textAlign[1],layout.textAlign[2]) end
