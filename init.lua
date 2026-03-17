@@ -28,7 +28,6 @@ for _, path in ipairs(utils.listFiles(BASE..".presets")) do
 	PRESETS[name] = path
 end
 
---TODO: add setup loading
 --TODO: add custom parameters to setup to allow loading of custom themes
 
 
