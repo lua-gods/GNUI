@@ -138,7 +138,7 @@ end
 ---@param r number
 ---@param g number
 ---@param b number
-function Display:setTextColor(visualID,taskID,r,g,b)
+function Display:setLabelColor(visualID,taskID,r,g,b)
 	local task = self:getTask(visualID,taskID)
 	task.textColor = vec(r,g,b)
 	task.jsonText = parseText(task.text,task.textColor)
@@ -150,7 +150,7 @@ end
 ---@param visualID integer
 ---@param taskID integer
 ---@param text string|GNUI.Text[]
-function Display:setText(visualID,taskID,text)
+function Display:setLabelText(visualID,taskID,text)
 	local task = self:getTask(visualID,taskID)
 	task.text = text
 	
@@ -163,7 +163,7 @@ end
 ---@param taskID integer
 ---@param h -1|0|1
 ---@param v -1|0|1
-function Display:setTextAlignment(visualID,taskID,h,v)
+function Display:setLabelAlignment(visualID,taskID,h,v)
 	local task = self:getTask(visualID,taskID)
 	task.textAlignment = vec(h,v)
 	updateLabelPos(task)
