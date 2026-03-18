@@ -247,9 +247,15 @@ return {
 			knob = {
 				type = "nineslice",
 				texturePath = atlas,
-				uv = vec(40, 5, 42, 7),
-				padding = vec(1, 1, 1, 1),
-				border = vec(1, 1, 1, 1),
+				uv = vec(0, 0, 4, 6),
+
+				border = vec(2, 2, 2, 4),
+				padding = vec(2, 2, 2, 0),
+				expand = vec(0, 0, 0, 2),
+				margin = vec(0, -2, 0, 2),
+
+				textAlignment = vec(0, 0),
+				textColor = "#ffffff",
 			},
 			knobPressed = {
 				type = "nineslice",
