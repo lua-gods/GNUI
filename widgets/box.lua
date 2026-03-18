@@ -5,20 +5,22 @@
 \____/_/ |_/ source: link ]]
 ---@diagnostic disable: duplicate-doc-field
 
-local BASE = ((...):gsub("/",".")):match(".+%.GNUI")
-local cfg = require(BASE..".config") ---@type GNUI.config
+local BASE = ((...):gsub("/", ".")):match(".+%.GNUI")
+local cfg = require(BASE .. ".config") ---@type GNUI.config
 
-local TrueBoxAPI = require(BASE..".core.prims.box") ---@type GNUI.Primitive.BoxAPI
-local Layout = require(cfg.LAYOUT..".init") ---@type GNUI.LayoutAPI
-local Style = require(cfg.THEME..".init") ---@type GNUI.ThemeAPI
+local TrueBoxAPI = require(BASE .. ".core.prims.box") ---@type GNUI.Primitive.BoxAPI
+local Layout = require(cfg.LAYOUT .. ".init") ---@type GNUI.LayoutAPI
+local Style = require(cfg.THEME .. ".init") ---@type GNUI.ThemeAPI
 
 ---@class GNUI.BoxAPI : GNUI.Primitive.BoxAPI
 local BoxAPI = {}
 
-setmetatable(BoxAPI,{
-	__index = function (t,i)
-		return rawget(t,i) or TrueBoxAPI[i] or TrueBoxAPI.index(t,i)
-	end
+setmetatable(BoxAPI, {
+	__index = function(t, i)
+		return rawget(t, i)
+			 or TrueBoxAPI[i]
+			 or TrueBoxAPI.index(t, i)
+	end,
 })
 
 --────────────────────────-< Layout Parser >-────────────────────────--
@@ -43,7 +45,7 @@ setmetatable(BoxAPI,{
 ---@generic box
 ---@param box box
 ---@return box
-function BoxAPI.parse(layout,canvas,box)
+function BoxAPI.parse(layout, canvas, box)
 	local box = box or TrueBoxAPI.new(canvas)
 
 	local hasSizeX, hasSizeY = false, false
@@ -55,7 +57,7 @@ function BoxAPI.parse(layout,canvas,box)
 	if layout.minSize then box:setMinimumSize(layout.minSize.x, layout.minSize.y) end
 	if layout.sizing then
 		if type(layout.sizing) == "string" then
----@diagnostic disable-next-line: param-type-mismatch
+			---@diagnostic disable-next-line: param-type-mismatch
 			box:setSizing(layout.sizing, layout.sizing)
 		else
 			box:setSizing(layout.sizing[1], layout.sizing[2])
@@ -71,11 +73,11 @@ function BoxAPI.parse(layout,canvas,box)
 	if layout.layout then box:setLayout(layout.layout) end
 	if layout.childAlign then box:setChildAlign(layout.childAlign) end
 	if layout.gap then box:setChildGap(layout.gap) end
-	
-	box:setStyle(layout.variant)
+
+	box:setStyleVariant(layout.variant)
 
 	if layout.text then box:setText(layout.text) end
-	if layout.textAlign then box:setTextAlignment(layout.textAlign[1],layout.textAlign[2]) end
+	if layout.textAlign then box:setTextAlignment(layout.textAlign[1], layout.textAlign[2]) end
 	if layout.wrap then box:setWrapText(layout.wrap) end
 
 	if layout.name then
