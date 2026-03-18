@@ -176,6 +176,38 @@ function Button:setToggle(toggle)
 end
 
 
+---Sets the style of the sprite of this box, if no sprite exists, it will create one for that given style
+---
+---@generic self
+---@param self self
+---@return self
+---@param variant string?
+function Button:setStyleVariant(variant)
+	variant = variant or "default"
+	---@cast self GNUI.Box
+	
+	self.variant = variant
+	local style = Style.getStyle(self, variant, "normal")
+	
+	-- replaces existing style or creates a new one
+	--TODO: replace styling method with a cleaner one.
+	if self.sprites[1] then
+		self.sprites[1]:setStyle(style)
+	else
+		style:newInstance(self,1)
+	end
+	
+	Style.getStyle("box", "highlight", "normal")
+	:newInstance(self,"highlight"):setVisible(false)
+	
+	self:recalculateMargin()
+	self:recalculatePadding()
+	self:recalculateMinimumSize()
+	self:update()
+	return self
+end
+
+
 --────────────────────────-< Layout Parser >-────────────────────────--
 
 ---@diagnostic disable: duplicate-doc-field
@@ -188,15 +220,14 @@ end
 ---@param button GNUI.Widget.Button?
 ---@return GNUI.Widget.Button
 function ButtonAPI.parse(layout,canvas,button)
-	local box = button or Box.parse(layout,canvas,ButtonAPI.new(canvas))
+	local self = button or Box.parse(layout,canvas,ButtonAPI.new(canvas))
 
 	
-	local style = Style.getStyle("box", "highlight", "normal")
-	style:newInstance(box,"highlight"):setVisible(false)
+	self:setStyleVariant(layout.variant)
 	
-	if layout.toggle then box.toggle = layout.toggle end
+	if layout.toggle then self.toggle = layout.toggle end
 	
-	return box
+	return self
 end
 
 Layout.registerType("button", ButtonAPI.parse)
