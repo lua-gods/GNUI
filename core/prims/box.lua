@@ -31,6 +31,7 @@ local BoxAPI = {}
 ---| "VERTICAL"
 ---| "HORIZONTAL"
 ---| "FIXED"
+---| {size:fun(self:GNUI.Box,children:GNUI.Box[]),pos:fun(self:GNUI.Box,children:GNUI.Box[])}
 
 
 ---@class GNUI.Box.Event.CharInput : Event
@@ -71,6 +72,9 @@ local BoxAPI = {}
 ---@field finalPadding Vector4
 ---@field finalMargin Vector4
 ---
+---@field SIZE_CHANGED Event # called after size is changed for this element
+---@field POSITION_CHANGED Event # called after position is changed for this element
+---
 ---@field sizing {x:GNUI.Box.SizingMode,y:GNUI.Box.SizingMode}
 ---
 ---@field childGap number
@@ -82,6 +86,7 @@ local BoxAPI = {}
 ---@field children GNUI.Box[]
 ---@field namedChildren table<string,GNUI.Box>
 ---@field childAlign Vector2
+---@field scroll Vector2
 ---
 ---@field visible boolean
 ---@field color Vector3
@@ -130,7 +135,7 @@ local nextFree = 1
 ---@return GNUI.Box
 function BoxAPI.new(canvas)
 	local self = {
-		
+
 		pos = vec(0, 0),
 		size = vec(-1, -1),
 		minSize = vec(0, 0),
@@ -145,12 +150,15 @@ function BoxAPI.new(canvas)
 		finalPadding = vec(0, 0, 0, 0),
 		finalMargin = vec(0, 0, 0, 0),
 
+		SIZE_CHANGED = Event.new(),
+		POSITION_CHANGED = Event.new(),
+		
 		sizing = { x = "FIXED", y = "FIXED" },
-		
+
 		childGap = 0,
-		
+
 		layout = "FIXED",
-		
+
 		parent = nil,
 		childIndex = 0,
 		children = {},
@@ -655,39 +663,40 @@ end
 
 ---@param box GNUI.Box
 local function updatePropagate(box, flags)
-	if box.canvas and not box.flags.dim then
+	for _,flag in ipairs(flags) do
+		box.flags[flag] = true
+	end
+	if box.canvas then  --  and not box.flaggedUpdate
 		-- TODO: propagate flag updating to all children
-		box.flags.dim = true --TODO: unhardcode this by applying it only when its needed
 		box.canvas.queueUpdate[#box.canvas.queueUpdate + 1] = box
+		box.flaggedUpdate = true
 	end
 	for index, child in ipairs(box.children) do
-		updatePropagate(child)
+		updatePropagate(child, flags)
 	end
 end
 
 ---Updates itself and its relatives that will get affected
 function Box:update(...)
-	self.flags = {}
-	for index, flag in ipairs { ... } do
-		self.flags[flag] = true
-	end
-
-	if not self.flags.dim then
-		if self.parent then
-			local lastParent = self
-			local parent = self.parent
-			while parent do
-				if not parent.layout then
-					break
-				else
-					lastParent = parent
-					parent = parent.parent
-				end
+	local flags = {"dim",...}
+	
+	if self.parent then
+		local lastParent = self
+		local parent = self.parent
+		while parent do
+			if not parent.layout then
+				break
+			else
+				lastParent = parent
+				parent = parent.parent
 			end
-			updatePropagate(lastParent, self.flags)
-		else
-			updatePropagate(self, self.flags)
 		end
+		updatePropagate(lastParent, flags)
+	else
+		updatePropagate(self, flags)
+	end
+	
+	if (not self.flags.dim) or true then -- TODO: I forgot why this is like this
 	end
 end
 
@@ -717,7 +726,8 @@ function Box:updateSprites()
 end
 
 local function unflag(box)
-	box.flags.dim = false -- AAAAAAAAAAAAA
+	box.flaggedUpdate = false
+	box.flags = {}
 	for _, child in ipairs(box.children) do
 		unflag(child)
 	end
@@ -743,7 +753,6 @@ end
 function Box:forceUpdate()
 	---@cast self GNUI.Box
 	self
-
 		 :solveForFitSizing(false)
 		 :sovleForFillSizing(false)
 		 :sovleForLayout(false)
@@ -769,11 +778,11 @@ function Box:solveForFitSizing(other)
 		child.finalSize[x] = 0
 		child:solveForFitSizing(other)
 	end
-
 	local padding = self:getPadding()
 	local textSize = self.text and
-	utils.getTextSize(self.text, x == "y" and (self.finalSize.x - padding.x - padding.z) or math.huge,
-		self.wrapText) or vec(0, 0)
+		 utils.getTextSize(self.text,
+			 x == "y" and (self.finalSize.x - padding.x - padding.z) or math.huge,
+			 self.wrapText) or vec(0, 0)
 	if self.sizing[x] == "FIXED" then
 		self.finalSize[x] = math.max(self.finalMinSize[x], self.size[x])
 	elseif self.sizing[x] == "FIT" then
@@ -785,7 +794,7 @@ function Box:solveForFitSizing(other)
 			end
 			totalSize = totalSize + self.childGap * (#self.children - 1)
 			self.finalSize[x] = math.max(self.finalMinSize[x], totalSize, textSize[x]) + padding[x] +
-			padding[z]
+				 padding[z]
 		else
 			local minSize = self.finalMinSize[x]
 			for _, child in ipairs(self.children) do
@@ -863,11 +872,11 @@ function Box:sovleForFillSizing(other)
 			if child.sizing[x] == "FILL" then
 				local margin = child:getMargin()
 				child.finalSize[x] = math.max(
-				self.finalSize[x] - padding[x] - padding[z] - margin[x] - margin[z], child.finalSize[x])
+				self.finalSize[x] - padding[x] - padding[z] - margin[x] - margin[z],
+					child.finalSize[x])
 			end
 		end
 	end
-
 	for _, child in ipairs(self.children) do
 		child:sovleForFillSizing(other)
 	end
@@ -882,11 +891,11 @@ function Box:sovleForLayout(other)
 	---@cast self GNUI.Box
 	local x = (other and "y" or "x")
 	local z = (other and "w" or "z")
-
 	if self.layout == "FIXED" then
 		for _, child in ipairs(self.children) do
 			child.finalPos[x] = child.pos[x]
 		end
+		self.SIZE_CHANGED:invoke(self.finalSize:copy())
 	else
 		if self.layout == (other and "VERTICAL" or "HORIZONTAL") then
 			local pos = self:getPadding()[x]
@@ -906,6 +915,8 @@ function Box:sovleForLayout(other)
 			end
 		end
 	end
+	
+	self.POSITION_CHANGED:invoke(self.finalPos:copy())
 
 	for _, child in ipairs(self.children) do
 		child:sovleForLayout(other)

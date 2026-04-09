@@ -54,10 +54,6 @@ function SliderAPI.new(canvas)
 	---@cast self GNUI.Widget.Slider
 	setmetatable(self, Slider)
 
-	self.boxKnob = Box.new(canvas)
-	self:addChild(self.boxKnob)
-	self.boxKnob:setSize(5, 5)
-
 	self.isVertical = false
 	self.value = 0
 	self.min = 0
@@ -67,7 +63,18 @@ function SliderAPI.new(canvas)
 	self.prefix = ""
 	self.suffix = ""
 	self.VALUE_CHANGED = Event.new()
-
+	
+	self.layout = "FIXED"
+	
+	local boxKnob = Box.new(canvas)
+	self.boxKnob = boxKnob
+	self:addChild(self.boxKnob)
+	boxKnob:setSizing("FIXED", "FIXED")
+	
+	self.SIZE_CHANGED:register(function (size)
+		boxKnob:setSize(17,17)
+	end)
+	
 	return self
 end
 

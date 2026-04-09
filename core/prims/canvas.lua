@@ -81,8 +81,8 @@ function Canvas:flushUpdates()
 		if box.flags.dim then
 			box:forceUpdate()
 		end
+		self.queueUpdate[key] = nil
 	end
-	self.queueUpdate = {}
 	return self
 end
 
