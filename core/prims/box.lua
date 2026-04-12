@@ -11,7 +11,7 @@ local Style = require(cfg.THEME .. ".init") ---@type GNUI.ThemeAPI
 
 local gncommon = require(cfg.GN_COMMON) ---@type GNCommon
 local utils = require(cfg.UTILS) ---@type GNUI.utils
-local Event = require(cfg.EVENT) ---@type Event
+local Event = require(cfg.EVENT) ---@type GN.Event
 
 
 local abs = math.abs
@@ -34,17 +34,17 @@ local BoxAPI = {}
 ---| {size:fun(self:GNUI.Box,children:GNUI.Box[]),pos:fun(self:GNUI.Box,children:GNUI.Box[])}
 
 
----@class GNUI.Box.Event.CharInput : Event
+---@class GNUI.Box.Event.CharInput : GN.Event
 ---@field register fun(self,func:fun(char: string))
 
----@class GNUI.Box.Event.KeyInput : Event
+---@class GNUI.Box.Event.KeyInput : GN.Event
 ---@field register fun(self,func:fun(scancode:integer, state:integer))
 
----@class GNUI.Box.Event.MouseInput : Event
+---@class GNUI.Box.Event.MouseInput : GN.Event
 ---@field register fun(self,func:fun(button:integer,state:integer))
 
 
----@class GNUI.Box.Event.CursorPresenceChanged : Event
+---@class GNUI.Box.Event.CursorPresenceChanged : GN.Event
 ---@field register fun(self,func:fun(inside: boolean))
 
 
@@ -72,8 +72,8 @@ local BoxAPI = {}
 ---@field finalPadding Vector4
 ---@field finalMargin Vector4
 ---
----@field SIZE_CHANGED Event # called after size is changed for this element
----@field POSITION_CHANGED Event # called after position is changed for this element
+---@field SIZE_CHANGED GN.Event # called after size is changed for this element
+---@field POSITION_CHANGED GN.Event # called after position is changed for this element
 ---
 ---@field sizing {x:GNUI.Box.SizingMode,y:GNUI.Box.SizingMode}
 ---
@@ -103,6 +103,7 @@ local BoxAPI = {}
 ---@field visualID integer
 ---@field sprites table<any,GNUI.Sprite> # middle man style handling
 ---
+---@field captureInput boolean
 ---@field isHovered boolean
 ---
 ---@field z number
@@ -114,6 +115,9 @@ local BoxAPI = {}
 ---@field KEY_INPUT GNUI.Box.Event.KeyInput
 ---@field CHAR_INPUT GNUI.Box.Event.CharInput
 ---@field MOUSE_INPUT GNUI.Box.Event.MouseInput
+---@field UNHANDLED_KEY_INPUT GNUI.Box.Event.KeyInput
+---@field UNHANDLED_CHAR_INPUT GNUI.Box.Event.CharInput
+---@field UNHANDLED_MOUSE_INPUT GNUI.Box.Event.MouseInput
 local Box = {}
 Box.__index = function(t, i)
 	return rawget(t, i)
@@ -177,12 +181,22 @@ function BoxAPI.new(canvas)
 		sprites = {},
 		tasks = {},
 
+		captureInput = true,
+		isHovered = false,
+		
+		z = 0,
+		zScale = 1,
+		
 		flags = {},
 
 		CURSOR_PRESENCE_CHANGED = Event.new(),
 		KEY_INPUT = Event.new(),
 		CHAR_INPUT = Event.new(),
 		MOUSE_INPUT = Event.new(),
+		
+		UNHANDLED_KEY_INPUT = Event.new(),
+		UNHANDLED_CHAR_INPUT = Event.new(),
+		UNHANDLED_MOUSE_INPUT = Event.new()
 	}
 	nextFree = nextFree + 1
 
@@ -659,6 +673,17 @@ function Box:isPosInbounds(pos)
 	return false
 end
 
+
+---@param captureInput boolean
+---@generic self
+---@param self self
+---@return self
+function Box:setCaptureInputs(captureInput)
+	---@cast self GNUI.Box
+	self.captureInput = captureInput
+	return self
+end
+
 --────────────────────────-< UPDATERS >-────────────────────────--
 
 ---@param box GNUI.Box
@@ -666,7 +691,7 @@ local function updatePropagate(box, flags)
 	for _,flag in ipairs(flags) do
 		box.flags[flag] = true
 	end
-	if box.canvas then  --  and not box.flaggedUpdate
+	if box.canvas and not box.flaggedUpdate then  --  
 		-- TODO: propagate flag updating to all children
 		box.canvas.queueUpdate[#box.canvas.queueUpdate + 1] = box
 		box.flaggedUpdate = true
@@ -684,7 +709,12 @@ function Box:update(...)
 		local lastParent = self
 		local parent = self.parent
 		while parent do
-			if not parent.layout then
+			
+			if parent.sizing.x == "FIXED" and parent.sizing.y == "FIXED" then
+				parent = self.parent
+				updatePropagate(parent, flags)
+				return
+			elseif not parent.layout then
 				break
 			else
 				lastParent = parent
@@ -701,7 +731,6 @@ function Box:update(...)
 end
 
 function Box:updateSprites()
-	--TODO: separate each applying method into its own update flag
 	local flags = self.flags
 	if flags.color then
 		self.canvas.display:setColor(self.visualID, self.color.x, self.color.y, self.color.z)
@@ -752,6 +781,8 @@ end
 ---@return self
 function Box:forceUpdate()
 	---@cast self GNUI.Box
+	
+	--TODO: make the update recursion happen again and again until all size changes are resolved
 	self
 		 :solveForFitSizing(false)
 		 :sovleForFillSizing(false)
@@ -760,6 +791,10 @@ function Box:forceUpdate()
 		 :solveForFitSizing(true)
 		 :sovleForFillSizing(true)
 		 :sovleForLayout(true)
+		 
+		 :solveForFitSizing(false)
+		 :sovleForFillSizing(false)
+		 :sovleForLayout(false)
 
 		 :updateSprites()
 	unflag(self)
@@ -895,7 +930,7 @@ function Box:sovleForLayout(other)
 		for _, child in ipairs(self.children) do
 			child.finalPos[x] = child.pos[x]
 		end
-		self.SIZE_CHANGED:invoke(self.finalSize:copy())
+		
 	else
 		if self.layout == (other and "VERTICAL" or "HORIZONTAL") then
 			local pos = self:getPadding()[x]
@@ -916,12 +951,13 @@ function Box:sovleForLayout(other)
 		end
 	end
 	
+	self.SIZE_CHANGED:invoke(self.finalSize:copy())
 	self.POSITION_CHANGED:invoke(self.finalPos:copy())
-
 	for _, child in ipairs(self.children) do
 		child:sovleForLayout(other)
 	end
 	return self
 end
+
 
 return BoxAPI
