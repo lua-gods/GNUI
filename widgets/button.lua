@@ -18,15 +18,15 @@ local utils = require(cfg.UTILS)
 local ButtonAPI = {}
 
 
----@class Event.GNUI.Button.PRESSED : Event
+---@class Event.GNUI.Button.PRESSED : GN.Event
 ---@field register fun(self,func:fun(down: boolean))|fun(func:fun(toggle: boolean))
 
 ---@class GNUI.Widget.Button : GNUI.Box
 ---@field down boolean
 ---@field toggle boolean
 ---
----@field BUTTON_DOWN Event
----@field BUTTON_UP Event
+---@field BUTTON_DOWN GN.Event
+---@field BUTTON_UP GN.Event
 ---
 ---@field PRESSED Event.GNUI.Button.PRESSED
 local Button = {}
@@ -82,11 +82,12 @@ function Button:applyButtonAction(button,state)
 				self.PRESSED:invoke(self.down)
 			else
 				self.down = true
+				self.PRESSED:invoke(true)
 			end
 		elseif state == 0 and self.down then
 			if not self.toggle then
-				self.PRESSED:invoke()
 				self.down = false
+				self.PRESSED:invoke(false)
 			end
 		end
 		if lastDown ~= self.down then
