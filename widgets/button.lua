@@ -111,7 +111,7 @@ end
 ---@return self
 function Button:applyApropriateStyle()
 	---@cast self GNUI.Widget.Button
-	self.sprites.highlight:setVisible(self.isHovered)
+	self.sprites.highlight:setVisible(self.isHovered or self.down)
 	if self.down then
 		self.sprites[1]:setStyle(Style.getStyleFromBox(self,"pressed"))
 	else
