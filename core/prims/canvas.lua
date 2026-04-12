@@ -1,25 +1,30 @@
 --[[______   __
-  / ____/ | / /  by: GNanimates / https://gnon.top / Discord: @gn68s
- / / __/  |/ / name: GNUI Canvas Class
-/ /_/ / /|  /  desc: The root box and the Input Interface for its children.
-\____/_/ |_/ source: link ]]
----@diagnostic disable: return-type-mismatch
+  / ____/ | / / Name: GNUI CANVAS API v1.0.0
+ / / __/  |/ /  Desc: the base Canvas, aka the root box
+/ /_/ / /|  / Author: GNanimates | https://gnon.top | @gn68s
+\____/_/ |_/ License: Mozilla Public License Version 2.0 ]]
+---@diagnostic disable: return-type-mismatch, assign-type-mismatch, undefined-field
 local BASE = ((...):gsub("/",".")):match(".+%.GNUI")
 
 local gncommon = require("lib.gncommon") ---@type GNCommon
 local cfg = require(BASE..".config") ---@type GNUI.config
 local Box = require(cfg.CORE..".prims.box") ---@type GNUI.Primitive.BoxAPI
 local Render = require(cfg.RENDER .. ".init") ---@type GNUI.RenderAPI
+local Event = require(cfg.EVENT) ---@type GN.Event
 
+--TODO: move this all to the box, and make all of them able to cancel the event.
+---@class GNUI.Canvas.Event.CharInput : GN.Event
+---@field register fun(self,func:(fun(char: string):boolean?),id:any?)
 
----@class GNUI.Canvas.Event.CharInput : Event
----@field register fun(self,func:(fun(char: string):boolean),id:any?)
+---@class GNUI.Canvas.Event.KeyInput : GN.Event
+---@field register fun(self,func:(fun(scancode:integer, state:integer):boolean?),id:any?)
 
----@class GNUI.Canvas.Event.KeyInput : Event
----@field register fun(self,func:(fun(scancode:integer, state:integer):boolean),id:any?)
+---@class GNUI.Canvas.Event.MouseInput : GN.Event
+---@field register fun(self,func:(fun(button:integer,state:integer):boolean?),id:any?)
 
----@class GNUI.Canvas.Event.MouseInput : Event
----@field register fun(self,func:(fun(button:integer,state:integer):boolean),id:any?)
+---@class GNUI.Canvas.Event.CursorMoved : GN.Event
+---@field register fun(self,func:(fun(pos: Vector2, vel: Vector2)),id:any?)
+
 
 
 ---@alias GNUI.InputButton.Type integer
@@ -50,6 +55,7 @@ local CanvasAPI = {}
 ---@field CHAR_INPUT GNUI.Canvas.Event.CharInput
 ---@field KEY_INPUT GNUI.Canvas.Event.KeyInput
 ---@field MOUSE_INPUT GNUI.Canvas.Event.MouseInput
+---@field CURSOR_MOVED GNUI.Canvas.Event.CursorMoved
 local Canvas = {}
 Canvas.__index = function (t,i)
 	return rawget(t,i) or Canvas[i] or Box.index(t,i)
@@ -68,6 +74,9 @@ function CanvasAPI.new()
 	self.visualID = 1
 	self.queueUpdate = {}
 	self.pressedButtons = {}
+	
+	self.CURSOR_MOVED = Event.new()
+	
 	self:setSizing("FIXED","FIXED")
 	setmetatable(self,Canvas)
 	return self
@@ -86,6 +95,7 @@ function Canvas:flushUpdates()
 	return self
 end
 
+--TODO: replace with a method that propagates from the root screen to the element, and back to the screen
 
 ---TODO: replace with a method that allows selecting boxes outside parent bounds.
 ---Finds the box being hovered by the cursor
@@ -93,7 +103,7 @@ end
 ---@param pos Vector2
 local function findHoveredBox(box,pos)
 	for index, childBox in ipairs(box.children) do
-		if childBox:isPosInbounds(pos) then
+		if childBox.captureInput and childBox:isPosInbounds(pos) then
 			local hoveredBox = findHoveredBox(childBox,pos)
 			if hoveredBox then return hoveredBox end
 		end
@@ -104,26 +114,34 @@ end
 
 ---Sets the position of the cursor in the Canvas.
 ---@overload fun(self: GNUI.Canvas ,xy: Vector2): GNUI.Canvas
----@param x any
----@param y any
+---@param x number
+---@param y number
 ---@return GNUI.Canvas
 function Canvas:setCursorPos(x,y)
-	self.cursorPos = gncommon.vec2(x,y)
 	
-	local newHoveredBox = findHoveredBox(self,self.cursorPos)
-	
-	if self.hoveredBox ~= newHoveredBox then
-		if self.hoveredBox then
-			self.hoveredBox.isHovered = false
-			self.hoveredBox.CURSOR_PRESENCE_CHANGED:invoke(false)
-		end
-		self.hoveredBox = newHoveredBox
-		if newHoveredBox then
-			newHoveredBox.isHovered = true
-			newHoveredBox.CURSOR_PRESENCE_CHANGED:invoke(true)
+	local newCursorPos = gncommon.vec2(x,y)
+	if self.cursorPos ~= newCursorPos then
+		local lastCursorPos = self.cursorPos
+		local cursorVel = newCursorPos - (lastCursorPos or newCursorPos)
+		
+		self.cursorPos = newCursorPos
+		
+		local newHoveredBox = findHoveredBox(self,self.cursorPos)
+		
+		self.CURSOR_MOVED:invoke(self.cursorPos,cursorVel)
+		
+		if self.hoveredBox ~= newHoveredBox then
+			if self.hoveredBox then
+				self.hoveredBox.isHovered = false
+				self.hoveredBox.CURSOR_PRESENCE_CHANGED:invoke(false)
+			end
+			self.hoveredBox = newHoveredBox
+			if newHoveredBox then
+				newHoveredBox.isHovered = true
+				newHoveredBox.CURSOR_PRESENCE_CHANGED:invoke(true)
+			end
 		end
 	end
-	
 	return self
 end
 
