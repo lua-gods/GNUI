@@ -44,6 +44,9 @@ local BoxAPI = {}
 ---@field register fun(self,func:fun(button:integer,state:integer))
 
 
+---@class GNUI.Box.Event.ScrollInput : GN.Event
+---@field register fun(self,func:(fun(x:integer,y:integer):boolean?),id:any?)
+
 ---@class GNUI.Box.Event.CursorPresenceChanged : GN.Event
 ---@field register fun(self,func:fun(inside: boolean))
 
@@ -115,9 +118,12 @@ local BoxAPI = {}
 ---@field KEY_INPUT GNUI.Box.Event.KeyInput
 ---@field CHAR_INPUT GNUI.Box.Event.CharInput
 ---@field MOUSE_INPUT GNUI.Box.Event.MouseInput
+---@field SCROLL_INPUT GNUI.Box.Event.ScrollInput
+---
 ---@field UNHANDLED_KEY_INPUT GNUI.Box.Event.KeyInput
 ---@field UNHANDLED_CHAR_INPUT GNUI.Box.Event.CharInput
 ---@field UNHANDLED_MOUSE_INPUT GNUI.Box.Event.MouseInput
+---@field UNHANDLED_SCROLL_INPUT GNUI.Box.Event.ScrollInput
 local Box = {}
 Box.__index = function(t, i)
 	return rawget(t, i)
@@ -193,10 +199,12 @@ function BoxAPI.new(canvas)
 		KEY_INPUT = Event.new(),
 		CHAR_INPUT = Event.new(),
 		MOUSE_INPUT = Event.new(),
+		SCROLL_INPUT = Event.new(),
 		
 		UNHANDLED_KEY_INPUT = Event.new(),
 		UNHANDLED_CHAR_INPUT = Event.new(),
-		UNHANDLED_MOUSE_INPUT = Event.new()
+		UNHANDLED_MOUSE_INPUT = Event.new(),
+		UNHANDLED_SCROLL_INPUT = Event.new(),
 	}
 	nextFree = nextFree + 1
 
