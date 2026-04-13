@@ -10,7 +10,7 @@ local Layout = require(cfg.LAYOUT .. ".init") ---@type GNUI.LayoutAPI
 
 local utils = require(cfg.UTILS) ---@type GNUI.utils
 
----@class Event.GNUI.Button.ValueChanged : Event
+---@class Event.GNUI.Button.ValueChanged : GN.Event
 ---@field register fun(self,func:fun(value: number))
 
 
@@ -67,16 +67,39 @@ function SliderAPI.new(canvas)
 	self.layout = "FIXED"
 	
 	local boxKnob = Box.new(canvas)
+	boxKnob:setName("eee")
 	self.boxKnob = boxKnob
 	self:addChild(self.boxKnob)
+	self.boxKnob.captureInput = false
 	boxKnob:setSizing("FIXED", "FIXED")
 	
 	self.SIZE_CHANGED:register(function (size)
-		boxKnob:setSize(17,17)
+		self:updateKnob()
+	end)
+	
+	self.BUTTON_DOWN:register(function ()
+		self.canvas.CURSOR_MOVED:register(function (pos,vel)
+			self:processSlider(vel)
+		end,self.id)
+	end)
+	
+	self.BUTTON_UP:register(function ()
+		self.canvas.CURSOR_MOVED:remove(self.id)
 	end)
 	
 	return self
 end
+
+
+function Slider:processSlider(vel)
+	self.boxKnob:setPos(self.boxKnob.pos.x + vel.x)
+end
+
+
+function Slider:updateKnob()
+	self.boxKnob:setSize(17,17)
+end
+
 
 ---@param vertical boolean
 ---@generic self
