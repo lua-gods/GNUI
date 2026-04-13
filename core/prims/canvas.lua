@@ -28,10 +28,9 @@ local Event = require(cfg.EVENT) ---@type GN.Event
 
 
 ---@alias GNUI.InputButton.Type integer
----| [0]  SCROLL
----| [1]  LEFT
----| [2]  RIGHT
----| [3]  MIDDLE
+---| [0]  LEFT
+---| [1]  RIGHT
+---| [2]  MIDDLE
 
 
 ---@alias GNUI.InputButton.State integer
@@ -219,6 +218,64 @@ function Canvas:inputMouse(button,state)
 		end
 	end
 end
+
+
+
+-- propagate scroll input from children to its parents, begging for one to capture it lmao.
+---@param box GNUI.Box
+---@param ... any
+---@return boolean
+local function processUnhandledInputCapture(box,event,...)
+	local outs = box[event]:invoke(...)
+	for index, value in ipairs(outs) do
+		if value then return true end
+	end
+	if box.parent then
+		return processUnhandledInputCapture(box.parent,event,...)
+	end
+	return false
+end
+
+-- propagate scroll input from parent to the given box.
+-- while allowing each step of the way to capture the inputs.
+---@param box GNUI.Box
+---@param ... any
+---@return boolean
+local function proccessInputCapture(box,event,...)
+	
+	-- prioritize calculating for parent first
+	if box.parent then
+		if proccessInputCapture(box.parent,...) then
+			-- input has been captured by a parent
+			return true
+		end
+	end
+	
+	-- check if its been captured
+	local outs = box[event]:invoke(...)
+	for index, value in ipairs(outs) do
+		if value then
+			return true
+		end
+	end
+	return false
+end
+
+
+---@param box GNUI.Box
+---@param event string
+---@param ... any
+local function processEvent(box,event,...)
+	local processed = proccessInputCapture(box,event,...)
+	if processed then return end
+	processUnhandledInputCapture(box,"UNHANDLED_"..event,...)
+end
+
+
+function Canvas:inputScroll(y,x)
+	processEvent(self.hoveredBox,"SCROLL_INPUT",y,x,0)
+end
+
 
 ---Love2D Exclusive
 function Canvas:draw()
