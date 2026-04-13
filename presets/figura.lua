@@ -10,5 +10,5 @@ return {
 	GN_COMMON = "%s/../gncommon",
 	UTILS = "%s.utils",
 	
-	EVENT = "lib.event",
+	EVENT = "lib.GNEvent",
 }
