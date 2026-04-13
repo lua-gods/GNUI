@@ -70,7 +70,7 @@ end
 ---@param slot (integer|string)?
 function Sprite:setBox(box, slot)
 	if self.taskID then
-		self.display:removeSprite(self.taskID)
+		self.display:removeSprite(box.visualID,self.taskID)
 	end
 	self.display = box.canvas.display
 	self.taskID = box.canvas.display:newSprite(box.visualID)
