@@ -146,78 +146,6 @@ end
 
 
 
----@param scancode integer
----@param state integer
-function Canvas:inputKey(scancode, state)
-	local outs = self.KEY_INPUT(scancode, state)
-	local allow = true
-	
-	for index, out in ipairs(outs) do
-		if out then
-			allow = false break
-		end
-	end
-	
-	if allow and self.hoveredBox then
-		self.hoveredBox.KEY_INPUT(scancode, state)
-		
-		if state == 1 then
-			self.pressedButtons[scancode] = self.hoveredBox
-		elseif state == 0 then
-			if self.pressedButtons[scancode] then
-				self.pressedButtons[scancode].KEY_INPUT(scancode,state)
-				self.pressedButtons[scancode] = nil
-			end
-		end
-	end
-	return allow
-end
-
-
-function Canvas:inputChar(char)
-	local outs = self.CHAR_INPUT(char)
-	local allow = true
-	
-	for index, out in ipairs(outs) do
-		if out then
-			allow = false break
-		end
-	end
-	
-	if allow and self.hoveredBox then
-		self.hoveredBox.CHAR_INPUT(char)
-	end
-end
-
-
----NOTE button 0 is scroll, and sate becomes the scroll amount
----
----@overload fun(self: GNUI.Canvas ,button: 0, dist: number): GNUI.Canvas
----@param button integer
----@param state integer
-function Canvas:inputMouse(button,state)
-	local outs = self.MOUSE_INPUT(button,state)
-	local allow = true
-	
-	for index, out in ipairs(outs) do
-		if out then
-			allow = false break
-		end
-	end
-	
-	if allow and self.hoveredBox then
-		self.hoveredBox.MOUSE_INPUT(button,state)
-		
-		if state == 1 then
-			self.pressedButtons[button] = self.hoveredBox
-		elseif state == 0 then
-			if self.pressedButtons[button] then
-				self.pressedButtons[button].MOUSE_INPUT(button,state)
-				self.pressedButtons[button] = nil
-			end
-		end
-	end
-end
 
 
 
@@ -245,7 +173,7 @@ local function proccessInputCapture(box,event,...)
 	
 	-- prioritize calculating for parent first
 	if box.parent then
-		if proccessInputCapture(box.parent,...) then
+		if proccessInputCapture(box.parent,event,...) then
 			-- input has been captured by a parent
 			return true
 		end
@@ -265,15 +193,58 @@ end
 ---@param box GNUI.Box
 ---@param event string
 ---@param ... any
-local function processEvent(box,event,...)
+local function processInput(box,event,...)
+	if not box then return end
 	local processed = proccessInputCapture(box,event,...)
-	if processed then return end
-	processUnhandledInputCapture(box,"UNHANDLED_"..event,...)
+	if processed then return true end
+	return processUnhandledInputCapture(box,"UNHANDLED_"..event,...)
 end
 
 
 function Canvas:inputScroll(y,x)
-	processEvent(self.hoveredBox,"SCROLL_INPUT",y,x,0)
+	processInput(self.hoveredBox,"SCROLL_INPUT",y,x,0)
+end
+
+
+
+---@param scancode integer
+---@param state integer
+function Canvas:inputKey(scancode, state)
+	if self.hoveredBox then
+		if state == 1 then
+			self.pressedButtons[scancode] = self.hoveredBox
+			local capture = processInput(self.hoveredBox,"KEY_INPUT",scancode,state)
+			return capture
+		elseif state == 0 then
+			if self.pressedButtons[scancode] then
+				processInput(self.pressedButtons[scancode],"KEY_INPUT",scancode,state)
+				self.pressedButtons[scancode] = nil
+			end
+		end
+	end
+end
+
+
+function Canvas:inputChar(char)
+	local out = processInput(self.hoveredBox,"CHAR_INPUT",char)
+	return out
+end
+
+
+---@param button integer
+---@param state integer
+function Canvas:inputMouse(button,state)
+	if self.hoveredBox then
+		if state == 1 then
+			self.pressedButtons[button] = self.hoveredBox
+			processInput(self.hoveredBox,"MOUSE_INPUT",button,state)
+		elseif state == 0 then
+			if self.pressedButtons[button] then
+				processInput(self.pressedButtons[button],"MOUSE_INPUT",button,state)
+				self.pressedButtons[button] = nil
+			end
+		end
+	end
 end
 
 
