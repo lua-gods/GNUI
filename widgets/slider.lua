@@ -54,7 +54,7 @@ function SliderAPI.new(canvas)
 	---@cast self GNUI.Widget.Slider
 	setmetatable(self, Slider)
 
-	self.isVertical = false
+	self.isVertical = true
 	self.value = 0
 	self.min = 0
 	self.max = 100
@@ -64,6 +64,7 @@ function SliderAPI.new(canvas)
 	self.suffix = ""
 	self.VALUE_CHANGED = Event.new()
 	
+	self.sizing[self.isVertical and "x" or "y"] = "FIXED"
 	self.layout = "FIXED"
 	
 	local boxKnob = Box.new(canvas)
@@ -72,6 +73,7 @@ function SliderAPI.new(canvas)
 	self:addChild(self.boxKnob)
 	self.boxKnob.captureInput = false
 	boxKnob:setSizing("FIXED", "FIXED")
+	self:setSizing("FIXED","FIT")
 	
 	self.SIZE_CHANGED:register(function (size)
 		self:updateKnob()
@@ -90,14 +92,42 @@ function SliderAPI.new(canvas)
 	return self
 end
 
+local function getKnobLength(box)
+	local len = Style.getStyleFromBox(box,"knobLength")
+	if len == -1 then
+		return box.isVertical and box.boxKnob.finalSize.x or box.boxKnob.finalSize.y
+	end
+	return len
+end
 
+--TODO: cache the knob length
 function Slider:processSlider(vel)
-	self.boxKnob:setPos(self.boxKnob.pos.x + vel.x)
+	local knobLength = getKnobLength(self)
+	if self.isVertical then
+		self.value = self.value + math.map(vel.y, 0, self.finalSize.y-knobLength,self.min,self.max)
+	else
+		self.value = self.value + math.map(vel.x, 0, self.finalSize.x-knobLength,self.min,self.max)
+	end
+	self.value = math.clamp(self.value, self.min, self.max)
+	self.VALUE_CHANGED:invoke(self.value)
+	self:updateKnob()
 end
 
 
 function Slider:updateKnob()
-	self.boxKnob:setSize(17,17)
+	local knobLength = getKnobLength(self)
+	---@cast knobLength number
+	self.sizing[self.isVertical and "x" or "y"] = "FIT"
+	local padding = self:getPadding()
+	self.boxKnob
+	:setSize(
+		self.isVertical and (self.finalSize.x-padding.x-padding.z) or knobLength,
+		not self.isVertical and (self.finalSize.y-padding.y-padding.w) or knobLength
+	)
+	:setPos(
+		not self.isVertical and math.map(self.value, self.min, self.max, padding.x, self.finalSize.x-knobLength-padding.z) or padding.x,
+		self.isVertical and math.map(self.value,self.min,self.max, -padding.y, self.finalSize.y-knobLength) or -padding.y
+	)
 end
 
 
@@ -108,6 +138,7 @@ end
 function Slider:setVertical(vertical)
 	---@cast self GNUI.Widget.Slider
 	self.isVertical = vertical
+	self.sizing[vertical and "x" or "y"] = "FIXED"
 	self:update()
 	return self
 end

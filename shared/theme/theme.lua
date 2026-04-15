@@ -21,7 +21,7 @@ local STYLE_IMPORTERS = {}
 ---@field [string] GNUI.Theme.Class.Variant|string
 
 ---@class GNUI.Theme.Class.Variant
----@field [string] GNUI.StyleEntry
+---@field [string] GNUI.StyleEntry|any
 
 ---@class GNUI.StyleEntry
 
@@ -51,15 +51,18 @@ function ThemeAPI.importTheme(path)
 			if type(variant) == "table" then
 				if not Theme[classIndex][variantIndex] then Theme[classIndex][variantIndex] = {} end
 				for keyIndex, key in pairs(variant) do
-					
-					if key.type then
-						local importer = STYLE_IMPORTERS[key.type]
-						if importer then
-							Theme[classIndex][variantIndex][keyIndex] = importer(key)
-						else
-							print("[GNUI] : tried to import \""..key.type.."\" but no importer found")
-							Theme[classIndex][variantIndex][keyIndex] = key
+					if type(key) == "table" then
+						if key.type then
+							local importer = STYLE_IMPORTERS[key.type]
+							if importer then
+								Theme[classIndex][variantIndex][keyIndex] = importer(key)
+							else
+								print("[GNUI] : tried to import \""..key.type.."\" but no importer found")
+								Theme[classIndex][variantIndex][keyIndex] = key
+							end
 						end
+					else
+						Theme[classIndex][variantIndex][keyIndex] = key
 					end
 				end
 			else

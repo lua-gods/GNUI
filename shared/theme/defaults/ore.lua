@@ -257,6 +257,7 @@ return {
 				textAlignment = vec(0, 0),
 				textColor = "#ffffff",
 			},
+			knobLength = 5,
 			knobPressed = {
 				type = "nineslice",
 				texturePath = atlas,
