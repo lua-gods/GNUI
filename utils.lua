@@ -22,7 +22,7 @@ end
 ---@param path string
 ---@return string[]
 function util.listFiles(path)
-	return listFiles(path)
+	return listFiles(path,true)
 end
 
 
