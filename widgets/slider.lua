@@ -34,6 +34,8 @@ local SliderAPI = {}
 ---@field prefix string # the prefix when the value is displayed
 ---@field suffix string # the suffix when the value is displayed
 ---
+---@field customKnobLength integer?
+---
 ---@field VALUE_CHANGED Event.GNUI.Button.ValueChanged # triggered when the value is changed
 ---@field PRESSED Event.GNUI.Button.PRESSED # triggered when the slider is pressed
 local Slider = {}
@@ -47,6 +49,15 @@ Slider.__style = "slider"
 Slider.__type = "Slider"
 
 
+local function snap(value, step, offset)
+	offset = offset or 0
+	if step < 0.0001 then
+		return value
+	end
+	return math.floor((value + offset) / step + 0.5) * step - offset
+end
+
+
 ---@param canvas GNUI.Canvas
 ---@return GNUI.Widget.Slider
 function SliderAPI.new(canvas)
@@ -54,46 +65,48 @@ function SliderAPI.new(canvas)
 	---@cast self GNUI.Widget.Slider
 	setmetatable(self, Slider)
 
-	self.isVertical = true
+	self.isVertical = false
 	self.value = 0
 	self.min = 0
 	self.max = 100
-	self.step = 0
+	self.step = 10
 	self.softBoundary = false
 	self.prefix = ""
 	self.suffix = ""
 	self.VALUE_CHANGED = Event.new()
-	
+
 	self.sizing[self.isVertical and "x" or "y"] = "FIXED"
 	self.layout = "FIXED"
-	
+
 	local boxKnob = Box.new(canvas)
 	boxKnob:setName("eee")
 	self.boxKnob = boxKnob
 	self:addChild(self.boxKnob)
 	self.boxKnob.captureInput = false
 	boxKnob:setSizing("FIXED", "FIXED")
-	self:setSizing("FIXED","FIT")
-	
-	self.SIZE_CHANGED:register(function (size)
+	self:setSizing("FIXED", "FIT")
+
+	self.SIZE_CHANGED:register(function(size)
 		self:updateKnob()
 	end)
-	
-	self.BUTTON_DOWN:register(function ()
-		self.canvas.CURSOR_MOVED:register(function (pos,vel)
-			self:processSlider(vel)
-		end,self.id)
+
+	self.BUTTON_DOWN:register(function()
+		local offset = vec(0,0)
+		local original = self.value
+		self.canvas.CURSOR_MOVED:register(function(pos, vel)
+			offset = offset + vel
+			self:processSlider(offset,original)
+		end, self.id)
 	end)
-	
-	self.BUTTON_UP:register(function ()
+
+	self.BUTTON_UP:register(function()
 		self.canvas.CURSOR_MOVED:remove(self.id)
 	end)
-	
 	return self
 end
 
 local function getKnobLength(box)
-	local len = Style.getStyleFromBox(box,"knobLength")
+	local len = box.customKnobLength or Style.getStyleFromBox(box, "knobLength")
 	if len == -1 then
 		return box.isVertical and box.boxKnob.finalSize.x or box.boxKnob.finalSize.y
 	end
@@ -101,18 +114,21 @@ local function getKnobLength(box)
 end
 
 --TODO: cache the knob length
-function Slider:processSlider(vel)
+function Slider:processSlider(offset, original)
 	local knobLength = getKnobLength(self)
+	local lastValue = self.value
 	if self.isVertical then
-		self.value = self.value + math.map(vel.y, 0, self.finalSize.y-knobLength,self.min,self.max)
+		self.value = original + math.map(offset.y, 0, self.finalSize.y - knobLength, self.min, self.max)
 	else
-		self.value = self.value + math.map(vel.x, 0, self.finalSize.x-knobLength,self.min,self.max)
+		self.value = original + math.map(offset.x, 0, self.finalSize.x - knobLength, self.min, self.max)
 	end
 	self.value = math.clamp(self.value, self.min, self.max)
-	self.VALUE_CHANGED:invoke(self.value)
-	self:updateKnob()
+	self.value = snap(self.value, self.step)
+	if lastValue ~= self.value then
+		self.VALUE_CHANGED:invoke(self.value)
+		self:updateKnob()
+	end
 end
-
 
 function Slider:updateKnob()
 	local knobLength = getKnobLength(self)
@@ -120,16 +136,19 @@ function Slider:updateKnob()
 	self.sizing[self.isVertical and "x" or "y"] = "FIT"
 	local padding = self:getPadding()
 	self.boxKnob
-	:setSize(
-		self.isVertical and (self.finalSize.x-padding.x-padding.z) or knobLength,
-		not self.isVertical and (self.finalSize.y-padding.y-padding.w) or knobLength
-	)
-	:setPos(
-		not self.isVertical and math.map(self.value, self.min, self.max, padding.x, self.finalSize.x-knobLength-padding.z) or padding.x,
-		self.isVertical and math.map(self.value,self.min,self.max, -padding.y, self.finalSize.y-knobLength) or -padding.y
-	)
+		 :setSize(
+			 self.isVertical and (self.finalSize.x - padding.x - padding.z) or knobLength,
+			 not self.isVertical and (self.finalSize.y - padding.y - padding.w) or knobLength
+		 )
+		 :setPos(
+			 not self.isVertical and
+			 math.map(self.value, self.min, self.max, padding.x, self.finalSize.x - knobLength -
+			 padding.z) or padding.x,
+			 self.isVertical and
+			 math.map(self.value, self.min, self.max, -padding.y, self.finalSize.y - knobLength) or
+			 -padding.y
+		 )
 end
-
 
 ---@param vertical boolean
 ---@generic self
@@ -225,8 +244,6 @@ function Slider:setSuffix(suffix)
 	return self
 end
 
---TODO: replace method with slider stuffs, right now its a direct copy from the Button class
-
 ---Applies the appropriate style to the button, based on its state.
 ---
 ---this is called automatically by built in events
@@ -253,7 +270,7 @@ end
 function Slider:setStyleVariant(variant)
 	variant = variant or "default"
 	---@cast self GNUI.Widget.Slider
-	
+
 	self.variant = variant
 	local style = Style.getStyle(self, variant, "normal")
 	style:newInstance(self)
@@ -264,7 +281,7 @@ function Slider:setStyleVariant(variant)
 	Style.getStyle("box", "highlight", "normal")
 		 :newInstance(self, "highlight")
 		 :setVisible(false)
-	
+
 	Style.getStyleFromBox(self, "knob")
 		 :newInstance(self.boxKnob)
 
@@ -299,7 +316,7 @@ end
 function SliderAPI.parse(layout, canvas, button)
 	local self = button or Box.parse(layout, canvas, SliderAPI.new(canvas))
 	---@cast self GNUI.Widget.Slider
-	
+
 	self:setToggle(false) -- force sliders to be non-toggleable
 
 	return self

@@ -803,6 +803,10 @@ function Box:forceUpdate()
 		 :solveForFitSizing(false)
 		 :sovleForFillSizing(false)
 		 :sovleForLayout(false)
+		 
+		 :solveForFitSizing(true)
+		 :sovleForFillSizing(true)
+		 :sovleForLayout(true)
 
 		 :updateSprites()
 	unflag(self)
