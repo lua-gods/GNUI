@@ -1,7 +1,7 @@
 ---@diagnostic disable: duplicate-doc-field
 local BASE = (...):match(".+[./]GNUI"):gsub("/",".")
-local utils = require("lib.gncommon") ---@type GNCommon
-local gncommon = require("lib.gncommon") ---@type GNCommon
+local utils = require("lib.GNcommon") ---@type GNCommon
+local gncommon = require("lib.GNcommon") ---@type GNCommon
 local cfg = require(BASE..".config") ---@type GNUI.config
 local Theme = require(cfg.THEME..".theme") ---@type GNUI.ThemeAPI
 

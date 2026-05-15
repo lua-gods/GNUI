@@ -6,7 +6,7 @@
 ---@diagnostic disable: return-type-mismatch, assign-type-mismatch, undefined-field
 local BASE = ((...):gsub("/",".")):match(".+%.GNUI")
 
-local gncommon = require("lib.gncommon") ---@type GNCommon
+local gncommon = require("lib.GNcommon") ---@type GNCommon
 local cfg = require(BASE..".config") ---@type GNUI.config
 local Box = require(cfg.CORE..".prims.box") ---@type GNUI.Primitive.BoxAPI
 local Render = require(cfg.RENDER .. ".init") ---@type GNUI.RenderAPI

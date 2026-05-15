@@ -7,7 +7,7 @@ return {
 	
 	WIDGETS = "%s.widgets",
 	
-	GN_COMMON = "lib.gncommon",
+	GN_COMMON = "lib.GNcommon",
 	UTILS = "%s.utils",
 	
 	EVENT = "lib.event",

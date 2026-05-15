@@ -38,7 +38,7 @@ local function parseEntry(canvas, layout)
 			error("Failed to parse layout: " .. tostring(layout.type) .. "\n" .. box,2)
 		end
 	else
-		error("Unknown layout type: " .. (layout and layout.type or "nil"))
+		error("Unknown element type: " .. (layout and layout.type or "nil"))
 	end
 end
 

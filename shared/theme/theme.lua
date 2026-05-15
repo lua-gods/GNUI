@@ -1,7 +1,7 @@
 local BASE = (...):match(".+[./]GNUI"):gsub("/",".")
 local cfg = require(BASE..".config") ---@type GNUI.config
 local utils =  require(BASE..".utils") ---@type GNUI.utils
-local gncommon = require("lib.gncommon") ---@type GNCommon
+local gncommon = require("lib.GNcommon") ---@type GNCommon
 
 
 --TODO: rewrite all styles into a full data driven one, instead of an imperial one
@@ -13,20 +13,23 @@ local gncommon = require("lib.gncommon") ---@type GNCommon
 ---@type table<string,GNUI.StyleImporter>
 local STYLE_IMPORTERS = {}
 
-
 ---@class GNUI.Theme
----@field [string] GNUI.Theme.Class
+---@field title string
+---@field styles GNUI.Theme.Styles
 
----@class GNUI.Theme.Class
----@field [string] GNUI.Theme.Class.Variant|string
+---@class GNUI.Theme.Styles
+---@field [string] GNUI.Theme.Styles.Class
 
----@class GNUI.Theme.Class.Variant
+---@class GNUI.Theme.Styles.Class
+---@field [string] GNUI.Theme.Styles.Class.Variant|string
+
+---@class GNUI.Theme.Styles.Class.Variant
 ---@field [string] GNUI.StyleEntry|any
 
 ---@class GNUI.StyleEntry
 
----@type GNUI.Theme
-local Theme = {}
+---@type table<string,GNUI.Theme>
+local Themes = {}
 
 ---@class GNUI.ThemeAPI
 local ThemeAPI = {}
@@ -44,42 +47,61 @@ end
 function ThemeAPI.importTheme(path)
 	local theme = require(path)
 	
-	for classIndex, class in pairs(theme) do
-		if not Theme[classIndex] then Theme[classIndex] = {} end
+	local Styles
+	
+	if not Themes[theme.title] then
+		Themes[theme.title] = {
+			title = theme.title,
+			styles = {}
+		}
+	end
+	Styles = Themes[theme.title].styles
+	
+	for classIndex, class in pairs(theme.styles) do
+		if not Styles[classIndex] then Styles[classIndex] = {} end
 		
 		for variantIndex, variant in pairs(class) do
 			if type(variant) == "table" then
-				if not Theme[classIndex][variantIndex] then Theme[classIndex][variantIndex] = {} end
+				if not Styles[classIndex][variantIndex] then Styles[classIndex][variantIndex] = {} end
 				for keyIndex, key in pairs(variant) do
 					if type(key) == "table" then
 						if key.type then
 							local importer = STYLE_IMPORTERS[key.type]
 							if importer then
-								Theme[classIndex][variantIndex][keyIndex] = importer(key)
+								Styles[classIndex][variantIndex][keyIndex] = importer(key)
 							else
 								print("[GNUI] : tried to import \""..key.type.."\" but no importer found")
-								Theme[classIndex][variantIndex][keyIndex] = key
+								Styles[classIndex][variantIndex][keyIndex] = key
 							end
 						end
 					else
-						Theme[classIndex][variantIndex][keyIndex] = key
+						Styles[classIndex][variantIndex][keyIndex] = key
 					end
 				end
 			else
-				Theme[classIndex][variantIndex] = variant
+				Styles[classIndex][variantIndex] = variant
 			end
 		end
 	end
 end
-
 
 --────────────────────────-< Theme Loader >-────────────────────────--
 
 ---@param class string|GNUI.Box
 ---@param variant string
 ---@param key any
+---@param themeOverride string?
 ---@return GNUI.Sprite.Style|any
-function ThemeAPI.getStyle(class,variant,key)
+function ThemeAPI.getStyle(class,variant,key,themeOverride)
+	local Theme
+	if not themeOverride then
+		Theme = Themes[next(Themes)]
+	else
+		assert(Themes[themeOverride],"Unknown theme: " .. themeOverride)
+		Theme = Themes[themeOverride]
+	end
+	Theme = Theme.styles
+	
 	if type(class) ~= "string" then
 		class = class.__style
 		assert(class,"No class found")
@@ -119,10 +141,13 @@ end
 
 ---@param class any
 ---@return string[]
-function ThemeAPI.getVariantNames(class)
+function ThemeAPI.getVariantNames(class,theme)
+	theme = "ore"
 	local list = {}
-	for variantIndex, variant in pairs(Theme[class]) do
-		list[#list+1] = variantIndex
+	if theme then
+		for variantIndex, variant in pairs(Themes[theme].styles[class]) do
+			list[#list+1] = variantIndex
+		end
 	end
 	return list
 end
@@ -130,9 +155,15 @@ end
 
 ---@return string[]
 function ThemeAPI.getClassNames()
+	local hash = {}
 	local list = {}
-	for classIndex, class in pairs(Theme) do
-		list[#list+1] = classIndex
+	for key, theme in pairs(Themes) do
+		for classIndex,stuff in pairs(theme.styles) do
+			hash[classIndex] = true
+		end
+	end
+	for name in pairs(hash) do
+		list[#list+1] = name
 	end
 	return list
 end
