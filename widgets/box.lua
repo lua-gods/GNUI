@@ -38,6 +38,8 @@ setmetatable(BoxAPI, {
 ---@field text string?
 ---@field textAlign {[1]:(-1|0|1),[2]:(-1|0|1)}?
 ---@field wrap boolean?
+---@field margin Vector4?
+---@field padding Vector4?
 
 
 ---@param layout GNUI.Layout
@@ -73,6 +75,8 @@ function BoxAPI.parse(layout, canvas, box)
 	if layout.layout then box:setLayout(layout.layout) end
 	if layout.childAlign then box:setChildAlign(layout.childAlign) end
 	if layout.gap then box:setChildGap(layout.gap) end
+	if layout.margin then box:setMargin(layout.margin) end
+	if layout.padding then box:setPadding(layout.padding) end
 
 	box:setStyleVariant(layout.variant)
 

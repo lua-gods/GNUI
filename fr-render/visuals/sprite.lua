@@ -99,9 +99,9 @@ end
 ---Sets the position of the given task
 ---@param x number
 ---@param y number
-function Display:setSpritePos(visualID,taskID,x,y)
+function Display:setSpritePos(visualID,taskID,x,y,layer)
 	local task = self:getTask(visualID,taskID)
-	task.quad:pos(-x,-y)
+	task.quad:pos(-x,-y,layer)
 end
 
 
@@ -151,6 +151,8 @@ end
 ---@param taskID integer
 function Display:removeSprite(visualID,taskID)
 	local task = self:getTask(visualID,taskID)
-	task.quad:remove()
-	self.visuals[visualID].tasks[taskID] = nil
+	if task then
+		task.quad:remove()
+		self.visuals[visualID].tasks[taskID] = nil
+	end
 end

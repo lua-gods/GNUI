@@ -184,6 +184,8 @@ end
 ---@param taskID integer
 function Display:removeLabel(visualID,taskID)
 	local task = self:getTask(visualID,taskID)
-	task.label:remove()
-	self.visuals[visualID].tasks[taskID] = nil
+	if task then
+		task.label:remove()
+		self.visuals[visualID].tasks[taskID] = nil
+	end
 end

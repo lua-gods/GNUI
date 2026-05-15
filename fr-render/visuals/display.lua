@@ -70,12 +70,13 @@ end
 ---NOTE: INTERNAL USE ONLY
 ---@param visualID integer
 ---@param spriteID integer
----@return GNUI.Render.Visual.Task
+---@return GNUI.Render.Visual.Task?
 function Display:getTask(visualID,spriteID)
 	local visual = self.visuals[visualID]
-	assert(visual,"Visual Quad "..tostring(visualID).." not found")
+	--assert(visual,"Visual Quad "..tostring(visualID).." not found")
+	if not visual then return end
 	local task = visual.tasks[spriteID]
-	assert(task,"Visual Quad "..tostring(visualID).." task "..tostring(spriteID).." not found")
+	--assert(task,"Visual Quad "..tostring(visualID).." task "..tostring(spriteID).." not found")
 	return task
 end
 
@@ -105,7 +106,7 @@ end
 function Display:addChild(visualID,childVisualID)
 	local vis = self.visuals[visualID]
 	local child = self.visuals[childVisualID]
-	assert(vis,"Visual Quad "..tostring(visualID).." not found")
+	if not vis then return nil end
 	assert(child,"Visual Quad "..tostring(childVisualID).." not found")
 	
 	
@@ -126,7 +127,7 @@ end
 function Display:removeChild(visualID,childVisualID)
 	local vis = self.visuals[visualID]
 	local child = self.visuals[childVisualID]
-	assert(vis,"Visual Quad "..visualID.." not found")
+	if not vis then return end
 	assert(child,"Visual Quad "..visualID.." not found")
 	
 	if vis.children[child.id] == child then
@@ -145,12 +146,20 @@ end
 ---@param visualID integer
 function Display:removeParent(visualID)
 	local vis = self.visuals[visualID]
-	assert(vis,"Visual Quad "..visualID.." not found")
+	if not vis then return end
 	
 	if vis.parent then
 		self:removeChild(vis.parent.id,vis.id)
 	end
 	return self
+end
+
+
+function Display:removeVisual(visualID)
+	local vis = self.visuals[visualID]
+	if not vis then return end
+	vis.model:remove()
+	self.visuals[visualID] = nil
 end
 
 
@@ -160,8 +169,8 @@ end
 function Display:setParent(visualID,parentID)
 	local vis = self.visuals[visualID]
 	local parent = self.visuals[parentID]
-	assert(vis,"Visual Quad "..visualID.." not found")
-	assert(parent,"Visual Quad "..parentID.." not found")
+	if not vis then return end
+	if not parent then return end
 	
 	self:removeParent(visualID)
 	self:addChild(parentID,visualID)
@@ -174,9 +183,10 @@ end
 ---@param y number
 function Display:setPos(visualID,x,y)
 	local vis = self.visuals[visualID]
-	assert(vis,"Visual Quad "..visualID.." not found")
-	vis.pos = vec(x,y)
-	updateDimensions(vis)
+	if vis then
+		vis.pos = vec(x,y)
+		updateDimensions(vis)
+	end
 end
 
 
@@ -186,14 +196,14 @@ end
 ---@param y number
 function Display:setSize(visualID,x,y)
 	local vis = self.visuals[visualID]
-	assert(vis,"Visual Quad "..visualID.." not found")
-	
-	vis.size = vec(x,y)
-	for key, task in pairs(vis.tasks) do
-		task:setSize(x,y)
+	if vis then
+		vis.size = vec(x,y)
+		for key, task in pairs(vis.tasks) do
+			task:setSize(x,y)
+		end
+		
+		updateDimensions(vis)
 	end
-	
-	updateDimensions(vis)
 end
 
 
@@ -202,8 +212,7 @@ end
 ---@param visible boolean
 function Display:setVisible(visualID,visible)
 	local vis = self.visuals[visualID]
-	assert(vis,"Visual Quad "..visualID.." not found")
-	
+	if not vis then return end
 	for key, task in pairs(vis.tasks) do
 		task:setVisible(visible)
 	end
@@ -219,7 +228,7 @@ end
 ---@param b number
 function Display:setColor(id,r,g,b)
 	local vis = self.visuals[id]
-	assert(vis,"Visual Quad "..id.." not found")
+	if not vis then return end
 	
 	for key, task in pairs(vis.tasks) do
 		task:setColor(r,g,b)

@@ -24,6 +24,7 @@ local gncommon = require(cfg.GN_COMMON) ---@type GNCommon
 ---@field textAlignment Vector2
 ---
 ---@field pos Vector2
+---@field layer number
 ---@field size Vector2
 ---
 ---@field display GNUI.Render.Display
@@ -42,6 +43,7 @@ function Sprite.new(box, slot)
 		pos = vec(0, 0),
 		size = vec(0, 0),
 		padding = vec(0, 0, 0, 0),
+		layer = 0,
 
 		childIndex = 1,
 
@@ -67,11 +69,12 @@ end
 
 
 ---@param box GNUI.Box
----@param slot (integer|string)?
+---@param slot (integer)?
 function Sprite:setBox(box, slot)
 	if self.taskID then
 		self.display:removeSprite(box.visualID,self.taskID)
 	end
+	self.layer = slot
 	self.display = box.canvas.display
 	self.taskID = box.canvas.display:newSprite(box.visualID)
 	self.labelID = box.canvas.display:newLabel(box.visualID)
@@ -102,6 +105,7 @@ function Sprite:setPos(x, y)
 	end
 	self.display:setPos(self.box.visualID, self.pos.x, self.pos.y)
 end
+
 
 ---@overload fun(self: GNUI.Sprite)
 ---@param x number

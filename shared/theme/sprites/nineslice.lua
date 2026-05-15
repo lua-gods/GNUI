@@ -41,11 +41,12 @@ function Nineslice.getIndex() return Nineslice.__index end
 
 ---A representation of a quad that will get drawn
 ---@param box GNUI.Box
----@param slot (integer|string)?
+---@param slot (integer)?
 ---@return GNUI.Sprite.Nineslice
 function Nineslice.new(box,slot)
 	assert(box,"no GNUI.Box given")
 	local self = Sprite.new(box,slot)
+	
 	---@cast self GNUI.Sprite.Nineslice
 	
 	local id = box.visualID
@@ -97,7 +98,7 @@ end
 ---@param y number
 function Nineslice:setPos(x,y)
 	if x then
-		local pos = gncommon.vec2(x,y)
+		local pos = gncommon.vec3(x,y)
 		if self.pos == pos then return end
 		self.pos = pos
 		self:applyDimensions()
@@ -146,7 +147,6 @@ function Nineslice:applyDimensions()
 	self.display:setSpritePos(id,self.idBottom,      pos.x+border.x,pos.y+size.y-border.w)
 	self.display:setSpritePos(id,self.idBottomRight, pos.x+size.x-border.z,pos.y+size.y-border.w)
 end
-
 
 ---@overload fun(self: GNUI.Sprite.Nineslice)
 ---@param path string
@@ -250,5 +250,14 @@ function Nineslice:applyAll(style)
 	self:applyDimensions()
 end
 
+function Nineslice:free()
+	for index, id in ipairs(self.ids) do
+		self.display:removeSprite(self.box.visualID, id)
+	end
+	
+	self.display:removeVisual(self.box.visualID)
+	
+	self.display:removeLabel(self.box.visualID, self.labelID)
+end
 
 return Nineslice

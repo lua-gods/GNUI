@@ -111,7 +111,7 @@ end
 ---@return self
 function Button:applyApropriateStyle()
 	---@cast self GNUI.Widget.Button
-	self.sprites.highlight:setVisible(self.isHovered or self.down)
+	self.sprites[2]:setVisible(self.isHovered or self.down)
 	if self.down then
 		self.sprites[1]:setStyle(Style.getStyleFromBox(self,"pressed"))
 	else
@@ -199,7 +199,7 @@ function Button:setStyleVariant(variant)
 	end
 	
 	Style.getStyle("box", "highlight", "normal")
-	:newInstance(self,"highlight"):setVisible(false)
+	:newInstance(self,2):setVisible(false)
 	
 	self:recalculateMargin()
 	self:recalculatePadding()

@@ -15,7 +15,7 @@ return {
 		box = {
 			default = "opaque",
 
-			empty = {
+			none = {
 				normal = {
 					type = "sprite",
 				},

@@ -279,7 +279,7 @@ function Slider:setStyleVariant(variant)
 	self.boxKnob.variant = variant
 
 	Style.getStyle("box", "highlight", "normal")
-		 :newInstance(self, "highlight")
+		 :newInstance(self, 2)
 		 :setVisible(false)
 
 	Style.getStyleFromBox(self, "knob")

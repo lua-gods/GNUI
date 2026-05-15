@@ -27,7 +27,7 @@ end
 
 ---A representation of a quad that will get drawn
 ---@param box GNUI.Box
----@param slot (integer|string)?
+---@param slot (integer)?
 ---@return GNUI.Sprite.Quad
 function Quad.new(box,slot)
 	assert(box,"no GNUI.Box given")
@@ -110,6 +110,12 @@ function Quad:applyAll(style)
 	if style.color then self:setColor(style and style.color) end
 	if style.textColor then self:setTextColor(style and style.textColor) end
 	if style.textAlignment then self:setTextAlignment(self.box.textAlignment or style.textAlignment:unpack()) end
+end
+
+
+function Quad:free()
+	self.display:removeSprite(self.box.visualID, self.taskID)
+	self.display:removeLabel(self.box.visualID, self.labelID)
 end
 
 
