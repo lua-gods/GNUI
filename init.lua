@@ -20,6 +20,10 @@ local utils = require(BASE..".utils") ---@type GNUI.utils
 
 
 ---@class GNUIAPI
+---@field Core GNUI.CoreAPI
+---@field Layout GNUI.LayoutAPI
+---@field Render GNUI.RenderAPI
+---@field Theme GNUI.ThemeAPI
 local GNUIAPI = {}
 
 local PRESETS = {}
@@ -72,7 +76,6 @@ function GNUIAPI.setup(customPresetName)
 	
 	-- import default theme
 	Theme.importTheme(BASE..".shared.theme.defaults.gnui")
-
 	
 	---@param canvas GNUI.Canvas
 	---@param data GNUI.Layout
