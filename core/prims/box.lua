@@ -387,8 +387,8 @@ function Box:recalculateMinimumSize()
 	for key, sprite in pairs(self.sprites) do
 		if sprite.style then
 			local style = sprite.style
-			minSize.x = math.max(minSize.x, style.padding.x + style.padding.z)
-			minSize.y = math.max(minSize.y, style.padding.y + style.padding.w)
+			minSize.x = math.max(minSize.x, style.padding.x + style.padding.z, style.minSize.x)
+			minSize.y = math.max(minSize.y, style.padding.y + style.padding.w, style.minSize.x)
 		end
 	end
 	self.finalMinSize = minSize
@@ -461,11 +461,11 @@ end
 ---@param self self
 ---@return self
 ---@param sprite GNUI.Sprite
----@param slot (integer|string)?
-function Box:setSprite(sprite, slot)
+---@param layer (integer)?
+function Box:setSprite(sprite, layer)
 	---@cast self GNUI.Box
 
-	sprite:setBox(self, slot)
+	sprite:setBox(self, layer)
 	self:recalculateMargin()
 	self:recalculatePadding()
 	self:recalculateMinimumSize()
