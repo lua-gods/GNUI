@@ -42,6 +42,18 @@ function ThemeAPI._registerImporter(type,importer)
 end
 
 
+---@param style GNUI.StyleEntry
+---@param box GNUI.Box
+---@param layer number?
+function ThemeAPI.applyStyle(style,box,layer)
+	assert(style,"No style given")
+	assert(box,"No box given")
+	assert(style.type,"No type found")
+	local importer = STYLE_IMPORTERS[style.type]
+	local parsedStype = importer(style)
+	parsedStype:newInstance(box,layer)
+end
+
 ---NOTE: the theme only applies to future instantiated elements, and wont be affecting existing ones.
 ---@param path string
 function ThemeAPI.importTheme(path)
@@ -130,6 +142,17 @@ function ThemeAPI.getStyle(class,variant,key,themeOverride)
 	error("Unknown style: " .. tostring(class) .. "." .. tostring(variant) .. "." .. tostring(key))
 end
 
+--────────────────────────-< Theme APIs >-────────────────────────--
+
+
+---@overload fun(style: GNUI.StyleEntry|{type:"sprite"}): GNUI.Sprite
+---@overload fun(style: GNUI.StyleEntry|{type:"quad"}): GNUI.Sprite.Quad
+---@overload fun(style: GNUI.StyleEntry|{type:"nineslice"}): GNUI.Sprite.Nineslice
+function ThemeAPI.newSprite(style)
+---@diagnostic disable-next-line: param-type-mismatch
+	return STYLE_IMPORTERS[style.type](style)
+end
+
 
 ---@param box GNUI.Box
 ---@param key any
@@ -166,6 +189,5 @@ function ThemeAPI.getClassNames()
 	end
 	return list
 end
-
 
 return ThemeAPI
