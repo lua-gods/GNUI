@@ -1,3 +1,4 @@
+---@diagnostic disable: param-type-mismatch
 --[[______   __
   / ____/ | / /  by: GNanimates / https://gnon.top / Discord: @gn68s
  / / __/  |/ / name: GNUI Box Widget
@@ -10,7 +11,7 @@ local cfg = require(BASE .. ".config") ---@type GNUI.config
 
 local TrueBoxAPI = require(BASE .. ".core.prims.box") ---@type GNUI.Primitive.BoxAPI
 local Layout = require(cfg.LAYOUT .. ".init") ---@type GNUI.LayoutAPI
-local Style = require(cfg.THEME .. ".init") ---@type GNUI.ThemeAPI
+local Theme = require(cfg.THEME .. ".init") ---@type GNUI.ThemeAPI
 
 ---@class GNUI.BoxAPI : GNUI.Primitive.BoxAPI
 local BoxAPI = {}
@@ -78,7 +79,15 @@ function BoxAPI.parse(layout, canvas, box)
 	if layout.margin then box:setMargin(layout.margin) end
 	if layout.padding then box:setPadding(layout.padding) end
 
-	box:setStyleVariant(layout.variant)
+	local t = type(layout.style)
+	
+	if t == "string" or t == "nil" then
+		box:setStyleVariant(layout.style)
+	else
+		if layout.style then
+			Theme.applyStyle(layout.style,box,1)
+		end
+	end
 
 	if layout.text then box:setText(layout.text) end
 	if layout.textAlign then box:setTextAlignment(layout.textAlign[1], layout.textAlign[2]) end
