@@ -27,6 +27,9 @@ Theme._registerImporter("sprite",function (style)
 	sprite.textAlignment = style.textAlignment or sprite.textAlignment
 	sprite.margin = style.margin or sprite.margin
 	
+	-- default layout
+	sprite.childGap = style.childGap or sprite.childGap
+	
 	return sprite
 end)
 
@@ -36,6 +39,7 @@ end)
 ---@field textColor Vector3
 ---@field textAlignment Vector2
 ---@field margin Vector4
+---@field childGap integer?
 local SpriteStyle = {}
 SpriteStyle.__index = SpriteStyle
 

@@ -24,6 +24,7 @@ local NinesliceStyleAPI = {}
 ---@field color Vector3|string?
 ---@field uv Vector4?
 ---@field border Vector4?
+---@field childGap number?
 
 
 Theme._registerImporter("nineslice",function (style)
@@ -36,6 +37,9 @@ Theme._registerImporter("nineslice",function (style)
 	nine.color = style.color and gncommon.color(style.color).xyz or nine.color
 	nine.textColor = style.textColor and gncommon.color(style.textColor).xyz or nine.textColor
 	nine.uv = style.uv or nine.uv
+	
+	-- default layout
+	nine.childGap = style.childGap or nine.childGap
 	
 	nine.border = style.border
 	
@@ -76,10 +80,10 @@ end
 
 
 ---@param box GNUI.Box
----@param slot (integer|string)?
+---@param layer (integer)?
 ---@return GNUI.Sprite
-function NinesliceStyle:newInstance(box,slot)
-	local instance = newInstance(box,slot):setStyle(self)
+function NinesliceStyle:newInstance(box,layer)
+	local instance = newInstance(box,layer):setStyle(self)
 	return instance
 end
 

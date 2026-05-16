@@ -485,7 +485,8 @@ function Box:setStyleVariant(variant)
 
 	self.variant = variant
 	local style = Style.getStyle(self, variant, "normal")
-	style:newInstance(self)
+	local layer = #self.sprites+1
+	style:newInstance(self,layer)
 
 	self:recalculateMargin()
 	self:recalculatePadding()

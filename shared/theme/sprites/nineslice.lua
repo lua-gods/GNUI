@@ -137,15 +137,16 @@ function Nineslice:applyDimensions()
 	self.display:setSpriteSize(id,self.idBottom,      size.x-border.x-border.z, border.w)
 	self.display:setSpriteSize(id,self.idBottomRight, border.z, border.w)
 	
-	self.display:setSpritePos(id,self.idTopLeft,  pos.x, pos.y)
-	self.display:setSpritePos(id,self.idTop,      pos.x+border.x, pos.y)
-	self.display:setSpritePos(id,self.idTopRight, pos.x+size.x-border.z, pos.y)
-	self.display:setSpritePos(id,self.idLeft,  pos.x, pos.y+border.y)
-	self.display:setSpritePos(id,self.idCenter,      pos.x+border.x, pos.y+border.y)
-	self.display:setSpritePos(id,self.idRight, pos.x+size.x-border.z, pos.y+border.y)
-	self.display:setSpritePos(id,self.idBottomLeft,  pos.x, pos.y+size.y-border.w)
-	self.display:setSpritePos(id,self.idBottom,      pos.x+border.x,pos.y+size.y-border.w)
-	self.display:setSpritePos(id,self.idBottomRight, pos.x+size.x-border.z,pos.y+size.y-border.w)
+	local l = self.layer
+	self.display:setSpritePos(id,self.idTopLeft,  pos.x, pos.y,l)
+	self.display:setSpritePos(id,self.idTop,      pos.x+border.x, pos.y,l)
+	self.display:setSpritePos(id,self.idTopRight, pos.x+size.x-border.z, pos.y,l)
+	self.display:setSpritePos(id,self.idLeft,  pos.x, pos.y+border.y,l)
+	self.display:setSpritePos(id,self.idCenter,      pos.x+border.x, pos.y+border.y,l)
+	self.display:setSpritePos(id,self.idRight, pos.x+size.x-border.z, pos.y+border.y,l)
+	self.display:setSpritePos(id,self.idBottomLeft,  pos.x, pos.y+size.y-border.w,l)
+	self.display:setSpritePos(id,self.idBottom,      pos.x+border.x,pos.y+size.y-border.w,l)
+	self.display:setSpritePos(id,self.idBottomRight, pos.x+size.x-border.z,pos.y+size.y-border.w,l)
 end
 
 ---@overload fun(self: GNUI.Sprite.Nineslice)
@@ -245,6 +246,7 @@ function Nineslice:applyAll(style)
 		self:setTextColor(style.textColor:unpack())
 		self:setPadding(style.padding:unpack())
 		self:setTextAlignment(self.box.textAlignment or style.textAlignment:unpack())
+		if style.childGap then self.box:setChildGap(style.childGap) end
 	end
 	
 	self:applyDimensions()

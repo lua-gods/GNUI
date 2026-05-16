@@ -110,6 +110,7 @@ function Quad:applyAll(style)
 	if style.color then self:setColor(style and style.color) end
 	if style.textColor then self:setTextColor(style and style.textColor) end
 	if style.textAlignment then self:setTextAlignment(self.box.textAlignment or style.textAlignment:unpack()) end
+	if style.childGap then self.box:setChildGap(style.childGap) end
 end
 
 

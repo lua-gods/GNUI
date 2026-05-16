@@ -37,6 +37,9 @@ Theme._registerImporter("quad",function (style)
 	quad.textColor = style.textColor and gncommon.color(style.textColor).xyz or quad.textColor
 	quad.uv = style.uv or quad.uv
 	
+	-- default layout
+	quad.childGap = style.childGap or quad.childGap
+	
 	return quad
 end)
 

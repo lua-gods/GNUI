@@ -71,7 +71,7 @@ function GNUIAPI.setup(customPresetName)
 	end
 	
 	-- import default theme
-	Theme.importTheme(BASE..".shared.theme.defaults.ore")
+	Theme.importTheme(BASE..".shared.theme.defaults.gnui")
 
 	
 	---@param canvas GNUI.Canvas

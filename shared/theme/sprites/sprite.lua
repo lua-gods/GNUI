@@ -35,15 +35,15 @@ Sprite.__index = Sprite
 
 
 ---@param box GNUI.Box
----@param slot (integer|string)?
+---@param layer (integer)?
 ---@return GNUI.Sprite
-function Sprite.new(box, slot)
+function Sprite.new(box, layer)
 	assert(box, "no GNUI.Box given")
 	local self = {
 		pos = vec(0, 0),
 		size = vec(0, 0),
 		padding = vec(0, 0, 0, 0),
-		layer = 0,
+		layer = layer,
 
 		childIndex = 1,
 
@@ -55,7 +55,7 @@ function Sprite.new(box, slot)
 
 	}
 	setmetatable(self, Sprite)
-	self:setBox(box, slot)
+	self:setBox(box, layer)
 	return self
 end
 
@@ -69,18 +69,18 @@ end
 
 
 ---@param box GNUI.Box
----@param slot (integer)?
-function Sprite:setBox(box, slot)
+---@param layer (integer)?
+function Sprite:setBox(box, layer)
 	if self.taskID then
 		self.display:removeSprite(box.visualID,self.taskID)
 	end
-	self.layer = slot
+	self.layer = layer
 	self.display = box.canvas.display
 	self.taskID = box.canvas.display:newSprite(box.visualID)
 	self.labelID = box.canvas.display:newLabel(box.visualID)
 	self.box = box
 
-	self.index = slot or #box.sprites + 1
+	self.index = layer or #box.sprites + 1
 
 	box.sprites[self.index] = self
 	box:recalculateMargin()
@@ -234,6 +234,7 @@ function Sprite:applyAll(style)
 	if style then
 		self:setTextColor(style.textColor and gncommon.color(style.textColor).xyz or self.textColor)
 		self:setTextAlignment(style.textAlignment:unpack())
+		if style.childGap then self.box:setChildGap(style.childGap) end
 	end
 end
 

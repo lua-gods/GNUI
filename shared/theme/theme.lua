@@ -142,7 +142,6 @@ end
 ---@param class any
 ---@return string[]
 function ThemeAPI.getVariantNames(class,theme)
-	theme = "ore"
 	local list = {}
 	if theme then
 		for variantIndex, variant in pairs(Themes[theme].styles[class]) do

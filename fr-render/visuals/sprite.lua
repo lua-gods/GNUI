@@ -101,7 +101,7 @@ end
 ---@param y number
 function Display:setSpritePos(visualID,taskID,x,y,layer)
 	local task = self:getTask(visualID,taskID)
-	task.quad:pos(-x,-y,layer)
+	task.quad:pos(-x,-y,-(layer-1)*1.001) --TODO: investigate layer handling
 end
 
 
