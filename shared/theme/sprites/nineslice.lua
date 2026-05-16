@@ -46,7 +46,6 @@ function Nineslice.getIndex() return Nineslice.__index end
 function Nineslice.new(box,slot)
 	assert(box,"no GNUI.Box given")
 	local self = Sprite.new(box,slot)
-	
 	---@cast self GNUI.Sprite.Nineslice
 	
 	local id = box.visualID

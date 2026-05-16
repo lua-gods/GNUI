@@ -16,6 +16,7 @@ local Style = require(cfg.THEME..".styles.quad") ---@type GNUI.Sprite.Quad.Style
 ---@field style GNUI.Sprite.Quad.Style
 ---@field uv Vector4
 ---@field color Vector3
+---@field sizing GNUI.Sprite.Quad.SizingMode
 ---@field texturePath string
 ---@
 local Quad = {}
@@ -109,6 +110,7 @@ function Quad:applyAll(style)
 	if style.uv then self:setUV(style.uv:unpack())end
 	if style.color then self:setColor(style and style.color) end
 	if style.textColor then self:setTextColor(style and style.textColor) end
+---@diagnostic disable-next-line: param-type-mismatch
 	if style.textAlignment then self:setTextAlignment(self.box.textAlignment or style.textAlignment:unpack()) end
 	if style.childGap then self.box:setChildGap(style.childGap) end
 end

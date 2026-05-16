@@ -26,6 +26,7 @@ local gncommon = require(cfg.GN_COMMON) ---@type GNCommon
 ---@field pos Vector2
 ---@field layer number
 ---@field size Vector2
+---@field minSize Vector2
 ---
 ---@field display GNUI.Render.Display
 ---@field taskID integer # Task ID
@@ -45,6 +46,7 @@ function Sprite.new(box, layer)
 		padding = vec(0, 0, 0, 0),
 		layer = layer,
 
+		minSize = vec(0,0),
 		childIndex = 1,
 
 		textColor = vec(1, 1, 1),
