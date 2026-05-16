@@ -48,7 +48,15 @@ return {
 					uv = vec(0,0,2,2),
 					border = vec(1,1,1,1),
 					padding = vec(3,2,2,1),
-					textColor = vec(0.1,0.1,0.1),
+					textColor = "#141414",
+				},
+				hovered = {
+					type="nineslice",
+					texturePath = atlas,
+					uv = vec(4,0,6,2),
+					border = vec(1,1,1,1),
+					padding = vec(3,2,2,1),
+					textColor = "#141414",
 				},
 				pressed = {
 					type="nineslice",
@@ -56,6 +64,7 @@ return {
 					uv = vec(12,0,14,2),
 					border = vec(1,1,1,1),
 					padding = vec(3,2,2,1),
+					textColor = "#141414",
 				},
 			}
 		},
