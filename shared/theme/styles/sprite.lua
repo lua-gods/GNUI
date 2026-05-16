@@ -17,6 +17,7 @@ local SpriteSTyleAPI = {}
 ---@field textColor Vector3|string?
 ---@field textAlignment Vector2?
 ---@field margin Vector4?
+---@field minSize Vector2?
 
 Theme._registerImporter("sprite",function (style)
 	local sprite = SpriteSTyleAPI.new()
@@ -26,6 +27,7 @@ Theme._registerImporter("sprite",function (style)
 	sprite.textColor = style.textColor and gncommon.color(style.textColor).xyz or sprite.textColor
 	sprite.textAlignment = style.textAlignment or sprite.textAlignment
 	sprite.margin = style.margin or sprite.margin
+	sprite.minSize = style.minSize or sprite.minSize
 	
 	-- default layout
 	sprite.childGap = style.childGap or sprite.childGap
@@ -40,6 +42,7 @@ end)
 ---@field textAlignment Vector2
 ---@field margin Vector4
 ---@field childGap integer?
+---@field minSize Vector2
 local SpriteStyle = {}
 SpriteStyle.__index = SpriteStyle
 
@@ -70,6 +73,7 @@ function SpriteSTyleAPI.new()
 		expand = vec(0,0,0,0),
 		margin = utils.vec4(0,0,0,0),
 		textAlignment = vec(-1,-1),
+		minSize = vec(0,0),
 	}
 	setmetatable(self,SpriteStyle)
 	return self

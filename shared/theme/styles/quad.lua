@@ -23,6 +23,7 @@ local QuadStyleAPI = {}
 ---@field texturePath string?
 ---@field color Vector3|string?
 ---@field uv Vector4?
+---@field sizing GNUI.Sprite.Quad.SizingMode?
 
 
 Theme._registerImporter("quad",function (style)

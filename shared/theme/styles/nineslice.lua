@@ -37,6 +37,7 @@ Theme._registerImporter("nineslice",function (style)
 	nine.color = style.color and gncommon.color(style.color).xyz or nine.color
 	nine.textColor = style.textColor and gncommon.color(style.textColor).xyz or nine.textColor
 	nine.uv = style.uv or nine.uv
+	nine.minSize = style.minSize or nine.minSize
 	
 	-- default layout
 	nine.childGap = style.childGap or nine.childGap
@@ -67,6 +68,7 @@ function NinesliceStyleAPI.new()
 	self.texturePath = ""
 	self.uv = vec(0,0,0,0)
 	self.border = vec(0,0,0,0)
+	self.minSize = vec(0,0)
 	setmetatable(self,NinesliceStyle)
 	return self
 end
