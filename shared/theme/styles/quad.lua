@@ -36,8 +36,16 @@ Theme._registerImporter("quad",function (style)
 	quad.texturePath = style.texturePath or quad.texturePath
 	quad.color = style.color and gncommon.color(style.color).xyz or quad.color
 	quad.textColor = style.textColor and gncommon.color(style.textColor).xyz or quad.textColor
-	quad.uv = style.uv or quad.uv
-	
+	if quad.uv then
+		quad.uv = style.uv
+	else
+		local size = util.getTextureSize(style.texturePath)
+		quad.uv = vec(0,0,size.x,size.y)
+	end
+	quad.sizing = style.sizing or quad.sizing
+	if quad.sizing == "FIXED" then
+		quad.minSize = util.getTextureSize(style.texturePath)
+	end
 	-- default layout
 	quad.childGap = style.childGap or quad.childGap
 	
