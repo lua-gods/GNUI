@@ -11,6 +11,9 @@ local gncommon = require(cfg.GN_COMMON) ---@type GNCommon
 local Sprite = require(cfg.THEME..".sprites.sprite") ---@type GNUI.Sprite
 local Style = require(cfg.THEME..".styles.quad") ---@type GNUI.Sprite.Quad.StyleAPI
 
+---@alias GNUI.Sprite.Quad.SizingMode string
+---| "STRETCH"
+---| "FIXED"
 
 ---@class GNUI.Sprite.Quad : GNUI.Sprite
 ---@field style GNUI.Sprite.Quad.Style
@@ -18,7 +21,6 @@ local Style = require(cfg.THEME..".styles.quad") ---@type GNUI.Sprite.Quad.Style
 ---@field color Vector3
 ---@field sizing GNUI.Sprite.Quad.SizingMode
 ---@field texturePath string
----@
 local Quad = {}
 Quad.__index = function (t,i)
 	return rawget(t,i) or Quad[i] or Sprite[i]
