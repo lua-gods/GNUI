@@ -40,6 +40,7 @@ Sprite.__index = Sprite
 ---@return GNUI.Sprite
 function Sprite.new(box, layer)
 	assert(box, "no GNUI.Box given")
+	layer = layer or 1
 	local self = {
 		pos = vec(0, 0),
 		size = vec(0, 0),

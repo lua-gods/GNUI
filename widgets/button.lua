@@ -43,8 +43,9 @@ end
 
 
 ---@param canvas GNUI.Canvas
+---@param children GNUI.Box[]?
 ---@return GNUI.Widget.Button
-function ButtonAPI.new(canvas)
+function ButtonAPI.new(canvas,children)
 	local self = Box.new(canvas)
 	---@cast self GNUI.Widget.Button
 	setmetatable(self, Button)
@@ -224,8 +225,8 @@ end
 ---@param canvas GNUI.Canvas
 ---@param button GNUI.Widget.Button?
 ---@return GNUI.Widget.Button
-function ButtonAPI.parse(layout,canvas,button)
-	local self = button or Box.parse(layout,canvas,ButtonAPI.new(canvas))
+function ButtonAPI.parse(layout,canvas,children,button)
+	local self = button or Box.parse(layout,canvas,children,ButtonAPI.new(canvas))
 
 	
 	self:setStyleVariant(layout.variant)

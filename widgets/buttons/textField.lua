@@ -354,7 +354,7 @@ end
 ---@param canvas GNUI.Canvas
 ---@param textField GNUI.TextField?
 ---@return GNUI.TextField
-function TextFieldAPI.parse(layout,canvas,textField)
+function TextFieldAPI.parse(layout,canvas,children,textField)
 	local box = textField or Box.parse(layout,canvas,TextFieldAPI.new(canvas))
 	
 	if layout.field then box.field = layout.field end

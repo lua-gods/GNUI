@@ -21,9 +21,11 @@ function Display:newSprite(visualID)
 	assert(vis,"Visual Quad "..visualID.." not found")
 	
 	local taskID = #vis.tasks+1
+	
+	local quad = vis.model:newSprite("task"..taskID):setRenderType("EMISSIVE")
 	local self = {
 		textureSize = vec(1,1),
-		quad = vis.model:newSprite("task"..taskID):setRenderType("CUTOUT_EMISSIVE_SOLID")
+		quad = quad
 	}
 	
 	setmetatable(self,Sprite)
@@ -66,8 +68,10 @@ end
 ---@param y number
 function Display:setSpriteSize(visualID,taskID,x,y)
 	local task = self:getTask(visualID,taskID)
-	local size = task.textureSize
-	task.quad:scale(x/size.x,y/size.y,1)
+	if task then
+		local size = task.textureSize
+		task.quad:scale(x/size.x,y/size.y,1)
+	end
 end
 
 
@@ -101,7 +105,9 @@ end
 ---@param y number
 function Display:setSpritePos(visualID,taskID,x,y,layer)
 	local task = self:getTask(visualID,taskID)
-	task.quad:pos(-x,-y,-(layer-1)*1.001) --TODO: investigate layer handling
+	if task then
+		task.quad:pos(-x,-y,-(layer-1)*1.001) --TODO: investigate layer handling
+	end
 end
 
 
@@ -113,6 +119,7 @@ function Display:setSpriteTexture(visualID,taskID,path)
 	local task = self:getTask(visualID,taskID)
 	if path then
 		local texture = textures[path]
+		assert(texture,'texture "'..path..'" not found')
 		local textureSize = texture:getDimensions()
 		local uv = vec(0,0,1,1)
 		task.texturePath = path

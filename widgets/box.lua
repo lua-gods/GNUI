@@ -45,10 +45,12 @@ setmetatable(BoxAPI, {
 
 ---@param layout GNUI.Layout
 ---@param canvas GNUI.Canvas
+---@param children GNUI.Box|GNUI.Box[]
 ---@generic box
----@param box box
+---@param box box?
 ---@return box
-function BoxAPI.parse(layout, canvas, box)
+function BoxAPI.parse(layout, canvas, children, box)
+	local hasExtraParser = box and true or false
 	local box = box or TrueBoxAPI.new(canvas)
 
 	local hasSizeX, hasSizeY = false, false
@@ -96,6 +98,13 @@ function BoxAPI.parse(layout, canvas, box)
 	if layout.name then
 		box:setName(layout.name)
 		box.name = layout.name
+	end
+	
+	-- only automatically add the children to the box if the box has no extra parser
+	if not hasExtraParser then
+		for index, child in ipairs(children) do
+			box:addChild(child)
+		end
 	end
 
 	return box

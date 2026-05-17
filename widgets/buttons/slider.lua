@@ -34,7 +34,7 @@ local SliderAPI = {}
 ---@field prefix string # the prefix when the value is displayed
 ---@field suffix string # the suffix when the value is displayed
 ---
----@field customKnobLength integer?
+---@field knobLength integer?
 ---
 ---@field VALUE_CHANGED Event.GNUI.Button.ValueChanged # triggered when the value is changed
 ---@field PRESSED Event.GNUI.Button.PRESSED # triggered when the slider is pressed
@@ -60,7 +60,7 @@ end
 
 ---@param canvas GNUI.Canvas
 ---@return GNUI.Widget.Slider
-function SliderAPI.new(canvas)
+function SliderAPI.new(canvas,children)
 	local self = Button.new(canvas)
 	---@cast self GNUI.Widget.Slider
 	setmetatable(self, Slider)
@@ -79,12 +79,15 @@ function SliderAPI.new(canvas)
 	self.layout = "FIXED"
 
 	local boxKnob = Box.new(canvas)
+	for index, value in ipairs(children) do
+		self:addChild(value)
+	end
 	boxKnob:setName("eee")
 	self.boxKnob = boxKnob
-	self:addChild(self.boxKnob)
-	self.boxKnob.captureInput = false
+	boxKnob.captureInput = false
 	boxKnob:setSizing("FIXED", "FIXED")
 	self:setSizing("FIXED", "FIT")
+	self:addChild(boxKnob)
 
 	self.SIZE_CHANGED:register(function(size)
 		self:updateKnob()
@@ -106,7 +109,7 @@ function SliderAPI.new(canvas)
 end
 
 local function getKnobLength(box)
-	local len = box.customKnobLength or Style.getStyleFromBox(box, "knobLength")
+	local len = box.knobLength or Style.getStyleFromBox(box, "knobLength")
 	if len == -1 then
 		return box.isVertical and box.boxKnob.finalSize.x or box.boxKnob.finalSize.y
 	end
@@ -244,6 +247,29 @@ function Slider:setSuffix(suffix)
 	return self
 end
 
+
+---@param length integer?
+---@generic self
+---@param self self
+---@return self
+function Slider:setKnobLength(length)
+	---@cast self GNUI.Widget.Slider
+	self.knobLength = length
+	self:updateKnob()
+	self:update()
+	return self
+end
+
+---@param softBoundary boolean
+---@return GNUI.Widget.Slider
+function Slider:setSoftBoundary(softBoundary)
+	---@cast self GNUI.Widget.Slider
+	self.softBoundary = softBoundary
+	self:update()
+	return self
+end
+
+
 ---Applies the appropriate style to the button, based on its state.
 ---
 ---this is called automatically by built in events
@@ -273,7 +299,7 @@ function Slider:setStyleVariant(variant)
 
 	self.variant = variant
 	local style = Style.getStyle(self, variant, "normal")
-	style:newInstance(self)
+	style:newInstance(self,1)
 
 	--TODO: replace styling method with a cleaner one
 	self.boxKnob.variant = variant
@@ -299,6 +325,7 @@ end
 ---@class GNUI.Layout
 ---@field type "slider"?
 ---
+---@field isVertical boolean?
 ---@field value number?
 ---@field min number?
 ---@field max number?
@@ -308,17 +335,29 @@ end
 ---
 ---@field prefix string?
 ---@field suffix string?
+---@field knobLength integer?
 
 ---@param layout any
 ---@param canvas GNUI.Canvas
 ---@param button GNUI.Widget.Button?
 ---@return GNUI.Widget.Slider
-function SliderAPI.parse(layout, canvas, button)
-	local self = button or Box.parse(layout, canvas, SliderAPI.new(canvas))
+function SliderAPI.parse(layout, canvas, children, button)
+	local self = button or Box.parse(layout, canvas, children, SliderAPI.new(canvas,children))
 	---@cast self GNUI.Widget.Slider
 
 	self:setToggle(false) -- force sliders to be non-toggleable
 
+	local isVertical = layout.isVertical
+	self:setVertical(isVertical) 
+	self:setSizing(isVertical and "FIT" or "FILL", isVertical and "FILL" or "FIT")
+	if layout.value then self.value = layout.value end
+	if layout.min then self:setMin(layout.min) end
+	if layout.max then self:setMax(layout.max) end
+	if layout.step then self:setStepSize(layout.step) end
+	if layout.softBoundary then self:setSoftBoundary(layout.softBoundary) end
+	if layout.prefix then self:setPrefix(layout.prefix) end
+	if layout.suffix then self:setSuffix(layout.suffix) end
+	if layout.knobLength then  self:setKnobLength(layout.knobLength) end
 	return self
 end
 
