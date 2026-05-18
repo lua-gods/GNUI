@@ -4,7 +4,7 @@ local LayoutAPI = {}
 
 
 ---@class GNUI.Layout
----@field [1] GNUI.Layout[]?
+---@field [1] GNUI.Layout[]|GNUI.Layout?
 ---@field style string|GNUI.StyleEntry?
 
 
