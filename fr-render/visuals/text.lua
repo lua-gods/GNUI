@@ -87,7 +87,7 @@ local function updateLabelPos(task)
 				-task.padding.y,
 				-task.size.y+task.padding.w+textDim.y,
 				align.y
-			)+0.5)
+			)-1)
 		)
 	end
 end
