@@ -244,6 +244,16 @@ function Display:setParentType(type)
 	self.visuals[1].model:setParentType(type)
 end
 
+---Returns the model of the visual
+---
+---NOTE: This is Figura exclusive.
+---@param visualID integer
+---@return ModelPart
+function Display:getModelPart(visualID)
+	local vis = self.visuals[visualID]
+	return vis.model
+end
+
 
 --- Voids the display entirely.
 function Display:free()
