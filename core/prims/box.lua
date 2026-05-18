@@ -75,6 +75,8 @@ local BoxAPI = {}
 ---@field finalPadding Vector4
 ---@field finalMargin Vector4
 ---
+---@field bounds Vector4
+---
 ---@field SIZE_CHANGED GN.Event # called after size is changed for this element
 ---@field POSITION_CHANGED GN.Event # called after position is changed for this element
 ---
@@ -138,6 +140,7 @@ function BoxAPI.index(t, i)
 	return Box.__index(t, i)
 end
 
+
 local nextFree = 1
 
 ---Creates a new box, the fundemental primitive element of GNUI.
@@ -159,7 +162,9 @@ function BoxAPI.new(canvas)
 		finalMaxSize = vec(0, 0),
 		finalPadding = vec(0, 0, 0, 0),
 		finalMargin = vec(0, 0, 0, 0),
-
+		
+		bounds = vec(0, 0, 0, 0),
+		
 		SIZE_CHANGED = Event.new(),
 		POSITION_CHANGED = Event.new(),
 		
@@ -212,6 +217,7 @@ function BoxAPI.new(canvas)
 	return self
 end
 
+
 ---@param name string
 ---@return GNUI.Box
 function Box:setName(name)
@@ -252,6 +258,21 @@ function Box:getGlobalPos()
 	end
 	return pos
 end
+
+
+---@return Vector4
+function Box:getGlobalBounds()
+	local pos = self.bounds + self.finalPos.xyxy
+	local parent = self.parent
+	while parent do
+		pos = pos + parent.finalPos.xyxy
+		parent = parent.parent
+	end
+	---@cast pos Vector4
+	return pos
+end
+
+
 
 ---@generic self
 ---@param self self
@@ -672,9 +693,11 @@ end
 ---@param pos Vector2
 ---@return boolean
 function Box:isPosInbounds(pos)
-	local globalPos = self:getGlobalPos()
-	local otherEnd = globalPos + self.finalSize
+	local bounds = self:getGlobalBounds()
 
+	local globalPos = bounds.xy
+	local otherEnd = bounds.zw
+	
 	if pos.x > globalPos.x and pos.x < otherEnd.x
 		 and pos.y > globalPos.y and pos.y < otherEnd.y then
 		return true
@@ -772,7 +795,7 @@ local function unflag(box)
 end
 
 
---deletes this
+---Deletes this box and its children
 function Box:free()
 	for _, child in ipairs(self.children) do
 		child:free()
@@ -784,13 +807,43 @@ function Box:free()
 	end
 end
 
+
+---@param self GNUI.Box
+---@return Vector4
+local function calculateBounds(self)
+	local size = self.finalSize
+	local finalBounds = vec(
+		0,
+		0,
+		size.x,
+		size.y
+	)
+	for index, value in ipairs(self.children) do
+		local childBounds = calculateBounds(value)
+		finalBounds.x = math.min(finalBounds.x, childBounds.x)
+		finalBounds.y = math.min(finalBounds.y, childBounds.y)
+		finalBounds.z = math.max(finalBounds.z, childBounds.z)
+		finalBounds.w = math.max(finalBounds.w, childBounds.w)
+	end
+	self.bounds = finalBounds
+	return self.bounds + self.finalPos.xyxy
+end
+
+
+function Box:calculateBounds()
+	-- TODO: optimize this to only calculate bounds for changed boxes
+	calculateBounds(self.canvas)
+	return self
+end
+
+
 ---Forces this element to update
 ---@generic self
 ---@param self self
 ---@return self
 function Box:forceUpdate()
 	---@cast self GNUI.Box
-	
+	self.formalSize = self.finalSize:copy()
 	--TODO: make the update recursion happen again and again until all size changes are resolved
 	self
 		 :solveForFitSizing(false)
@@ -808,9 +861,12 @@ function Box:forceUpdate()
 		 :solveForFitSizing(true)
 		 :sovleForFillSizing(true)
 		 :sovleForLayout(true)
-
+		 :calculateBounds()
+		 
 		 :updateSprites()
-	unflag(self)
+		 
+	
+		 unflag(self)
 	return self
 end
 
