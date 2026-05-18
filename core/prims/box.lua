@@ -516,6 +516,13 @@ function Box:setStyleVariant(variant)
 	return self
 end
 
+---Returns the model part of the box
+---
+---NOTE: this is Figura exclusive
+function Box:getModelPart()
+	self.canvas.display:getModelPart(self.visualID)
+end
+
 --────────────────────────-< Children Management >-────────────────────────--
 
 ---@param box GNUI.Box
@@ -845,6 +852,8 @@ function Box:forceUpdate()
 	---@cast self GNUI.Box
 	self.formalSize = self.finalSize:copy()
 	--TODO: make the update recursion happen again and again until all size changes are resolved
+	
+	--TODO: make the update propagation only happen when SIZE changes, and not position changes
 	self
 		 :solveForFitSizing(false)
 		 :sovleForFillSizing(false)
@@ -878,6 +887,7 @@ function Box:solveForFitSizing(other)
 	local x = (other and "y" or "x")
 	local z = (other and "w" or "z")
 	---@cast self GNUI.Box
+	
 	for _, child in ipairs(self.children) do
 		child.finalSize[x] = 0
 		child:solveForFitSizing(other)
