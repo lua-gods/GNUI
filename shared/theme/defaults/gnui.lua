@@ -13,26 +13,26 @@ return {
 	title = "gnui",
 	styles = {
 		box = {
-			default={
+			default = {
 				normal = {
-					type="nineslice",
+					type = "nineslice",
 					texturePath = atlas,
-					uv = vec(5,10,7,12),
-					border = vec(2,2,2,2),
-					padding = vec(1,1,1,1),
+					uv = vec(5, 10, 7, 12),
+					border = vec(2, 2, 2, 2),
+					padding = vec(1, 1, 1, 1),
 					childGap = 1,
-				}
+				},
 			},
-			highlight={
+			highlight = {
 				normal = {
-					type="nineslice",
+					type = "nineslice",
 					texturePath = atlas,
-					uv = vec(13,1,15,3),
-					border = vec(1,1,1,1),
-					expand = vec(2,2,2,2),
-				}
+					uv = vec(13, 1, 15, 3),
+					border = vec(1, 1, 1, 1),
+					expand = vec(2, 2, 2, 2),
+				},
 			},
-			
+
 			none = {
 				normal = {
 					type = "sprite",
@@ -43,64 +43,67 @@ return {
 		button = {
 			default = {
 				normal = {
-					type="nineslice",
+					type = "nineslice",
 					texturePath = atlas,
-					uv = vec(0,0,4,4),
-					border = vec(2,2,2,2),
-					padding = vec(2,2,3,1),
-					expand = vec(1,1,1,1),
+					uv = vec(0, 0, 4, 4),
+					border = vec(2, 2, 2, 2),
+					padding = vec(2, 1, 2, 1),
+					expand = vec(1, 1, 1, 1),
+					textAlignment = vec(0, 0),
 					textColor = "#141414",
 				},
 				hovered = {
-					type="nineslice",
+					type = "nineslice",
 					texturePath = atlas,
-					uv = vec(4,0,8,4),
-					border = vec(2,2,2,2),
-					padding = vec(2,2,3,1),
-					expand = vec(1,1,1,1),
+					uv = vec(4, 0, 8, 4),
+					border = vec(2, 2, 2, 2),
+					padding = vec(2, 1, 2, 1),
+					expand = vec(1, 1, 1, 1),
+					textAlignment = vec(0, 0),
 					textColor = "#141414",
 				},
 				pressed = {
-					type="nineslice",
+					type = "nineslice",
 					texturePath = atlas,
-					uv = vec(8,0,12,4),
-					border = vec(2,2,2,2),
-					padding = vec(2,2,3,1),
-					expand = vec(1,1,1,1),
+					uv = vec(8, 0, 12, 4),
+					border = vec(2, 2, 2, 2),
+					padding = vec(2, 1, 2, 1),
+					expand = vec(1, 1, 1, 1),
+					textAlignment = vec(0, 0),
 					textColor = "#141414",
 				},
-			}
+			},
 		},
 		slider = {
 			default = {
 				normal = {
 					type = "nineslice",
 					texturePath = atlas,
-					uv = vec(16,0,20,4),
+					uv = vec(16, 0, 20, 4),
 					border = vec(2, 2, 2, 2),
-					expand = vec(1,1,1,1),
+					expand = vec(1, 1, 1, 1),
 					minSize = vec(11, 11),
 				},
 				hovered = {
 					type = "nineslice",
 					texturePath = atlas,
-					uv = vec(12,0,16,4),
+					uv = vec(12, 0, 16, 4),
 					border = vec(2, 2, 2, 2),
-					expand = vec(1,1,1,1),
+					expand = vec(1, 1, 1, 1),
 					minSize = vec(11, 11),
 				},
 				pressed = {
 					type = "nineslice",
 					texturePath = atlas,
-					uv = vec(16,0,20,4),
+					uv = vec(16, 0, 20, 4),
 					border = vec(2, 2, 2, 2),
-					expand = vec(1,1,1,1),
+					expand = vec(1, 1, 1, 1),
 					minSize = vec(11, 11),
 				},
 				knob = {
 					type = "nineslice",
 					texturePath = atlas,
-					uv = vec(0,0,4,4),
+					uv = vec(0, 0, 4, 4),
 
 					border = vec(2, 2, 2, 2),
 					expand = vec(1, 1, 1, 1),
@@ -112,8 +115,49 @@ return {
 				knobPressed = {
 					type = "nineslice",
 					texturePath = atlas,
-					uv = vec(4,0,6,2),
+					uv = vec(4, 0, 6, 2),
 					border = vec(1, 1, 1, 1),
+				},
+			},
+		},
+		textField = {
+			default = {
+				empty = {
+					type = "nineslice",
+					texturePath = atlas,
+					uv = vec(1,5,3,8),
+					textColor = "#9B9B9B",
+					border = vec(1, 1, 1, 2),
+					padding = vec(2, 0, 2, -1),
+					minSize = vec(11, 11),
+					textAlignment = vec(-1,1),
+				},
+				normal = {
+					type = "nineslice",
+					texturePath = atlas,
+					uv = vec(1,5,3,8),
+					border = vec(1, 1, 1, 2),
+					padding = vec(2, 0, 2, -1),
+					minSize = vec(11, 11),
+					textAlignment = vec(-1,1),
+				},
+				active = {
+					type = "nineslice",
+					texturePath = atlas,
+					uv = vec(5,5,7,8),
+					border = vec(1, 1, 1, 2),
+					padding = vec(2,0,2,-1),
+					minSize = vec(11, 11),
+					textAlignment = vec(-1,1),
+				},
+				invalid = {
+					type = "nineslice",
+					texturePath = atlas,
+					uv = vec(9,5,11,8),
+					border = vec(1, 1, 1, 2),
+					padding = vec(2,0,2,-1),
+					minSize = vec(11, 11),
+					textAlignment = vec(-1,1),
 				},
 			},
 		},
