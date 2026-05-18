@@ -37,12 +37,14 @@ end
 ---@param wrap any
 ---@return Vector2
 function util.getTextSize(content, maxWidth, wrap)
+	content = content:gsub(":[^:]+:","W")
 	return client.getTextDimensions(content, maxWidth, wrap)
 end
 
 ---@param text string
 ---@return integer
 function util.getTextWidth(text)
+	content = content:gsub(":[^:]+:","W")
 	return client.getTextWidth(text)
 end
 
