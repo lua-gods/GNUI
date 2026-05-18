@@ -75,12 +75,13 @@ function BoxAPI.parse(layout, canvas, children, box)
 		end
 	end
 	if layout.pos then box:setPos(layout.pos.x, layout.pos.y) end
-	if layout.layout then box:setLayout(layout.layout) end
+	if layout.layout then 
+		box:setLayout(layout.layout) 
+	end
 	if layout.childAlign then box:setChildAlign(layout.childAlign) end
 	if layout.gap then box:setChildGap(layout.gap) end
 	if layout.margin then box:setMargin(layout.margin) end
-	if layout.padding then box:setPadding(layout.padding) end
-
+	
 	local t = type(layout.style)
 	
 	if t == "string" or t == "nil" then
@@ -90,6 +91,8 @@ function BoxAPI.parse(layout, canvas, children, box)
 			Theme.applyStyle(layout.style,box,1)
 		end
 	end
+	
+	box:setPadding(layout.padding or vec(0,0,0,0))
 
 	if layout.text then box:setText(layout.text) end
 	if layout.textAlign then box:setTextAlignment(layout.textAlign[1], layout.textAlign[2]) end
@@ -106,7 +109,6 @@ function BoxAPI.parse(layout, canvas, children, box)
 			box:addChild(child)
 		end
 	end
-
 	return box
 end
 
