@@ -19,13 +19,13 @@ local Layout = require(cfg.LAYOUT..".init") ---@type GNUI.LayoutAPI
 local utils = require(cfg.UTILS) ---@type GNUI.utils
 
 
----@class GNUI.Widget.TextFieldAPI.Event.Confirmed : Event
+---@class GNUI.Widget.TextFieldAPI.Event.Confirmed : GN.Event
 ---@field register fun(self,func:fun(field: string))
 
----@class GNUI.Widget.TextFieldAPI.Event.Discard : Event
+---@class GNUI.Widget.TextFieldAPI.Event.Discard : GN.Event
 ---@field register fun(self,func:fun(discarded: string))
 
----@class GNUI.Widget.TextFieldAPI.Event.FieldChanged : Event
+---@class GNUI.Widget.TextFieldAPI.Event.FieldChanged : GN.Event
 ---@field register fun(self,func:fun(field: string))
 
 
@@ -33,7 +33,7 @@ local utils = require(cfg.UTILS) ---@type GNUI.utils
 local TextFieldAPI = {}
 
 
----@alias GNUI.TextField.Verifier string|(fun(field: string):boolean)
+---@alias GNUI.TextField.Verifier string
 ---| "decimal"
 ---| "integer"
 ---| "hex"
@@ -269,6 +269,30 @@ function TextField:setEditingField(field)
 end
 
 
+---@param placeholder string
+---@generic self
+---@param self self
+---@return self
+function TextField:setPlaceholder(placeholder)
+	---@cast self GNUI.TextField
+	self.placeholder = placeholder
+	self:updateTextField()
+	return self
+end
+
+
+---@param isMultiline boolean
+---@generic self
+---@param self self
+---@return self
+function TextField:setMultiline(isMultiline)
+	---@cast self GNUI.TextField
+	self.multiline = isMultiline
+	self:updateTextField()
+	return self
+end
+
+
 ---@generic self
 ---@param self self
 ---@return self
@@ -276,6 +300,7 @@ function TextField:discard()
 	---@cast self GNUI.TextField
 	if self.down then
 		self.DISCARDED:invoke(self.editingField)
+		self.cursor = #self.field
 		self:release()
 	end
 	return self
@@ -291,8 +316,10 @@ function TextField:confirm()
 		if self.validator and self.validator(self.editingField) or not self.validator then
 			self.field = self.editingField
 			self.CONFIRMED:invoke(self.field)
+			self:release()
+		else
+			self:discard()
 		end
-		self:release()
 	end
 	return self
 end
@@ -306,7 +333,11 @@ function TextField:updateTextField()
 	if self.down then
 		self:setText(self.editingField:sub(1,self.cursor) .. "|" .. self.editingField:sub(self.cursor+1,-1))
 	else
-		self:setText(self.field)
+		if #self.field == 0 then
+			self:setText(self.placeholder)
+		else
+			self:setText(self.field)
+		end
 	end
 	
 	local isValid = true
@@ -335,7 +366,11 @@ function TextField:applyApropriateStyle()
 			self.sprites[1]:setStyle(Style.getStyleFromBox(self,"invalid"))
 		end
 	else
-		self.sprites[1]:setStyle(Style.getStyleFromBox(self,"normal"))
+		if #self.field == 0 then
+			self.sprites[1]:setStyle(Style.getStyleFromBox(self,"empty"))
+		else
+			self.sprites[1]:setStyle(Style.getStyleFromBox(self,"normal"))
+		end
 	end
 	return self
 end
@@ -348,18 +383,17 @@ end
 ---@field field string?
 ---@field placeholder string?
 ---@field multiline boolean?
----@field validator GNUI.TextField.Verifier?
+---@field validator (GNUI.TextField.Verifier|fun(field: string):boolean)?
 
 ---@param layout any
 ---@param canvas GNUI.Canvas
 ---@param textField GNUI.TextField?
 ---@return GNUI.TextField
-function TextFieldAPI.parse(layout,canvas,children,textField)
-	local box = textField or Box.parse(layout,canvas,TextFieldAPI.new(canvas))
-	
-	if layout.field then box.field = layout.field end
-	if layout.placeholder then box.placeholder = layout.placeholder end
-	if layout.multiline then box.multiline = layout.multiline end
+function TextFieldAPI.parse(layout,canvas, children,textField)
+	local box = textField or Box.parse(layout,canvas,children,TextFieldAPI.new(canvas,children))
+	if layout.field then box:setField(layout.field) end
+	if layout.placeholder then box:setPlaceholder(layout.placeholder) end
+	if layout.multiline then box:setMultiline(layout.multiline) end
 	if layout.validator then 
 		if type(layout.validator) == "function" then
 			box.validator = layout.validator
@@ -367,7 +401,7 @@ function TextFieldAPI.parse(layout,canvas,children,textField)
 			box.validator = TextFieldAPI.validators[layout.validator]
 		end
 	end
-	
+	box:applyApropriateStyle()
 	return box
 end
 
