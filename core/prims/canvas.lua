@@ -211,7 +211,7 @@ end
 ---@param state integer
 function Canvas:inputKey(scancode, state)
 	if self.hoveredBox then
-		if state == 1 then
+		if state == 1 or state == 2 then
 			self.pressedButtons[scancode] = self.hoveredBox
 			local capture = processInput(self.hoveredBox,"KEY_INPUT",scancode,state)
 			return capture
