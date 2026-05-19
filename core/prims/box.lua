@@ -328,7 +328,7 @@ function Box:setPadding(left, top, right, bottom)
 	self:update()
 	for key, value in pairs(self.sprites) do
 		if value.labelID then
-			self.canvas.display:setLabelPadding(self.visualID, value.labelID, self.padding:unpack())
+			self.canvas.display:setLabelPadding(self.visualID, value.labelID, self.finalPadding:unpack())
 		end
 	end
 	return self
@@ -487,9 +487,9 @@ function Box:setSprite(sprite, layer)
 	---@cast self GNUI.Box
 
 	sprite:setBox(self, layer)
-	self:recalculateMargin()
-	self:recalculatePadding()
 	self:recalculateMinimumSize()
+	self:setPadding(self.padding)
+	self:setMargin(self.margin)
 	self:update()
 	return self
 end
