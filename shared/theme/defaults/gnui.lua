@@ -13,7 +13,8 @@ return {
 	title = "gnui",
 	styles = {
 		box = {
-			default = {
+			default = "none",
+			opaque = {
 				normal = {
 					type = "nineslice",
 					texturePath = atlas,
@@ -32,7 +33,14 @@ return {
 					expand = vec(2, 2, 2, 2),
 				},
 			},
-
+			white = {
+				normal = {
+					type = "quad",
+					texturePath = atlas,
+					uv = vec(2,11,2,11),
+					sizing="STRETCH"
+				},
+			},
 			none = {
 				normal = {
 					type = "sprite",

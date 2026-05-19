@@ -41,6 +41,7 @@ setmetatable(BoxAPI, {
 ---@field wrap boolean?
 ---@field margin Vector4?
 ---@field padding Vector4?
+---@field color Vector3?
 
 
 ---@param layout GNUI.Layout
@@ -97,6 +98,7 @@ function BoxAPI.parse(layout, canvas, children, box)
 	if layout.text then box:setText(layout.text) end
 	if layout.textAlign then box:setTextAlignment(layout.textAlign[1], layout.textAlign[2]) end
 	if layout.wrap then box:setWrapText(layout.wrap) end
+	if layout.color then box:setColor(layout.color) end
 
 	if layout.name then
 		box:setName(layout.name)
