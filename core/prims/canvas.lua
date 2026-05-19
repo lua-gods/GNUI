@@ -86,9 +86,7 @@ end
 ---@return GNUI.Canvas
 function Canvas:flushUpdates()
 	for key, box in pairs(self.queueUpdate) do
-		if box.flags.dim then
-			box:forceUpdate()
-		end
+		box:forceUpdate()
 		self.queueUpdate[key] = nil
 	end
 	return self
