@@ -18,7 +18,7 @@ local utils = require(cfg.UTILS)
 local ButtonAPI = {}
 
 
----@class Event.GNUI.Button.PRESSED : GN.Event
+---@class Event.GNUI.Button.STATE_CHANGED : GN.Event
 ---@field register fun(self,func:fun(down: boolean))|fun(func:fun(toggle: boolean))
 
 ---@class GNUI.Widget.Button : GNUI.Box
@@ -27,11 +27,14 @@ local ButtonAPI = {}
 ---
 ---@field BUTTON_DOWN GN.Event
 ---@field BUTTON_UP GN.Event
+---@field STATE_CHANGED Event.GNUI.Button.STATE_CHANGED
 ---
----@field PRESSED Event.GNUI.Button.PRESSED
+---@field PRESSED GN.Event
 local Button = {}
 Button.__index = function (t,i)
-	return rawget(t,i) or Button[i] or Box.index(t,i)
+	return rawget(t,i)
+	    or Button[i]
+	    or Box.index(t,i)
 end
 Button.__style = "button"
 Button.__type = "Button"
@@ -55,6 +58,7 @@ function ButtonAPI.new(canvas,children)
 	self.PRESSED = Event.new()
 	self.BUTTON_DOWN = Event.new()
 	self.BUTTON_UP = Event.new()
+	self.STATE_CHANGED = Event.new()
 	
 	self.MOUSE_INPUT:register(function (button, state)
 		self:applyButtonAction(button,state)
@@ -80,16 +84,22 @@ function Button:applyButtonAction(button,state)
 		if state == 1 then
 			if self.toggle then
 				self.down = not self.down
-				self.PRESSED:invoke(self.down)
+				self.STATE_CHANGED:invoke(self.down)
 			else
-				self.down = true
-				self.PRESSED:invoke(true)
+				if not self.down then
+					self.down = true
+					self.STATE_CHANGED:invoke(true)
+				end
 			end
-		elseif state == 0 and self.down then --TODO: follow press event standards
+		elseif state == 0 and self.down then
 			if not self.toggle then
-				self.down = false
-			else
-				self.PRESSED:invoke(false)
+				if self.down then
+					self.STATE_CHANGED:invoke(false)
+					self.down = false
+					if self:isPosInbounds(self.canvas.cursorPos) then
+						self.PRESSED:invoke()
+					end
+				end
 			end
 		end
 		if lastDown ~= self.down then
@@ -113,7 +123,7 @@ end
 ---@return self
 function Button:applyApropriateStyle()
 	---@cast self GNUI.Widget.Button
-	self.sprites[2]:setVisible(self.isHovered or self.down)
+	self.sprites[2]:setVisible(self.isHovered or (self.down and not self.toggle))
 	if self.down then
 		self.sprites[1]:setStyle(Style.getStyleFromBox(self,"pressed"))
 	else
