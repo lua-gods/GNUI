@@ -663,7 +663,7 @@ end
 
 ---@param pos Vector2
 ---@return boolean
-function Box:isPosInbounds(pos)
+function Box:isPosInboundingBox(pos)
 	local bounds = self:getGlobalBounds()
 
 	local globalPos = bounds.xy
@@ -675,6 +675,24 @@ function Box:isPosInbounds(pos)
 	end
 	return false
 end
+
+
+---@param pos Vector2
+---@return boolean
+function Box:isPosInBox(pos)
+	local gpos = self:getGlobalPos()
+
+	local start = gpos.xy
+	local otherEnd = gpos.xy + self.finalSize
+
+	if pos.x > start.x and pos.x < otherEnd.x and pos.y > start.y and
+		 pos.y < otherEnd.y then
+		return true
+	end
+	return false
+end
+
+
 
 ---@param captureInput boolean
 ---@generic self
@@ -871,7 +889,15 @@ function Box:_solveFit(isY)
 					inner = inner + child.finalSize[x] + m[x] + m[z]
 				end
 			end
-			inner = inner + self.childGap * math.max(#self.children - 1, 0)
+			
+			local visibleChildCount = 0
+			for index, value in ipairs(self.children) do
+				if value.visible then
+					visibleChildCount = visibleChildCount + 1
+				end
+			end
+			
+			inner = inner + self.childGap * math.max(visibleChildCount - 1, 0)
 		else
 			for _, child in ipairs(self.children) do
 				if child.sizing[x] ~= "FILL" then
@@ -908,7 +934,15 @@ function Box:_solveFill(isY)
 			end
 			remaining = remaining - child.finalSize[x] - m[x] - m[z]
 		end
-		remaining = remaining - self.childGap * math.max(#self.children - 1, 0)
+		
+		local visibleChildCount = 0
+		for index, value in ipairs(self.children) do
+			if value.visible then
+				visibleChildCount = visibleChildCount + 1
+			end
+		end
+		
+		remaining = remaining - self.childGap * math.max(visibleChildCount - 1, 0)
 
 		if #fillers > 0 then
 			local share = math.max(0, remaining) / #fillers
