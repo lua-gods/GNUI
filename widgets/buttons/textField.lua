@@ -29,7 +29,7 @@ local utils = require(cfg.UTILS) ---@type GNUI.utils
 ---@field register fun(self,func:fun(field: string))
 
 
----@class GNUI.TextFieldAPI
+---@class GNUI.Widget.TextFieldAPI
 local TextFieldAPI = {}
 
 
@@ -55,7 +55,7 @@ TextFieldAPI.validators = {
 }
 
 
----@class GNUI.TextField : GNUI.Widget.Button
+---@class GNUI.Widget.TextField : GNUI.Widget.Button
 ---@field toggle true
 ---@field cursor integer
 ---@field field string
@@ -84,10 +84,10 @@ end
 
 
 ---@param canvas GNUI.Canvas
----@return GNUI.TextField
+---@return GNUI.Widget.TextField
 function TextFieldAPI.new(canvas)
 	local self = Button.new(canvas)
-	---@cast self GNUI.TextField
+	---@cast self GNUI.Widget.TextField
 	setmetatable(self,TextField)
 	self:setMinimumSize(0,13)
 	
@@ -247,7 +247,7 @@ end
 ---@param self self
 ---@return self
 function TextField:setField(field)
-	---@cast self GNUI.TextField
+	---@cast self GNUI.Widget.TextField
 	self.field = field
 	self.cursor = #self.field
 	self:updateTextField()
@@ -259,7 +259,7 @@ end
 ---@param self self
 ---@return self
 function TextField:setEditingField(field)
-	---@cast self GNUI.TextField
+	---@cast self GNUI.Widget.TextField
 	if self.down then
 		self.editingField = field
 		self.cursor = #self.field
@@ -274,7 +274,7 @@ end
 ---@param self self
 ---@return self
 function TextField:setPlaceholder(placeholder)
-	---@cast self GNUI.TextField
+	---@cast self GNUI.Widget.TextField
 	self.placeholder = placeholder
 	self:updateTextField()
 	return self
@@ -286,7 +286,7 @@ end
 ---@param self self
 ---@return self
 function TextField:setMultiline(isMultiline)
-	---@cast self GNUI.TextField
+	---@cast self GNUI.Widget.TextField
 	self.multiline = isMultiline
 	self:updateTextField()
 	return self
@@ -297,7 +297,7 @@ end
 ---@param self self
 ---@return self
 function TextField:discard()
-	---@cast self GNUI.TextField
+	---@cast self GNUI.Widget.TextField
 	if self.down then
 		self.DISCARDED:invoke(self.editingField)
 		self.cursor = #self.field
@@ -311,7 +311,7 @@ end
 ---@param self self
 ---@return self
 function TextField:confirm()
-	---@cast self GNUI.TextField
+	---@cast self GNUI.Widget.TextField
 	if self.down then
 		if self.validator and self.validator(self.editingField) or not self.validator then
 			self.field = self.editingField
@@ -329,7 +329,7 @@ end
 ---@param self self
 ---@return self
 function TextField:updateTextField()
-	---@cast self GNUI.TextField
+	---@cast self GNUI.Widget.TextField
 	if self.down then
 		self:setText(self.editingField:sub(1,self.cursor) .. "|" .. self.editingField:sub(self.cursor+1,-1))
 	else
@@ -358,7 +358,7 @@ end
 ---@param self self
 ---@return self
 function TextField:applyApropriateStyle()
-	---@cast self GNUI.TextField
+	---@cast self GNUI.Widget.TextField
 	if self.down then
 		if self.validField then
 			self.sprites[1]:setStyle(Style.getStyleFromBox(self,"active"))
@@ -387,8 +387,8 @@ end
 
 ---@param layout any
 ---@param canvas GNUI.Canvas
----@param textField GNUI.TextField?
----@return GNUI.TextField
+---@param textField GNUI.Widget.TextField?
+---@return GNUI.Widget.TextField
 function TextFieldAPI.parse(layout,canvas, children,textField)
 	local box = textField or Box.parse(layout,canvas,children,TextFieldAPI.new(canvas,children))
 	if layout.field then box:setField(layout.field) end
