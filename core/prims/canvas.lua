@@ -4,11 +4,11 @@
 / /_/ / /|  / Author: GNanimates | https://gnon.top | @gn68s
 \____/_/ |_/ License: Mozilla Public License Version 2.0 ]]
 ---@diagnostic disable: return-type-mismatch, assign-type-mismatch, undefined-field
-local BASE = ((...):gsub("/",".")):match(".+%.GNUI")
+local BASE = ((...):gsub("/", ".")):match(".+%.GNUI")
 
 local gncommon = require("lib.GNcommon") ---@type GNCommon
-local cfg = require(BASE..".config") ---@type GNUI.config
-local Box = require(cfg.CORE..".prims.box") ---@type GNUI.Primitive.BoxAPI
+local cfg = require(BASE .. ".config") ---@type GNUI.config
+local Box = require(cfg.CORE .. ".prims.box") ---@type GNUI.Primitive.BoxAPI
 local Render = require(cfg.RENDER .. ".init") ---@type GNUI.RenderAPI
 local Event = require(cfg.EVENT) ---@type GN.Event
 
@@ -43,7 +43,7 @@ local Event = require(cfg.EVENT) ---@type GN.Event
 ---@class GNUI.CanvasAPI
 local CanvasAPI = {}
 
----A root node for boxes, 
+---A root node for boxes,
 ---this class also exposes all the input methods for the framework to connect to
 ---@class GNUI.Canvas : GNUI.Box
 ---@field display GNUI.Render.Display
@@ -56,16 +56,16 @@ local CanvasAPI = {}
 ---@field MOUSE_INPUT GNUI.Canvas.Event.MouseInput
 ---@field CURSOR_MOVED GNUI.Canvas.Event.CursorMoved
 local Canvas = {}
-Canvas.__index = function (t,i)
-	return rawget(t,i) or Canvas[i] or Box.index(t,i)
+Canvas.__index = function(t, i)
+	return rawget(t, i) or Canvas[i] or Box.index(t, i)
 end
 
 
----Creates a new canvas for boxes to attach to, this box is special, 
+---Creates a new canvas for boxes to attach to, this box is special,
 ---as it acts as the root node of all boxes
 ---@return GNUI.Canvas
 function CanvasAPI.new()
----@diagnostic disable-next-line: missing-parameter its literally me!
+	---@diagnostic disable-next-line: missing-parameter its literally me!
 	local self = Box.new()
 	---@cast self GNUI.Canvas
 	self.display = Render.newDisplay()
@@ -73,14 +73,13 @@ function CanvasAPI.new()
 	self.visualID = 1
 	self.queueUpdate = {}
 	self.pressedButtons = {}
-	
+
 	self.CURSOR_MOVED = Event.new()
-	
-	self:setSizing("FIXED","FIXED")
-	setmetatable(self,Canvas)
+
+	self:setSizing("FIXED", "FIXED")
+	setmetatable(self, Canvas)
 	return self
 end
-
 
 ---Forces an immidiate update to all the boxes in the queue
 ---@return GNUI.Canvas
@@ -98,10 +97,10 @@ end
 ---Finds the box being hovered by the cursor
 ---@param box GNUI.Box
 ---@param pos Vector2
-local function findHoveredBox(box,pos)
+local function findHoveredBox(box, pos)
 	for index, childBox in ipairs(box.children) do
 		if childBox.captureInput and childBox:isPosInbounds(pos) then
-			local hoveredBox = findHoveredBox(childBox,pos)
+			local hoveredBox = findHoveredBox(childBox, pos)
 			if hoveredBox then return hoveredBox end
 		end
 	end
@@ -114,19 +113,18 @@ end
 ---@param x number
 ---@param y number
 ---@return GNUI.Canvas
-function Canvas:setCursorPos(x,y)
-	
-	local newCursorPos = gncommon.vec2(x,y)
+function Canvas:setCursorPos(x, y)
+	local newCursorPos = gncommon.vec2(x, y)
 	if self.cursorPos ~= newCursorPos then
 		local lastCursorPos = self.cursorPos
 		local cursorVel = newCursorPos - (lastCursorPos or newCursorPos)
-		
+
 		self.cursorPos = newCursorPos
-		
-		local newHoveredBox = findHoveredBox(self,self.cursorPos)
-		
-		self.CURSOR_MOVED:invoke(self.cursorPos,cursorVel)
-		
+
+		local newHoveredBox = findHoveredBox(self, self.cursorPos)
+
+		self.CURSOR_MOVED:invoke(self.cursorPos, cursorVel)
+
 		if self.hoveredBox ~= newHoveredBox then
 			if self.hoveredBox then
 				self.hoveredBox.isHovered = false
@@ -142,22 +140,17 @@ function Canvas:setCursorPos(x,y)
 	return self
 end
 
-
-
-
-
-
 -- propagate scroll input from children to its parents, begging for one to capture it lmao.
 ---@param box GNUI.Box
 ---@param ... any
 ---@return boolean
-local function processUnhandledInputCapture(box,event,...)
+local function processUnhandledInputCapture(box, event, ...)
 	local outs = box[event]:invoke(...)
 	for index, value in ipairs(outs) do
 		if value then return true end
 	end
 	if box.parent then
-		return processUnhandledInputCapture(box.parent,event,...)
+		return processUnhandledInputCapture(box.parent, event, ...)
 	end
 	return false
 end
@@ -167,16 +160,15 @@ end
 ---@param box GNUI.Box
 ---@param ... any
 ---@return boolean
-local function proccessInputCapture(box,event,...)
-	
+local function proccessInputCapture(box, event, ...)
 	-- prioritize calculating for parent first
 	if box.parent then
-		if proccessInputCapture(box.parent,event,...) then
+		if proccessInputCapture(box.parent, event, ...) then
 			-- input has been captured by a parent
 			return true
 		end
 	end
-	
+
 	-- check if its been captured
 	local outs = box[event]:invoke(...)
 	for index, value in ipairs(outs) do
@@ -191,19 +183,17 @@ end
 ---@param box GNUI.Box
 ---@param event string
 ---@param ... any
-local function processInput(box,event,...)
+local function processInput(box, event, ...)
 	if not box then return end
-	local processed = proccessInputCapture(box,event,...)
+	local processed = proccessInputCapture(box, event, ...)
 	if processed then return true end
-	return processUnhandledInputCapture(box,"UNHANDLED_"..event,...)
+	return processUnhandledInputCapture(box, "UNHANDLED_" .. event, ...)
 end
 
 
-function Canvas:inputScroll(y,x)
-	processInput(self.hoveredBox,"SCROLL_INPUT",y,x,0)
+function Canvas:inputScroll(y, x)
+	processInput(self.hoveredBox, "SCROLL_INPUT", y, x, 0)
 end
-
-
 
 ---@param scancode integer
 ---@param state integer
@@ -211,45 +201,41 @@ function Canvas:inputKey(scancode, state)
 	if self.hoveredBox then
 		if state == 1 or state == 2 then
 			self.pressedButtons[scancode] = self.hoveredBox
-			local capture = processInput(self.hoveredBox,"KEY_INPUT",scancode,state)
+			local capture = processInput(self.hoveredBox, "KEY_INPUT", scancode, state)
 			return capture
 		elseif state == 0 then
 			if self.pressedButtons[scancode] then
-				processInput(self.pressedButtons[scancode],"KEY_INPUT",scancode,state)
+				processInput(self.pressedButtons[scancode], "KEY_INPUT", scancode, state)
 				self.pressedButtons[scancode] = nil
 			end
 		end
 	end
 end
 
-
 function Canvas:inputChar(char)
-	local out = processInput(self.hoveredBox,"CHAR_INPUT",char)
+	local out = processInput(self.hoveredBox, "CHAR_INPUT", char)
 	return out
 end
 
-
 ---@param button integer
 ---@param state integer
-function Canvas:inputMouse(button,state)
+function Canvas:inputMouse(button, state)
 	if self.hoveredBox then
 		if state == 1 then
 			self.pressedButtons[button] = self.hoveredBox
-			processInput(self.hoveredBox,"MOUSE_INPUT",button,state)
+			processInput(self.hoveredBox, "MOUSE_INPUT", button, state)
 		elseif state == 0 then
 			if self.pressedButtons[button] then
-				processInput(self.pressedButtons[button],"MOUSE_INPUT",button,state)
+				processInput(self.pressedButtons[button], "MOUSE_INPUT", button, state)
 				self.pressedButtons[button] = nil
 			end
 		end
 	end
 end
 
-
 ---Love2D Exclusive
 function Canvas:draw()
 	self.display:draw()
 end
-
 
 return CanvasAPI
