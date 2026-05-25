@@ -22,7 +22,7 @@ function Display:newSprite(visualID)
 	
 	local taskID = #vis.tasks+1
 	
-	local quad = vis.model:newSprite("task"..taskID):setRenderType("EMISSIVE")
+	local quad = vis.model:newSprite("task"..taskID)
 	local self = {
 		textureSize = vec(1,1),
 		quad = quad
@@ -70,8 +70,9 @@ function Display:setSpriteSize(visualID,taskID,x,y)
 	local task = self:getTask(visualID,taskID)
 	if task then
 		local size = task.textureSize
-		task.quad:scale(x/size.x,y/size.y,1)
+		task.quad:scale(x/size.x,y/size.y,0)
 	end
+	self:flash(visualID)
 end
 
 
@@ -82,6 +83,7 @@ end
 function Display:setSpriteVisible(visualID,taskID,visible)
 	local task = self:getTask(visualID,taskID)
 	task.quad:setVisible(visible)
+	self:flash(visualID)
 end
 
 
@@ -97,6 +99,7 @@ end
 function Display:setSpriteColor(visualID,taskID,r,g,b)
 	local task = self:getTask(visualID,taskID)
 	task.quad:color(r,g,b)
+	self:flash(visualID)
 end
 
 
@@ -133,6 +136,7 @@ function Display:setSpriteTexture(visualID,taskID,path)
 	else
 		task:setVisible(false)
 	end
+	self:flash(visualID)
 end
 
 
@@ -150,6 +154,7 @@ function Display:setSpriteUV(visualID,taskID,u1,v1,u2,v2)
 	task.quad
 	:setUV(uv.xy/task.textureSize)
 	:setRegion((uv.zw-uv.xy))
+	self:flash(visualID)
 end
 
 
@@ -162,4 +167,5 @@ function Display:removeSprite(visualID,taskID)
 		task.quad:remove()
 		self.visuals[visualID].tasks[taskID] = nil
 	end
+	self:flash(visualID)
 end
