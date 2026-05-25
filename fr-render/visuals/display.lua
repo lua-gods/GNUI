@@ -4,6 +4,9 @@
 / /_/ / /|  /  desc: handles all the updating for all visuals,
 \____/_/ |_/ source: link ]]
 
+local Tween = require("lib.GNtween")
+
+
 ---@class GNUI.Render.Visual.Task
 ---@field [any] any
 
@@ -64,6 +67,26 @@ function Display:newVisual()
 	
 	self.visuals[id] = visual
 	return id
+end
+
+
+---@param visualID integer
+function Display:flash(visualID)
+	if false and self.visuals[visualID] then
+		local visual = self.visuals[visualID]
+		Tween.new({
+			from = 0,
+			to = 1,
+			duration = 0.25,
+			tick = function (v, t)
+	---@diagnostic disable-next-line: param-type-mismatch
+				for index, value in pairs(visual.tasks) do
+					value:setColor(1,v,v)
+				end
+			end,
+			id=visual.id.."ee"
+		})
+	end
 end
 
 
@@ -186,6 +209,7 @@ function Display:setPos(visualID,x,y)
 	if vis then
 		vis.pos = vec(x,y)
 		updateDimensions(vis)
+		self:flash(visualID)
 	end
 end
 
@@ -203,6 +227,7 @@ function Display:setSize(visualID,x,y)
 		end
 		
 		updateDimensions(vis)
+		self:flash(visualID)
 	end
 end
 
@@ -216,23 +241,25 @@ function Display:setVisible(visualID,visible)
 	for key, task in pairs(vis.tasks) do
 		task:setVisible(visible)
 	end
-	
+	self:flash(visualID)
 	vis.model:setVisible(visible)
 end
 
 
 ---Sets the tint color for all the tasks in this visual
----@param id integer
+---@param visualID integer
 ---@param r number
 ---@param g number
 ---@param b number
-function Display:setColor(id,r,g,b)
-	local vis = self.visuals[id]
+function Display:setColor(visualID,r,g,b)
+	local vis = self.visuals[visualID]
 	if not vis then return end
 	
 	for key, task in pairs(vis.tasks) do
 		task:setColor(r,g,b)
 	end
+	
+	self:flash(visualID)
 end
 
 
