@@ -108,10 +108,9 @@ function Label:setVisible(visible)
 end
 
 
----Sets the label color
----TODO: investigate label set color method
+---Sets the label color, (set color seems to be a method for setting the color of the sprite, not the text, so dont uncomment lmao)
 function Label:setColor(r,g,b)
-	self.textColor = vectors.rgbToHex(r,g,b)
+	--self.textColor = vectors.rgbToHex(r,g,b)
 end
 
 
