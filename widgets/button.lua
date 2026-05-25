@@ -96,7 +96,7 @@ function Button:applyButtonAction(button,state)
 				if self.down then
 					self.STATE_CHANGED:invoke(false)
 					self.down = false
-					if self:isPosInbounds(self.canvas.cursorPos) then
+					if self:isPosInboundingBox(self.canvas.cursorPos) then
 						self.PRESSED:invoke()
 					end
 				end
@@ -231,6 +231,7 @@ end
 ---@class GNUI.Layout
 ---@field type "button"?
 ---@field toggle boolean?
+---@field pressed boolean?
 
 ---@param layout any
 ---@param canvas GNUI.Canvas
@@ -242,7 +243,8 @@ function ButtonAPI.parse(layout,canvas,children,button)
 	
 	self:setStyleVariant(layout.variant)
 	
-	if layout.toggle then self.toggle = layout.toggle end
+	if layout.toggle then self:setToggle(layout.toggle) end
+	if layout.pressed then self:press() end
 	
 	return self
 end

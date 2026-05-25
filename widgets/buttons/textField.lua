@@ -59,13 +59,15 @@ TextFieldAPI.validators = {
 ---@field toggle true
 ---@field cursor integer
 ---@field field string
+---@field prefix string
+---@field suffix string
 ---@field editingField string
 ---@field placeholder string
 ---@field validField boolean
 ---@field multiline boolean
 ---@field validator fun(field: string):boolean
----@field CONFIRMED GNUI.Widget.TextFieldAPI.Event.Confirmed
----@field DISCARDED GNUI.Widget.TextFieldAPI.Event.Discard
+---@field FIELD_CONFIRMED GNUI.Widget.TextFieldAPI.Event.Confirmed
+---@field FIELD_DISCARDED GNUI.Widget.TextFieldAPI.Event.Discard
 ---@field FIELD_CHANGED GNUI.Widget.TextFieldAPI.Event.FieldChanged
 local TextField = {}
 TextField.__index = function (t,i)
@@ -99,8 +101,8 @@ function TextFieldAPI.new(canvas)
 	self.validField = true
 	self.multiline = false
 	
-	self.CONFIRMED = Event.new()
-	self.DISCARDED = Event.new()
+	self.FIELD_CONFIRMED = Event.new()
+	self.FIELD_DISCARDED = Event.new()
 	self.FIELD_CHANGED = Event.new()
 	
 	self.BUTTON_DOWN:register(function ()
@@ -223,7 +225,7 @@ function TextFieldAPI.new(canvas)
 		end,self.id)
 		
 		self.canvas.MOUSE_INPUT:register(function (button, state)
-			if not self:isPosInbounds(self.canvas.cursorPos) and state == 1 then
+			if not self:isPosInboundingBox(self.canvas.cursorPos) and state == 1 then
 				self:confirm()
 			end
 			return true
@@ -299,7 +301,7 @@ end
 function TextField:discard()
 	---@cast self GNUI.Widget.TextField
 	if self.down then
-		self.DISCARDED:invoke(self.editingField)
+		self.FIELD_DISCARDED:invoke(self.editingField)
 		self.cursor = #self.field
 		self:release()
 	end
@@ -315,7 +317,7 @@ function TextField:confirm()
 	if self.down then
 		if self.validator and self.validator(self.editingField) or not self.validator then
 			self.field = self.editingField
-			self.CONFIRMED:invoke(self.field)
+			self.FIELD_CONFIRMED:invoke(self.field)
 			self:release()
 		else
 			self:discard()
@@ -325,18 +327,57 @@ function TextField:confirm()
 end
 
 
+---@return string
+function TextField:getActiveField()
+	if self.down then
+		return self.editingField
+	else
+		return self.field
+	end
+end
+
+
+---@param prefix string?
+---@generic self
+---@param self self
+---@return self
+function TextField:setPrefix(prefix)
+	---@cast self GNUI.Widget.TextField
+	self.prefix = prefix
+	self:updateTextField()
+	return self
+end
+
+
+---@param suffix string?
+---@generic self
+---@param self self
+---@return self
+function TextField:setSuffix(suffix)
+	---@cast self GNUI.Widget.TextField
+	self.suffix = suffix
+	self:updateTextField()
+	return self
+end
+
+
 ---@generic self
 ---@param self self
 ---@return self
 function TextField:updateTextField()
 	---@cast self GNUI.Widget.TextField
+	local prefix = self.prefix or ""
+	local suffix = self.suffix or ""
 	if self.down then
-		self:setText(self.editingField:sub(1,self.cursor) .. "|" .. self.editingField:sub(self.cursor+1,-1))
+		if not self.validator or self.validator(self.editingField) then
+			self.FIELD_CHANGED:invoke()
+		end
+		self:setText(prefix ..self.editingField:sub(1,self.cursor) .. "|" .. self.editingField:sub(self.cursor+1,-1) .. suffix)
 	else
 		if #self.field == 0 then
 			self:setText(self.placeholder)
 		else
-			self:setText(self.field)
+			self:setText(prefix .. self.field .. suffix)
 		end
 	end
 	
@@ -384,16 +425,21 @@ end
 ---@field placeholder string?
 ---@field multiline boolean?
 ---@field validator (GNUI.TextField.Verifier|fun(field: string):boolean)?
+---@field prefix string?
+---@field suffix string?
 
 ---@param layout any
 ---@param canvas GNUI.Canvas
 ---@param textField GNUI.Widget.TextField?
 ---@return GNUI.Widget.TextField
 function TextFieldAPI.parse(layout,canvas, children,textField)
-	local box = textField or Box.parse(layout,canvas,children,TextFieldAPI.new(canvas,children))
+	local box = textField or Box.parse(layout,canvas,children,TextFieldAPI.new(canvas))
 	if layout.field then box:setField(layout.field) end
 	if layout.placeholder then box:setPlaceholder(layout.placeholder) end
 	if layout.multiline then box:setMultiline(layout.multiline) end
+	if layout.prefix then box:setPrefix(layout.prefix) end
+	if layout.suffix then box:setSuffix(layout.suffix) end
+	
 	if layout.validator then 
 		if type(layout.validator) == "function" then
 			box.validator = layout.validator
