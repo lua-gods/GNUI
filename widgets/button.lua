@@ -85,9 +85,10 @@ function Button:applyButtonAction(button,state)
 				self.down = true
 				self.PRESSED:invoke(true)
 			end
-		elseif state == 0 and self.down then
+		elseif state == 0 and self.down then --TODO: follow press event standards
 			if not self.toggle then
 				self.down = false
+			else
 				self.PRESSED:invoke(false)
 			end
 		end
