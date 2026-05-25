@@ -145,11 +145,20 @@ function Slider:updateKnob()
 		 )
 		 :setPos(
 			 not self.isVertical and
-			 math.map(self.value, self.min, self.max, padding.x, self.finalSize.x - knobLength -
-			 padding.z) or padding.x,
+			 math.map(
+				self.value, 
+				self.min, self.max, 
+				padding.x,
+				self.finalSize.x - knobLength - padding.z
+			) or padding.x,
 			 self.isVertical and
-			 math.map(self.value, self.min, self.max, -padding.y, self.finalSize.y - knobLength) or
-			 -padding.y
+			 math.map(
+				self.value,
+				self.min,
+				self.max,
+				-padding.y,
+				self.finalSize.y - knobLength
+			) or -padding.y
 		 )
 end
 
