@@ -37,7 +37,7 @@ local SliderAPI = {}
 ---@field knobLength integer?
 ---
 ---@field VALUE_CHANGED Event.GNUI.Button.ValueChanged # triggered when the value is changed
----@field PRESSED Event.GNUI.Button.PRESSED # triggered when the slider is pressed
+---@field PRESSED GN.Event # triggered when the slider is pressed
 local Slider = {}
 Slider.__index = function(t, i)
 	return rawget(t, i)
@@ -47,7 +47,6 @@ Slider.__index = function(t, i)
 end
 Slider.__style = "slider"
 Slider.__type = "Slider"
-
 
 local function snap(value, step, offset)
 	offset = offset or 0
@@ -82,7 +81,6 @@ function SliderAPI.new(canvas,children)
 	for index, value in ipairs(children) do
 		self:addChild(value)
 	end
-	boxKnob:setName("eee")
 	self.boxKnob = boxKnob
 	boxKnob.captureInput = false
 	boxKnob:setSizing("FIXED", "FIXED")
@@ -162,6 +160,11 @@ function Slider:updateKnob()
 		 )
 end
 
+function Slider:_recalculateValue()
+	self.value = math.clamp(self.value, self.min, self.max)
+	self:update()
+end
+
 ---@param vertical boolean
 ---@generic self
 ---@param self self
@@ -182,7 +185,47 @@ function Slider:setValue(value)
 	---@cast self GNUI.Widget.Slider
 	self.value = value
 	self.VALUE_CHANGED:invoke(value)
-	self:update()
+	self:updateKnob()
+	return self
+end
+
+
+---Sets the value of the slider, as a number between 0 and 1, it automatically maps it to the min and max
+---@param value number
+---@generic self
+---@param self self
+---@return self
+function Slider:setNormalizedValue(value)
+	---@cast self GNUI.Widget.Slider
+	self.value = math.map(value, 0, 1, self.min, self.max)
+	self.VALUE_CHANGED:invoke(value)
+	self:updateKnob()
+	return self
+end
+
+
+---Sets the value of the slider, as a number between 0 and 1, it automatically maps it to the min and max, and without calling the `VALUE_CHANGED` event
+---@param value number
+---@generic self
+---@param self self
+---@return self
+function Slider:setNormalizedValueSilent(value)
+	---@cast self GNUI.Widget.Slider
+	self.value = math.map(value, 0, 1, self.min, self.max)
+	self:updateKnob()
+	return self
+end
+
+
+---Sets the value of the slider, without calling the `VALUE_CHANGED` event
+---@param value number
+---@generic self
+---@param self self
+---@return self
+function Slider:setValueSilent(value)
+	---@cast self GNUI.Widget.Slider
+	self.value = value
+	self:updateKnob()
 	return self
 end
 
@@ -193,7 +236,8 @@ end
 function Slider:setMin(min)
 	---@cast self GNUI.Widget.Slider
 	self.min = min
-	self:update()
+	self:_recalculateValue()
+	self:updateKnob()
 	return self
 end
 
@@ -204,7 +248,8 @@ end
 function Slider:setMax(max)
 	---@cast self GNUI.Widget.Slider
 	self.max = max
-	self:update()
+	self:_recalculateValue()
+	self:updateKnob()
 	return self
 end
 
@@ -219,7 +264,8 @@ function Slider:setRange(min, max, softBoundary)
 	self.min = min
 	self.max = max
 	self.softBoundary = softBoundary or false
-	self:update()
+	self:_recalculateValue()
+	self:updateKnob()
 	return self
 end
 
@@ -230,7 +276,8 @@ end
 function Slider:setStepSize(stepSize)
 	---@cast self GNUI.Widget.Slider
 	self.step = stepSize
-	self:update()
+	self:_recalculateValue()
+	self:updateKnob()
 	return self
 end
 
@@ -274,8 +321,23 @@ end
 function Slider:setSoftBoundary(softBoundary)
 	---@cast self GNUI.Widget.Slider
 	self.softBoundary = softBoundary
+	self:updateKnob()
 	self:update()
 	return self
+end
+
+
+---Returns the value of the slider
+---@return number
+function Slider:getValue()
+	return self.value
+end
+
+
+--Returns the value of the slider as a number between 0 and 1.
+---@return number
+function Slider:getNormalizedValue()
+	return math.map(self.value, self.min, self.max, 0, 1)
 end
 
 
