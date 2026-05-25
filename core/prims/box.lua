@@ -245,13 +245,7 @@ function Box:getPos() return self.finalPos end
 
 ---@return Vector2
 function Box:getGlobalPos()
-	local pos = self.finalPos
-	local parent = self.parent
-	while parent do
-		pos = pos + parent.finalPos
-		parent = parent.parent
-	end
-	return pos
+	return self.absPos
 end
 
 ---@return Vector4
@@ -655,6 +649,15 @@ function Box:setVisible(visible)
 	self.visible = visible
 	self:update("visibility")
 	return self
+end
+
+
+---@overload fun(self: GNUI.Box ,pos : Vector2): Vector2
+---@param x number
+---@param y number
+---@return Vector2
+function Box:toLocal(x,y)
+	return gncommon.vec2(x,y) - self.absPos
 end
 
 -- ────────────────────────-<  >-────────────────────────--
