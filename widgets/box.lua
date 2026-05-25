@@ -102,7 +102,6 @@ function BoxAPI.parse(layout, canvas, children, box)
 
 	if layout.name then
 		box:setName(layout.name)
-		box.name = layout.name
 	end
 	
 	-- only automatically add the children to the box if the box has no extra parser

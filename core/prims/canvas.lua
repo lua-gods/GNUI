@@ -52,6 +52,7 @@ local CanvasAPI = {}
 ---@field queueUpdate GNUI.Box[]
 ---@field hoveredBox GNUI.Box
 ---@field pressedButtons GNUI.Box[]
+---@field nextFrameCallbacks function[]
 ---
 ---@field CHAR_INPUT GNUI.Canvas.Event.CharInput
 ---@field KEY_INPUT GNUI.Canvas.Event.KeyInput
@@ -75,7 +76,9 @@ function CanvasAPI.new()
 	self.visualID = 1
 	self.queueUpdate = {}
 	self.pressedButtons = {}
-
+	
+	self.nextFrameCallbacks = {}
+	
 	self.CURSOR_MOVED = Event.new()
 
 	self:setSizing("FIXED", "FIXED")
@@ -96,6 +99,10 @@ function Canvas:flushUpdates()
 		box:forceUpdate()
 		self.queueUpdate[key] = nil
 	end
+	for index, value in ipairs(self.nextFrameCallbacks) do
+		value()
+	end
+	self.nextFrameCallbacks = {}
 	return self
 end
 
@@ -107,7 +114,7 @@ end
 ---@param pos Vector2
 local function findHoveredBox(box, pos)
 	for index, childBox in ipairs(box.children) do
-		if childBox.captureInput and childBox:isPosInbounds(pos) then
+		if childBox.captureInput and childBox.visible and childBox:isPosInbounds(pos) then
 			local hoveredBox = findHoveredBox(childBox, pos)
 			if hoveredBox then return hoveredBox end
 		end
@@ -240,6 +247,16 @@ function Canvas:inputMouse(button, state)
 		end
 	end
 end
+
+
+---calls the given function when all screen requested updates are called.
+---
+---This is useful for when you want to wait for a layout update before gathering data from them.
+---@param callback fun()
+function Canvas:callNextFrame(callback)
+	self.nextFrameCallbacks[#self.nextFrameCallbacks+1] = callback
+end
+
 
 ---Love2D Exclusive
 function Canvas:draw()

@@ -238,9 +238,6 @@ end
 function Display:setVisible(visualID,visible)
 	local vis = self.visuals[visualID]
 	if not vis then return end
-	for key, task in pairs(vis.tasks) do
-		task:setVisible(visible)
-	end
 	self:flash(visualID)
 	vis.model:setVisible(visible)
 end

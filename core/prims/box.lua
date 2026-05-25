@@ -647,17 +647,16 @@ end
 function Box:setVisible(visible)
 	---@cast self GNUI.Box
 	self.visible = visible
-	self:update("visibility")
+	self:update("visibility", "dim")
 	return self
 end
-
 
 ---@overload fun(self: GNUI.Box ,pos : Vector2): Vector2
 ---@param x number
 ---@param y number
 ---@return Vector2
-function Box:toLocal(x,y)
-	return gncommon.vec2(x,y) - self.absPos
+function Box:toLocal(x, y)
+	return gncommon.vec2(x, y) - self.absPos
 end
 
 -- ────────────────────────-<  >-────────────────────────--
@@ -725,30 +724,25 @@ end
 ---@return GNUI.Box
 local function findUpdateRoot(box, hasDim)
 	if not hasDim then
-		-- pos only has meaning in FIXED layout, which is self-contained.
-		-- No parent needs to re-run its layout. No siblings are affected.
-		-- The box itself is the root — we just propagate new abs coords downward.
 		return box
 	end
-
 	local root = box
-	local p    = box.parent
+	local p = box.parent
 	while p do
-		if p.layout == "FIXED"
-			 or (p.sizing.x == "FIXED" and p.sizing.y == "FIXED") then
+		if (p.sizing.x == "FIXED" and p.sizing.y == "FIXED") then
 			break
 		end
 		root = p
-		p    = p.parent
+		p = p.parent
 	end
 	return root
 end
 
 --- Queue a box for an update, merging flags if it was already queued.
 --- This is the only place boxes are added to the canvas update queue.
----@param box    GNUI.Box
----@param dim    boolean
----@param pos    boolean
+---@param box GNUI.Box
+---@param dim boolean
+---@param pos boolean
 ---@param visual boolean
 local function queueBox(box, dim, pos, visual)
 	-- Merge so multiple changes before the flush are batched together
@@ -768,15 +762,18 @@ function Box:update(...)
 	local hasDim = false
 	local hasPos = false
 	local hasVisual = false
-	
+
 
 	for _, flag in ipairs({ ... }) do
 		if flag == "dim" or flag == "text" then
 			hasDim = true
 		elseif flag == "pos" then
 			hasPos = true
-		elseif flag == "color" or flag == "visibility" then
+		elseif flag == "color" then
 			hasVisual = true
+		elseif flag == "visibility" then
+			hasDim = true
+			hasPos = true
 		end
 	end
 
@@ -845,7 +842,10 @@ function Box:_solveFit(isY)
 	local x = isY and "y" or "x"
 	local z = isY and "w" or "z"
 	for _, child in ipairs(self.children) do child:_solveFit(isY) end
-
+	if not self.visible then
+		self.finalSize[x] = 0
+		return
+	end
 	local sz = self.sizing[x]
 
 	if sz == "FIXED" then
@@ -892,7 +892,10 @@ function Box:_solveFill(isY)
 	local z = isY and "w" or "z"
 	local padding = self:getPadding()
 	local parallel = (self.layout == (isY and "VERTICAL" or "HORIZONTAL"))
-
+	if not self.visible then
+		self.finalSize[x] = 0
+		return
+	end
 	if parallel then
 		local remaining = self.finalSize[x] - padding[x] - padding[z]
 		local fillers = {}
@@ -931,6 +934,9 @@ function Box:_solveLayout(isY)
 	local x = isY and "y" or "x"
 	local z = isY and "w" or "z"
 	local padding = self:getPadding()
+	if not self.visible then
+		return
+	end
 
 	if self.layout == "FIXED" then
 		for _, child in ipairs(self.children) do
@@ -939,17 +945,21 @@ function Box:_solveLayout(isY)
 	elseif self.layout == (isY and "VERTICAL" or "HORIZONTAL") then
 		local cursor = padding[x]
 		for _, child in ipairs(self.children) do
-			local m = child:getMargin()
-			child.finalPos[x] = cursor + m[x]
-			cursor = cursor + child.finalSize[x] + m[x] + m[z] + self.childGap
+			if child.visible then
+				local m = child:getMargin()
+				child.finalPos[x] = cursor + m[x]
+				cursor = cursor + child.finalSize[x] + m[x] + m[z] + self.childGap
+			end
 		end
 	else
 		for _, child in ipairs(self.children) do
-			local m = child:getMargin()
-			child.finalPos[x] = math.lerp(padding[x] + m[x],
-				self.finalSize[x] - child.finalSize[x] -
-				padding[z] - m[z],
-				self.childAlign[x] * 0.5 + 0.5)
+			if child.visible then
+				local m = child:getMargin()
+				child.finalPos[x] = math.lerp(padding[x] + m[x],
+					self.finalSize[x] - child.finalSize[x] -
+					padding[z] - m[z],
+					self.childAlign[x] * 0.5 + 0.5)
+			end
 		end
 	end
 
@@ -985,6 +995,7 @@ function Box:_updateSprites()
 	d:setPos(self.visualID, self.finalPos.x, self.finalPos.y)
 	d:setSize(self.visualID, self.finalSize.x, self.finalSize.y)
 	d:setColor(self.visualID, self.color.x, self.color.y, self.color.z)
+	d:setVisible(self.visualID, self.visible)
 	-- d:setVisible(self.visualID, self.visible)
 
 	for _, sprite in pairs(self.sprites) do
