@@ -77,13 +77,6 @@ function GNUIAPI.setup(customPresetName)
 	-- import default theme
 	Theme.importTheme(BASE..".shared.theme.defaults.gnui")
 	
-	---@param canvas GNUI.Canvas
-	---@param data GNUI.Layout
-	---@return GNUI.Box
-	function GNUIAPI.parse(canvas,data)
-		return Layout.parse(canvas,data)
-	end
-	
 	local screen
 	
 	function GNUIAPI.getScreen()

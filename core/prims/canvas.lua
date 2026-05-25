@@ -12,6 +12,8 @@ local Box = require(cfg.CORE .. ".prims.box") ---@type GNUI.Primitive.BoxAPI
 local Render = require(cfg.RENDER .. ".init") ---@type GNUI.RenderAPI
 local Event = require(cfg.EVENT) ---@type GN.Event
 
+local Layout = require(cfg.LAYOUT .. ".init") ---@type GNUI.LayoutAPI
+
 --TODO: move this all to the box, and make all of them able to cancel the event.
 ---@class GNUI.Canvas.Event.CharInput : GN.Event
 ---@field register fun(self,func:(fun(char: string):boolean?),id:any?)
@@ -79,6 +81,12 @@ function CanvasAPI.new()
 	self:setSizing("FIXED", "FIXED")
 	setmetatable(self, Canvas)
 	return self
+end
+
+---@param data GNUI.Layout
+---@return GNUI.Box
+function Canvas:parse(data)
+	return Layout.parse(self,data)
 end
 
 ---Forces an immidiate update to all the boxes in the queue
