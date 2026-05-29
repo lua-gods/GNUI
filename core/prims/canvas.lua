@@ -54,6 +54,9 @@ local CanvasAPI = {}
 ---@field pressedButtons GNUI.Box[]
 ---@field nextFrameCallbacks function[]
 ---
+---@field FLUSH_UPDATES GN.Event
+---@field POST_FLUSH_UPDATES GN.Event
+---
 ---@field CHAR_INPUT GNUI.Canvas.Event.CharInput
 ---@field KEY_INPUT GNUI.Canvas.Event.KeyInput
 ---@field MOUSE_INPUT GNUI.Canvas.Event.MouseInput
@@ -79,6 +82,9 @@ function CanvasAPI.new()
 	
 	self.nextFrameCallbacks = {}
 	
+	self.FLUSH_UPDATES = Event.new()
+	self.POST_FLUSH_UPDATES = Event.new()
+	
 	self.CURSOR_MOVED = Event.new()
 
 	self:setSizing("FIXED", "FIXED")
@@ -95,6 +101,7 @@ end
 ---Forces an immidiate update to all the boxes in the queue
 ---@return GNUI.Canvas
 function Canvas:flushUpdates()
+	self.FLUSH_UPDATES:invoke()
 	for key, box in pairs(self.queueUpdate) do
 		box:forceUpdate()
 		self.queueUpdate[key] = nil
@@ -103,6 +110,7 @@ function Canvas:flushUpdates()
 		value()
 	end
 	self.nextFrameCallbacks = {}
+	self.POST_FLUSH_UPDATES:invoke()
 	return self
 end
 
