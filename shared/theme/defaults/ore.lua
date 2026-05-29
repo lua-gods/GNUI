@@ -23,11 +23,11 @@ return {
 
 			opaque = {
 				normal = {
-					type        = "nineslice",
+					type = "nineslice",
 					texturePath = atlas,
-					uv          = vec(40, 1, 42, 3),
-					border      = vec(1, 1, 1, 1),
-					padding     = vec(1, 1, 1, 1),
+					uv = vec(40, 1, 42, 3),
+					border = vec(1, 1, 1, 1),
+					padding = vec(1, 1, 1, 1),
 				},
 			},
 
