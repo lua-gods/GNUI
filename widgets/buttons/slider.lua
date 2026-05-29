@@ -59,8 +59,8 @@ end
 
 ---@param canvas GNUI.Canvas
 ---@return GNUI.Widget.Slider
-function SliderAPI.new(canvas,children)
-	local self = Button.new(canvas)
+function SliderAPI.new(box,canvas,children)
+	local self = Button.new(box,canvas,children)
 	---@cast self GNUI.Widget.Slider
 	setmetatable(self, Slider)
 
@@ -413,7 +413,7 @@ end
 ---@param button GNUI.Widget.Button?
 ---@return GNUI.Widget.Slider
 function SliderAPI.parse(layout, canvas, children, button)
-	local self = button or Box.parse(layout, canvas, children, SliderAPI.new(canvas,children))
+	local self = button or Box.parse(layout, canvas, children, SliderAPI.new)
 	---@cast self GNUI.Widget.Slider
 
 	self:setToggle(false) -- force sliders to be non-toggleable

@@ -1,8 +1,6 @@
 ---@class GNUI.LayoutAPI
 local LayoutAPI = {}
 
-
-
 ---@class GNUI.Layout
 ---@field [1] GNUI.Layout[]|GNUI.Layout?
 ---@field style string|GNUI.StyleEntry?
@@ -34,7 +32,8 @@ local function parseEntry(canvas, layout)
 				children[index] = parseEntry(canvas, childLayout)
 			end
 		end
-		local parser = elements[layout.type or "box"]
+		layout.type = layout.type or "box"
+		local parser = elements[layout.type]
 		local ok, box = pcall(parser,layout,canvas,children)
 		if ok then
 			return box

@@ -48,11 +48,10 @@ setmetatable(BoxAPI, {
 ---@param canvas GNUI.Canvas
 ---@param children GNUI.Box|GNUI.Box[]
 ---@generic box
----@param box box?
+---@param extraParser fun(box:GNUI.Box,canvas:GNUI.Canvas,children:table) --TODO: annotate this properly
 ---@return box
-function BoxAPI.parse(layout, canvas, children, box)
-	local hasExtraParser = box and true or false
-	local box = box or TrueBoxAPI.new(canvas)
+function BoxAPI.parse(layout, canvas, children, extraParser)
+	local box = TrueBoxAPI.new(canvas)
 
 	local hasSizeX, hasSizeY = false, false
 	if layout.size then
@@ -83,6 +82,24 @@ function BoxAPI.parse(layout, canvas, children, box)
 	
 	local t = type(layout.style)
 	
+	
+
+	
+	
+	if layout.name then
+		box:setName(layout.name)
+	end
+	-- only automatically add the children to the box if the box has no extra parser
+	if extraParser then
+		extraParser(box,canvas,children)
+	else
+		for index, child in ipairs(children) do
+			box:addChild(child)
+		end
+	end
+	
+	box:setText("BALLS")
+	
 	if t == "string" or t == "nil" then
 		box:setStyleVariant(layout.style)
 	else
@@ -90,25 +107,17 @@ function BoxAPI.parse(layout, canvas, children, box)
 			Theme.applyStyle(layout.style,box,1)
 		end
 	end
-	box:setPadding(layout.padding or vec(0,0,0,0))
-	box:setMargin(layout.margin or vec(0,0,0,0))
-
+	
+	
 	if layout.text then box:setText(layout.text) end
 	if layout.textAlign then box:setTextAlignment(layout.textAlign[1], layout.textAlign[2]) end
 	if layout.wrap then box:setWrapText(layout.wrap) end
 	if layout.color then box:setColor(layout.color) end
 	if layout.gap then box:setChildGap(layout.gap) end
 	
-	if layout.name then
-		box:setName(layout.name)
-	end
 	
-	-- only automatically add the children to the box if the box has no extra parser
-	if not hasExtraParser then
-		for index, child in ipairs(children) do
-			box:addChild(child)
-		end
-	end
+	box:setPadding(layout.padding or vec(0,0,0,0))
+	box:setMargin(layout.margin or vec(0,0,0,0))
 	return box
 end
 

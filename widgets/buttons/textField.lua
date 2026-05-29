@@ -87,8 +87,8 @@ end
 
 ---@param canvas GNUI.Canvas
 ---@return GNUI.Widget.TextField
-function TextFieldAPI.new(canvas)
-	local self = Button.new(canvas)
+function TextFieldAPI.new(box,canvas,children)
+	local self = Button.new(box,canvas,children)
 	---@cast self GNUI.Widget.TextField
 	setmetatable(self,TextField)
 	self:setMinimumSize(0,13)
@@ -433,7 +433,7 @@ end
 ---@param textField GNUI.Widget.TextField?
 ---@return GNUI.Widget.TextField
 function TextFieldAPI.parse(layout,canvas, children,textField)
-	local box = textField or Box.parse(layout,canvas,children,TextFieldAPI.new(canvas))
+	local box = textField or Box.parse(layout,canvas,children,TextFieldAPI.new)
 	if layout.field then box:setField(layout.field) end
 	if layout.placeholder then box:setPlaceholder(layout.placeholder) end
 	if layout.multiline then box:setMultiline(layout.multiline) end
