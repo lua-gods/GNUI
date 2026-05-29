@@ -39,6 +39,7 @@ end
 ---
 ---its not recommended to be changed unless you know what you're doing.
 ---@param customPresetName string?
+---@return GNUIAPI
 function GNUIAPI.setup(customPresetName)
 	if not customPresetName then
 		customPresetName = next(PRESETS)
@@ -88,6 +89,7 @@ function GNUIAPI.setup(customPresetName)
 			return screen
 		end
 	end
+	return GNUIAPI
 end
 
 
