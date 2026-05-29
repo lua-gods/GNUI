@@ -81,6 +81,38 @@ return {
 					textColor = "#141414",
 				},
 			},
+			secondary = {
+				normal = {
+					type = "nineslice",
+					texturePath = atlas,
+					uv = vec(21,0,25,4),
+					border = vec(2, 2, 2, 2),
+					padding = vec(2, 1, 2, 1),
+					expand = vec(1, 1, 1, 1),
+					textAlignment = vec(0, 0),
+					textColor = "#141414",
+				},
+				hovered = {
+					type = "nineslice",
+					texturePath = atlas,
+					uv = vec(25,0,29,4),
+					border = vec(2, 2, 2, 2),
+					padding = vec(2, 1, 2, 1),
+					expand = vec(1, 1, 1, 1),
+					textAlignment = vec(0, 0),
+					textColor = "#141414",
+				},
+				pressed = {
+					type = "nineslice",
+					texturePath = atlas,
+					uv = vec(29,0,33,4),
+					border = vec(2, 2, 2, 2),
+					padding = vec(2, 1, 2, 1),
+					expand = vec(1, 1, 1, 1),
+					textAlignment = vec(0, 0),
+					textColor = "#141414",
+				},
+			},
 		},
 		slider = {
 			default = {
