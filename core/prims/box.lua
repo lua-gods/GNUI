@@ -279,14 +279,14 @@ function Box:setMargin(left, top, right, bottom)
 end
 
 function Box:recalculateMargin()
-	local margin = vec(0, 0, 0, 0)
+	local margin = self.margin:copy()
 	for key, sprite in pairs(self.sprites) do
 		if sprite.style then
-			local m = sprite.style.margin
-			margin.x = (abs(margin.x) <= abs(m.x)) and m.x or margin.x
-			margin.y = (abs(margin.y) <= abs(m.y)) and m.y or margin.y
-			margin.z = (abs(margin.z) <= abs(m.z)) and m.z or margin.z
-			margin.w = (abs(margin.w) <= abs(m.w)) and m.w or margin.w
+			local styleMargin = sprite.style.margin
+			margin.x = (abs(margin.x) <= abs(styleMargin.x)) and styleMargin.x or margin.x
+			margin.y = (abs(margin.y) <= abs(styleMargin.y)) and styleMargin.y or margin.y
+			margin.z = (abs(margin.z) <= abs(styleMargin.z)) and styleMargin.z or margin.z
+			margin.w = (abs(margin.w) <= abs(styleMargin.w)) and styleMargin.w or margin.w
 		end
 	end
 	self.finalMargin = margin
@@ -323,7 +323,7 @@ end
 function Box:getPadding() return self.finalPadding end
 
 function Box:recalculatePadding()
-	local padding = vec(0, 0, 0, 0)
+	local padding = self.padding:copy()
 	for key, sprite in pairs(self.sprites) do
 		if sprite.style then
 			local p = sprite.style.padding
