@@ -80,8 +80,6 @@ function BoxAPI.parse(layout, canvas, children, box)
 		box:setLayout(layout.layout) 
 	end
 	if layout.childAlign then box:setChildAlign(layout.childAlign) end
-	if layout.gap then box:setChildGap(layout.gap) end
-	if layout.margin then box:setMargin(layout.margin) end
 	
 	local t = type(layout.style)
 	
@@ -92,8 +90,8 @@ function BoxAPI.parse(layout, canvas, children, box)
 			Theme.applyStyle(layout.style,box,1)
 		end
 	end
-	
 	box:setPadding(layout.padding or vec(0,0,0,0))
+	box:setMargin(layout.margin or vec(0,0,0,0))
 
 	if layout.text then box:setText(layout.text) end
 	if layout.textAlign then box:setTextAlignment(layout.textAlign[1], layout.textAlign[2]) end
