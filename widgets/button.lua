@@ -240,8 +240,7 @@ end
 function ButtonAPI.parse(layout,canvas,children,button)
 	local self = button or Box.parse(layout,canvas,children,ButtonAPI.new(canvas))
 
-	
-	self:setStyleVariant(layout.variant)
+	self:setStyleVariant(layout.style)
 	
 	if layout.toggle then self:setToggle(layout.toggle) end
 	if layout.pressed then self:press() end
