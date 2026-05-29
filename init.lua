@@ -32,64 +32,55 @@ for _, path in ipairs(utils.listFiles(BASE..".presets")) do
 	PRESETS[name] = path
 end
 
---TODO: add custom parameters to setup to allow loading of custom themes
+local customPresetName = next(PRESETS)
+
+assert(PRESETS[customPresetName],"GNUI setup preset '"..customPresetName.."' does not exist")
+---@type GNUI.config
+local preset = require(PRESETS[customPresetName])
+
+cfg.CORE = preset.CORE:format(BASE)
+cfg.LAYOUT = preset.LAYOUT:format(BASE)
+cfg.RENDER = preset.RENDER:format(BASE)
+cfg.THEME = preset.THEME:format(BASE)
+cfg.WIDGETS = preset.WIDGETS:format(BASE)
+cfg.GN_COMMON = preset.GN_COMMON:format(BASE)
+cfg.UTILS = preset.UTILS:format(BASE)
+cfg.EVENT = preset.EVENT:format(BASE)
+
+-- load selected modules
+local Core = require(cfg.CORE..".init") ---@type GNUI.CoreAPI
+local Layout = require(cfg.LAYOUT..".init") ---@type GNUI.LayoutAPI
+local Render = require(cfg.RENDER..".init") ---@type GNUI.RenderAPI
+local Theme = require(cfg.THEME..".init") ---@type GNUI.ThemeAPI
+
+GNUIAPI.Core = Core
+GNUIAPI.Layout = Layout
+GNUIAPI.Render = Render
+GNUIAPI.Theme = Theme
+cfg.PRESET_TYPE = customPresetName
 
 
----overrideName is meant for custom presets and modules.
----
----its not recommended to be changed unless you know what you're doing.
----@param customPresetName string?
----@return GNUIAPI
-function GNUIAPI.setup(customPresetName)
-	if not customPresetName then
-		customPresetName = next(PRESETS)
-	end
-	
-	assert(PRESETS[customPresetName],"GNUI setup preset '"..customPresetName.."' does not exist")
-	---@type GNUI.config
-	local preset = require(PRESETS[customPresetName])
-	
-	cfg.CORE = preset.CORE:format(BASE)
-	cfg.LAYOUT = preset.LAYOUT:format(BASE)
-	cfg.RENDER = preset.RENDER:format(BASE)
-	cfg.THEME = preset.THEME:format(BASE)
-	cfg.WIDGETS = preset.WIDGETS:format(BASE)
-	cfg.GN_COMMON = preset.GN_COMMON:format(BASE)
-	cfg.UTILS = preset.UTILS:format(BASE)
-	cfg.EVENT = preset.EVENT:format(BASE)
-	
-	-- load selected modules
-	local Core = require(cfg.CORE..".init") ---@type GNUI.CoreAPI
-	local Layout = require(cfg.LAYOUT..".init") ---@type GNUI.LayoutAPI
-	local Render = require(cfg.RENDER..".init") ---@type GNUI.RenderAPI
-	local Theme = require(cfg.THEME..".init") ---@type GNUI.ThemeAPI
-	
-	GNUIAPI.Core = Core
-	GNUIAPI.Layout = Layout
-	GNUIAPI.Render = Render
-	GNUIAPI.Theme = Theme
-	cfg.PRESET_TYPE = customPresetName
-	
-	
-	for index, path in ipairs(utils.listFiles(cfg.WIDGETS)) do
-		require(path)
-	end
-	
-	-- import default theme
-	Theme.importTheme(BASE..".shared.theme.defaults.gnui")
-	
-	local screen
-	
-	function GNUIAPI.getScreen()
-		if screen then
-			return screen
-		else
-			screen = Core.newCanvas()
+for index, path in ipairs(utils.listFiles(cfg.WIDGETS)) do
+	require(path)
+end
+
+-- import default theme
+Theme.importTheme(BASE..".shared.theme.defaults.gnui")
+
+local screen
+
+---@return GNUI.Canvas
+function GNUIAPI.getScreen()
+	if screen then
+		return screen
+	else
+		screen = Core.newCanvas()
+		screen.FLUSH_UPDATES:register(function ()
 			screen:setSize(utils.getScreenSize())
-			return screen
-		end
+		end)
+
+		return screen
 	end
-	return GNUIAPI
 end
 
 
