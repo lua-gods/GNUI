@@ -99,7 +99,8 @@ function BoxAPI.parse(layout, canvas, children, box)
 	if layout.textAlign then box:setTextAlignment(layout.textAlign[1], layout.textAlign[2]) end
 	if layout.wrap then box:setWrapText(layout.wrap) end
 	if layout.color then box:setColor(layout.color) end
-
+	if layout.gap then box:setChildGap(layout.gap) end
+	
 	if layout.name then
 		box:setName(layout.name)
 	end
