@@ -4,7 +4,7 @@
 / /_/ / /|  /  desc: handles all the updating for all visuals,
 \____/_/ |_/ source: link ]]
 
-local Tween = require("lib.GNtween")
+local hasTween,Tween = pcall(require,"lib.GNtween")
 
 
 ---@class GNUI.Render.Visual.Task
@@ -72,7 +72,7 @@ end
 
 ---@param visualID integer
 function Display:flash(visualID)
-	if false and self.visuals[visualID] then
+	if false and hasTween and self.visuals[visualID] then
 		local visual = self.visuals[visualID]
 		Tween.new({
 			from = 0,
