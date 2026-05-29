@@ -139,7 +139,7 @@ function ThemeAPI.getStyle(class,variant,key,themeOverride)
 			end
 		end
 	end
-	error("Unknown style: " .. tostring(class) .. "." .. tostring(variant) .. "." .. tostring(key))
+	error("Unknown style: " .. tostring(class) .. "." .. tostring(variant) .. "." .. tostring(key).."\nOnly existing variants are:\n - "..table.concat(ThemeAPI.getVariantNames(class),"\n - "))
 end
 
 --────────────────────────-< Theme APIs >-────────────────────────--
@@ -163,13 +163,15 @@ end
 
 
 ---@param class any
+---@param theme string?
 ---@return string[]
 function ThemeAPI.getVariantNames(class,theme)
 	local list = {}
-	if theme then
-		for variantIndex, variant in pairs(Themes[theme].styles[class]) do
-			list[#list+1] = variantIndex
-		end
+	if not theme then
+		theme = next(Themes)
+	end
+	for variantIndex, variant in pairs(Themes[theme].styles[class]) do
+		list[#list+1] = variantIndex
 	end
 	return list
 end
