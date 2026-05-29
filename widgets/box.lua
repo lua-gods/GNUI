@@ -98,8 +98,6 @@ function BoxAPI.parse(layout, canvas, children, extraParser)
 		end
 	end
 	
-	box:setText("BALLS")
-	
 	if t == "string" or t == "nil" then
 		box:setStyleVariant(layout.style)
 	else
