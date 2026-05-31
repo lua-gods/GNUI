@@ -633,6 +633,9 @@ end
 function Box:setWrapText(wrap)
 	---@cast self GNUI.Box
 	self.wrapText = wrap
+	for index, value in ipairs(self.sprites) do
+		value:setWrapText(self.wrapText)
+	end
 	self:update("text")
 	return self
 end

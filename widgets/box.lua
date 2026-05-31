@@ -29,6 +29,7 @@ setmetatable(BoxAPI, {
 ---@class GNUI.Layout
 ---@field type nil|"box"
 ---@field name string?
+---@field pos Vector2?
 ---@field size Vector2?
 ---@field minSize Vector2?
 ---@field sizing ({[1]:GNUI.Box.SizingMode,[2]:GNUI.Box.SizingMode}|GNUI.Box.SizingMode)?
@@ -42,6 +43,7 @@ setmetatable(BoxAPI, {
 ---@field margin Vector4?
 ---@field padding Vector4?
 ---@field color Vector3?
+---@field wrapText boolean?
 
 
 ---@param layout GNUI.Layout
@@ -112,6 +114,7 @@ function BoxAPI.parse(layout, canvas, children, extraParser)
 	if layout.wrap then box:setWrapText(layout.wrap) end
 	if layout.color then box:setColor(layout.color) end
 	if layout.gap then box:setChildGap(layout.gap) end
+	if type(layout.wrapText) == "boolean" then box:setWrapText(layout.wrapText) end
 	
 	
 	box:setPadding(layout.padding or vec(0,0,0,0))

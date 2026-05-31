@@ -4,6 +4,9 @@
 / /_/ / /|  /  desc: meant to be refactored to the existing framework/library
 \____/_/ |_/ source: link ]]
 
+--- fixes emoji width to be 8 pixels wide
+local EMOJI_WIDTH_PATCH = true
+
 ---@class GNUI.utils
 local util = {}
 
@@ -37,14 +40,15 @@ end
 ---@param wrap any
 ---@return Vector2
 function util.getTextSize(content, maxWidth, wrap)
-	content = content:gsub(":[^:]+:","W")
+	content = EMOJI_WIDTH_PATCH and content:gsub(":[^:]+:","W") or content
+	
 	return client.getTextDimensions(content, maxWidth, wrap)
 end
 
 ---@param text string
 ---@return integer
 function util.getTextWidth(text)
-	content = content:gsub(":[^:]+:","W")
+	content = EMOJI_WIDTH_PATCH and content:gsub(":[^:]+:","W") or content
 	return client.getTextWidth(text)
 end
 

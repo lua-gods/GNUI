@@ -207,6 +207,10 @@ function Sprite:setVisible(visible)
 	self.display:setSpriteVisible(self.box.visualID, self.taskID, visible)
 end
 
+function Sprite:setWrapText(wrap)
+	self.display:setLabelWrapText(self.box.visualID, self.labelID, wrap)
+end
+
 ---@overload fun(self: GNUI.Sprite)
 ---@param style GNUI.Sprite.Style
 function Sprite:setStyle(style)

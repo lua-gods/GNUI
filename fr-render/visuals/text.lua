@@ -32,6 +32,7 @@ local function parseText(text,defaultColor)
 				if not value.color then
 					value.color = defaultColor
 				end
+				value.text = value.text
 			end
 			tableText = text
 		end
@@ -78,7 +79,7 @@ local function updateLabelPos(task)
 	if task.label and task.text then
 		task.label:alignment(task.textAlignment.x == -1 and "LEFT" or task.textAlignment.x == 0 and "CENTER" or "RIGHT")
 		local fineWidth = task.size.x-task.padding.x-task.padding.z
-		task.label:setWidth(fineWidth)
+		task.label:setWidth(task.wrapText and fineWidth or math.huge)
 		local textDim = client.getTextDimensions(task.jsonText, fineWidth, task.wrapText)
 		local align = task.textAlignment*0.5+0.5
 		task.label:setPos(
@@ -91,7 +92,6 @@ local function updateLabelPos(task)
 		)
 	end
 end
-
 
 
 ---@param x number
@@ -115,6 +115,18 @@ end
 
 
 --────────────────────────-< Injected APIs >-────────────────────────--
+
+
+---TODO: implement a caller in the GNUI core
+---Sets the wrap text of the given label
+---@param visualID integer
+---@param taskID integer
+---@param wrapText boolean
+function Display:setLabelWrapText(visualID,taskID,wrapText)
+	local task = self:getTask(visualID,taskID)
+	task.wrapText = wrapText
+	updateLabelPos(task)
+end
 
 
 ---Sets the padding of the given label
