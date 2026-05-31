@@ -116,6 +116,8 @@ local BoxAPI = {}
 ---
 ---@field flags table<GNUI.Box.Flags,boolean?>
 ---
+---@field prevFinalSize Vector2?
+---
 ---@field CURSOR_PRESENCE_CHANGED GNUI.Box.Event.CursorPresenceChanged
 ---@field KEY_INPUT GNUI.Box.Event.KeyInput
 ---@field CHAR_INPUT GNUI.Box.Event.CharInput
