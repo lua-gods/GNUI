@@ -12,6 +12,8 @@ local gncommon = require(cfg.GN_COMMON) ---@type GNCommon
 local utils = require(cfg.UTILS) ---@type GNUI.utils
 local Event = require(cfg.EVENT) ---@type GN.Event
 
+local Layout = require(cfg.LAYOUT .. ".init") ---@type GNUI.LayoutAPI
+
 local abs = math.abs
 
 ---@class GNUI.Primitive.BoxAPI
@@ -736,6 +738,17 @@ function Box:calculateBounds()
 	calculateBounds(self.canvas)
 	return self
 end
+
+
+---Parses the given layout data and parents it to this box, while returning the new box
+---@param data GNUI.Layout
+---@return GNUI.Box
+function Box:parse(data)
+	local box = Layout.parse(self.canvas,data)
+	self:addChild(box)
+	return box
+end
+
 
 -- ────────────────────────-< UPDATERS >-────────────────────────--
 

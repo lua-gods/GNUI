@@ -92,11 +92,6 @@ function CanvasAPI.new()
 	return self
 end
 
----@param data GNUI.Layout
----@return GNUI.Box
-function Canvas:parse(data)
-	return Layout.parse(self,data)
-end
 
 ---Forces an immidiate update to all the boxes in the queue
 ---@return GNUI.Canvas
