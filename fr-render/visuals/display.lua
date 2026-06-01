@@ -109,7 +109,6 @@ end
 local function updateChildrenIndexes(vis)
 	for i, child in ipairs(vis.children) do
 		vis.index = i
-		updateChildrenIndexes(child)
 	end
 end
 
@@ -141,6 +140,33 @@ function Display:addChild(visualID,childVisualID)
 	updateDimensions(child)
 	updateDimensions(vis)
 	return vis
+end
+
+
+function Display:setVisualChildIndex(visualID,index)
+	local vis = self.visuals[visualID]
+	if not vis then return end
+	local parent = vis.parent
+	if parent then
+		index = math.clamp(index, 1, #parent.children)
+		local ogIndex = vis.index
+		if index ~= ogIndex then
+			local temp = parent.children[index]
+			parent.children[index] = vis
+			parent.children[ogIndex] = temp
+			
+			vis.index = index
+			
+			if temp then
+				temp.index = ogIndex
+			end
+			
+			updateDimensions(parent)
+			if parent.children[index] then
+				updateDimensions(parent)
+			end
+		end
+	end
 end
 
 

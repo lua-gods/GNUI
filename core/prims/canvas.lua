@@ -117,7 +117,8 @@ end
 ---@param pos Vector2
 ---@return GNUI.Box
 local function findHoveredBox(box, pos)
-	for index, childBox in ipairs(box.children) do
+	for index = #box.children, 1, -1 do
+		local childBox = box.children[index]
 		if childBox.captureInput and childBox.visible and childBox:isPosInboundingBox(pos) then
 			local hoveredBox = findHoveredBox(childBox, pos)
 			if hoveredBox and hoveredBox:isPosInBox(pos)

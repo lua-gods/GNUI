@@ -130,6 +130,10 @@ local BoxAPI = {}
 ---@field UNHANDLED_CHAR_INPUT GNUI.Box.Event.CharInput
 ---@field UNHANDLED_MOUSE_INPUT GNUI.Box.Event.MouseInput
 ---@field UNHANDLED_SCROLL_INPUT GNUI.Box.Event.ScrollInput
+---
+---@field CHILD_ADDED GN.Event
+---@field CHILD_REMOVED GN.Event
+---@field CHILDREN_ORDER_CHANGED GN.Event
 local Box = {}
 Box.__index = function(t, i)
 	return rawget(t, i) or Box[i] or rawget(t, "children")[i] or
@@ -214,6 +218,10 @@ function BoxAPI.new(canvas)
 		UNHANDLED_CHAR_INPUT = Event.new(),
 		UNHANDLED_MOUSE_INPUT = Event.new(),
 		UNHANDLED_SCROLL_INPUT = Event.new(),
+		
+		CHILD_ADDED = Event.new(),
+		CHILD_REMOVED = Event.new(),
+		CHILDREN_ORDER_CHANGED = Event.new(),
 	}
 	nextFree = nextFree + 1
 
@@ -504,13 +512,13 @@ end
 ---NOTE: this is Figura exclusive
 function Box:getModelPart() self.canvas.display:getModelPart(self.visualID) end
 
--- ────────────────────────-< Children Management >-────────────────────────--
+--────  Children Management  ────────────────────────────────────────────────────────--
 
 ---@param box GNUI.Box
-local function updateChildrenIndexes(box)
+local function recalculateChildrenIndexes(box)
+	box.CHILDREN_ORDER_CHANGED:invoke(box)
 	for id, child in ipairs(box.children) do
 		child.childIndex = id
-		updateChildrenIndexes(child)
 	end
 end
 
@@ -520,6 +528,11 @@ end
 ---@return self
 function Box:addChild(child)
 	---@cast self GNUI.Box
+	if child.parent then
+		child.parent:removeChild(child)
+	end
+	self.CHILD_ADDED:invoke(child)
+	self.CHILDREN_ORDER_CHANGED:invoke(child)
 	child.parent = self
 	local id = #self.children + 1
 	self.children[id] = child
@@ -543,13 +556,15 @@ function Box:removeChild(box)
 	local boxID = box.childIndex
 	if self.children[boxID] == box then
 		local box = self.children[boxID]
+		self.CHILD_REMOVED:invoke(box)
+		self.CHILDREN_ORDER_CHANGED:invoke()
 		table.remove(self.children, boxID)
 
 		if box.name then box.namedChildren[box.name] = nil end
 
 		self.canvas.display:removeChild(self.visualID, box.visualID)
 
-		updateChildrenIndexes(self)
+		recalculateChildrenIndexes(self)
 		box.parent = nil
 	end
 	self:recalculateMinimumSize()
@@ -566,6 +581,36 @@ local function searchChild(box, name)
 		local result = searchChild(value, name)
 		if result then return result end
 	end
+end
+
+---@generic self
+---@param self self
+---@return self
+function Box:setChildIndex(index)
+	---@cast self GNUI.Box
+	local parent = self.parent
+	if parent then
+		index = math.clamp(index, 1, #self.parent.children)
+		local ogIndex = self.childIndex
+		if index ~= ogIndex then
+			local temp = parent.children[index]
+			parent.children[index] = self
+			parent.children[ogIndex] = temp
+			
+			self.childIndex = index
+
+			if temp then
+				temp.childIndex = ogIndex
+			end
+			parent.CHILDREN_ORDER_CHANGED:invoke(index,ogIndex)
+			local vis = self.visualID
+			self.canvas.display:setVisualChildIndex(vis, index)
+			self.parent:update("dim")
+		end -- TODO: figure out why this isnt reordering the input handler AND renderer
+	end
+	
+	
+	return self
 end
 
 ---Returns the first box with that given name, through its entirey hierarchy.
@@ -1018,7 +1063,7 @@ function Box:_solveLayout(isY)
 	for _, child in ipairs(self.children) do child:_solveLayout(isY) end
 end
 
---TODO: make updating
+
 ---@param parentAbs Vector2   absolute screen position of the parent
 function Box:_calcAbsPos(parentAbs)
 	local newX = parentAbs.x + self.finalPos.x
@@ -1044,11 +1089,14 @@ function Box:_updateSprites()
 	if not self.canvas then return end
 	local d = self.canvas.display
 
+	-- TODO: split to only update ones that are requireed
 	d:setPos(self.visualID, self.finalPos.x, self.finalPos.y)
 	d:setSize(self.visualID, self.finalSize.x, self.finalSize.y)
+	
 	d:setColor(self.visualID, self.color.x, self.color.y, self.color.z)
 	d:setVisible(self.visualID, self.visible)
-	-- d:setVisible(self.visualID, self.visible)
+	
+	d:setVisualChildIndex(self.visualID, self.childIndex)
 
 	for _, sprite in pairs(self.sprites) do
 		sprite:setSize(self.finalSize.x, self.finalSize.y)
