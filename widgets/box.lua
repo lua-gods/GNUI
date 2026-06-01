@@ -39,12 +39,12 @@ setmetatable(BoxAPI, {
 ---@field childAlign Vector2?
 ---@field text string?
 ---@field textAlign {[1]:(-1|0|1),[2]:(-1|0|1)}?
----@field wrap boolean?
 ---@field margin Vector4?
 ---@field padding Vector4?
 ---@field color Vector3?
 ---@field wrapText boolean?
 ---@field captureInput boolean?
+---@field textOffset Vector2?
 
 
 ---@param layout GNUI.Layout
@@ -112,11 +112,11 @@ function BoxAPI.parse(layout, canvas, children, extraParser)
 	
 	if layout.text then box:setText(layout.text) end
 	if layout.textAlign then box:setTextAlignment(layout.textAlign[1], layout.textAlign[2]) end
-	if layout.wrap then box:setWrapText(layout.wrap) end
 	if layout.color then box:setColor(layout.color) end
 	if layout.gap then box:setChildGap(layout.gap) end
 	if type(layout.wrapText) == "boolean" then box:setWrapText(layout.wrapText) end
 	if type(layout.captureInput) == "boolean" then box:setCaptureInputs(layout.captureInput) end
+	if layout.textOffset then box:setTextoffset(layout.textOffset.x,layout.textOffset.y) end
 	
 	
 	box:setPadding(layout.padding or vec(0,0,0,0))

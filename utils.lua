@@ -42,7 +42,7 @@ end
 function util.getTextSize(content, maxWidth, wrap)
 	content = EMOJI_WIDTH_PATCH and content:gsub(":[^:]+:","W") or content
 	
-	return client.getTextDimensions(content, maxWidth, wrap)
+	return client.getTextDimensions(content, maxWidth+1, wrap):sub(1,2)
 end
 
 ---@param text string

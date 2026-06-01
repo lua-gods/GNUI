@@ -538,11 +538,11 @@ function Box:addChild(child)
 	end
 	self.CHILD_ADDED:invoke(child)
 	self.CHILDREN_ORDER_CHANGED:invoke(child)
+	
 	child.parent = self
 	local id = #self.children + 1
 	self.children[id] = child
 	child.childIndex = id
-
 	if child.name then self.namedChildren[child.name] = child end
 	self.canvas.display:addChild(self.visualID, child.visualID)
 
@@ -621,7 +621,9 @@ end
 ---Returns the first box with that given name, through its entirey hierarchy.
 ---@param name string
 ---@return GNUI.Box?
-function Box:getChild(name) return searchChild(self, name) end
+function Box:getChild(name) 
+	return searchChild(self, name)
+end
 
 ---Removes the parent of the box
 ---@generic self
@@ -629,8 +631,10 @@ function Box:getChild(name) return searchChild(self, name) end
 ---@return self
 function Box:removeParent()
 	---@cast self GNUI.Box
-	if self.parent then self.parent:removeChild(self) end
-	self:update("dim")
+	if self.parent then 
+		self.parent:removeChild(self)
+		self:update("dim")
+	end
 	return self
 end
 
@@ -638,9 +642,11 @@ end
 ---@param parent GNUI.Box
 ---@return GNUI.Box
 function Box:setParent(parent)
-	self:removeParent()
-	parent:addChild(self)
-	self:update("dim")
+	if parent ~= self.parent then
+		self:removeParent()
+		parent:addChild(self)
+		self:update("dim")
+	end
 	return self
 end
 
@@ -655,10 +661,12 @@ function Box:getParent() return self.parent end
 ---@param slot (integer|string)?
 function Box:setText(text, slot)
 	---@cast self GNUI.Box
-	self.text = text
-	slot = slot or 1
-	if self.sprites[slot] then self.sprites[slot]:setText(text) end
-	self:update("text", "dim")
+	if self.text ~= text then
+		self.text = text
+		slot = slot or 1
+		if self.sprites[slot] then self.sprites[slot]:setText(text) end
+		self:update("text", "dim")
+	end
 	return self
 end
 
@@ -669,11 +677,32 @@ end
 ---@param v -1|0|1
 function Box:setTextAlignment(h, v)
 	---@cast self GNUI.Box
-	self.textAlignment = vec(h, v)
-	self:update("text")
-	for key, value in pairs(self.sprites) do value:setTextAlignment(h, v) end
+	local newAlignment = gncommon.vec2(h, v)
+	if newAlignment ~= self.textAlignment then
+		self.textAlignment = newAlignment
+		self:update("text")
+		for key, value in pairs(self.sprites) do value:setTextAlignment(h, v) end
+	end
 	return self
 end
+
+
+---@generic self
+---@param self self
+---@return self
+---@param x -1|0|1
+---@param y -1|0|1
+function Box:setTextoffset(x, y)
+	---@cast self GNUI.Box
+	local newOffset = gncommon.vec2(x, y)
+	if newOffset ~= self.textOffset then
+		self.textOffset = newOffset
+		self:update("text")
+		for key, value in pairs(self.sprites) do value:setTextOffset(x, y) end
+	end
+	return self
+end
+
 
 ---sets if the text should wrap around or not
 ---@generic self
@@ -682,18 +711,22 @@ end
 ---@param wrap boolean
 function Box:setWrapText(wrap)
 	---@cast self GNUI.Box
-	self.wrapText = wrap
-	for index, value in ipairs(self.sprites) do
-		value:setWrapText(self.wrapText)
+	if self.wrapText ~= wrap then
+		self.wrapText = wrap
+		for index, value in ipairs(self.sprites) do
+			value:setWrapText(self.wrapText)
+		end
+		self:update("text")
 	end
-	self:update("text")
 	return self
 end
 
 function Box:setColor(r, g, b)
 	local clr = gncommon.vec3(r, g, b)
-	self.color = clr
-	self:update("color")
+	if self.color ~= clr then
+		self.color = clr
+		self:update("color")
+	end
 	return self
 end
 
@@ -703,8 +736,10 @@ end
 ---@param visible boolean
 function Box:setVisible(visible)
 	---@cast self GNUI.Box
-	self.visible = visible
-	self:update("visibility", "dim")
+	if visible ~= self.visible then
+		self.visible = visible
+		self:update("visibility")
+	end
 	return self
 end
 
@@ -787,7 +822,6 @@ local function calculateBounds(self)
 end
 
 function Box:calculateBounds()
-	-- TODO: optimize this to only calculate bounds for changed boxes
 	calculateBounds(self.canvas)
 	return self
 end
@@ -798,6 +832,7 @@ end
 ---@return GNUI.Box
 function Box:parse(data)
 	local box = Layout.parse(self.canvas,data)
+	box:forceUpdate() -- TODO: figure out why this is required
 	self:addChild(box)
 	return box
 end

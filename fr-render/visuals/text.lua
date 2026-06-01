@@ -15,6 +15,7 @@ local Display = require("./display") ---@type GNUI.Render.Display
 ---@field jsonText string
 ---@field textColor string
 ---@field textAlignment Vector2
+---@field textOffset Vector2
 ---@field wrapText boolean
 ---
 ---@field label TextTask
@@ -54,6 +55,7 @@ function Display:newLabel(visualID)
 		padding = vec(0,0,0,0),
 		
 		textAlignment = vec(-1,1),
+		textOffset = vec(0,0),
 		textColor = "ffffff",
 		wrapText = true,
 		label = vis.model:newText("task"..taskID),
@@ -78,17 +80,17 @@ end
 local function updateLabelPos(task)
 	if task.label and task.text then
 		task.label:alignment(task.textAlignment.x == -1 and "LEFT" or task.textAlignment.x == 0 and "CENTER" or "RIGHT")
-		local fineWidth = task.size.x-task.padding.x-task.padding.z
+		local fineWidth = task.size.x-task.padding.x-task.padding.z+1
 		task.label:setWidth(task.wrapText and fineWidth or math.huge)
-		local textDim = client.getTextDimensions(task.jsonText, fineWidth, task.wrapText)
+		local textDim = client.getTextDimensions(task.jsonText, fineWidth, task.wrapText):sub(0,0)
 		local align = task.textAlignment*0.5+0.5
 		task.label:setPos(
-			math.floor(math.lerp(-task.padding.x,task.padding.z,align.x) - task.size.x * (align.x)+0.5),
+			math.floor(math.lerp(-task.padding.x,task.padding.z,align.x) - task.size.x * (align.x)) + task.textOffset.x,
 			math.floor(math.lerp(
 				-task.padding.y,
 				-task.size.y+task.padding.w+textDim.y,
 				align.y
-			)-1)
+			)-1) + task.textOffset.y
 		)
 	end
 end
@@ -186,6 +188,18 @@ end
 function Display:setLabelAlignment(visualID,taskID,h,v)
 	local task = self:getTask(visualID,taskID)
 	task.textAlignment = vec(h,v)
+	updateLabelPos(task)
+end
+
+
+---Sets the alignment of the given label
+---@param visualID integer
+---@param taskID integer
+---@param h -1|0|1
+---@param v -1|0|1
+function Display:setLabelOffset(visualID,taskID,h,v)
+	local task = self:getTask(visualID,taskID)
+	task.textOffset = vec(h,v)
 	updateLabelPos(task)
 end
 

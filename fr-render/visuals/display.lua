@@ -117,7 +117,7 @@ end
 ---@param visual GNUI.Render.Visual
 local function updateDimensions(visual)
 	visual.model:pos(-visual.pos.x,-visual.pos.y,-visual.index)
-	visual.model:scale(1,1,1)
+	visual.model:scale(1,1,1/(#visual.children+1))
 end
 
 
@@ -136,7 +136,7 @@ function Display:addChild(visualID,childVisualID)
 	local id = #vis.children + 1
 	vis.children[id] = vis
 	child.index = id
-	vis.model:addChild(child.model:remove())
+	child.model:moveTo(vis.model)
 	updateDimensions(child)
 	updateDimensions(vis)
 	return vis

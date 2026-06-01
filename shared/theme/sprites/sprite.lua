@@ -22,6 +22,7 @@ local gncommon = require(cfg.GN_COMMON) ---@type GNCommon
 ---@field padding Vector4
 ---@field textColor Vector3
 ---@field textAlignment Vector2
+---@field textOffset Vector2
 ---
 ---@field pos Vector2
 ---@field layer number
@@ -52,6 +53,7 @@ function Sprite.new(box, layer)
 
 		textColor = vec(1, 1, 1),
 		textAlignment = vec(0, 0),
+		textOffset = vec(0, 0),
 
 		boxColor = vec(1, 1, 1),
 		flagApply = false,
@@ -201,6 +203,14 @@ function Sprite:setTextAlignment(h, v)
 	end
 	return self
 end
+
+
+---@param x number
+---@param y number
+function Sprite:setTextOffset(x, y)
+	self.display:setLabelOffset(self.box.visualID, self.labelID, x, y)
+end
+
 
 function Sprite:setVisible(visible)
 	self.visible = visible
