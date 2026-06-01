@@ -44,6 +44,7 @@ setmetatable(BoxAPI, {
 ---@field padding Vector4?
 ---@field color Vector3?
 ---@field wrapText boolean?
+---@field captureInput boolean?
 
 
 ---@param layout GNUI.Layout
@@ -115,6 +116,7 @@ function BoxAPI.parse(layout, canvas, children, extraParser)
 	if layout.color then box:setColor(layout.color) end
 	if layout.gap then box:setChildGap(layout.gap) end
 	if type(layout.wrapText) == "boolean" then box:setWrapText(layout.wrapText) end
+	if type(layout.captureInput) == "boolean" then box:setCaptureInputs(layout.captureInput) end
 	
 	
 	box:setPadding(layout.padding or vec(0,0,0,0))

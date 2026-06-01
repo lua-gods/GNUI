@@ -247,8 +247,11 @@ end
 ---@return self
 function Box:setPos(x, y)
 	---@cast self GNUI.Box
-	self.pos = gncommon.vec2(x, y, self.pos)
-	self:update("pos")
+	local newPos = gncommon.vec2(x, y, self.pos)
+	if newPos ~= self.pos then
+		self.pos = newPos
+		self:update("pos")
+	end
 	return self
 end
 
@@ -371,9 +374,11 @@ function Box:getChildGap() return self.childGap end
 ---@return self
 function Box:setSize(x, y)
 	---@cast self GNUI.Box
-	local size = gncommon.vec2(x, y, self.size)
-	self.size = size
-	self:update("dim")
+	local newSize = gncommon.vec2(x, y, self.size)
+	if newSize ~= self.size then
+		self.size = newSize
+		self:update("dim")
+	end
 	return self
 end
 
@@ -884,7 +889,6 @@ function Box:forceUpdate()
 	local doDim    = self.pendingDim
 	local doPos    = self.pendingPos or doDim
 	local doVisual = self.pendingVisual
-
 	if doDim then
 		self:_solveFit(false)
 		self:_solveFill(false)
@@ -1014,6 +1018,7 @@ function Box:_solveFill(isY)
 			end
 		end
 	else
+		a = a and (a + 1) or 0
 		for _, child in ipairs(self.children) do
 			if child.sizing[x] == "FILL" then
 				local m = child:getMargin()
