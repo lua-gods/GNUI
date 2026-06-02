@@ -103,7 +103,7 @@ local BoxAPI = {}
 ---@field textAlignment Vector2
 ---@field wrapText boolean
 ---
----@field flaggedUpdate boolean
+---@field flaggedUpdate integer?
 ---@field canvas GNUI.Canvas
 ---
 ---@field variant string?
@@ -261,6 +261,18 @@ function Box:getPos() return self.finalPos end
 ---@return Vector2
 function Box:getGlobalPos()
 	return self.absPos
+end
+
+local function printTree(box,level)
+	print(string.rep("\t",level) .. (box.name or (type(box)..box.id)))
+	for key, value in pairs(box.children) do
+		printTree(value,level+1)
+	end
+end
+
+function Box:printTree()
+	printTree(self,0)
+	print("----------------")
 end
 
 ---@return Vector4
@@ -521,10 +533,10 @@ function Box:getModelPart() self.canvas.display:getModelPart(self.visualID) end
 
 ---@param box GNUI.Box
 local function recalculateChildrenIndexes(box)
-	box.CHILDREN_ORDER_CHANGED:invoke(box)
 	for id, child in ipairs(box.children) do
 		child.childIndex = id
 	end
+	box.CHILDREN_ORDER_CHANGED:invoke(box)
 end
 
 ---@param child GNUI.Box
@@ -536,8 +548,6 @@ function Box:addChild(child)
 	if child.parent then
 		child.parent:removeChild(child)
 	end
-	self.CHILD_ADDED:invoke(child)
-	self.CHILDREN_ORDER_CHANGED:invoke(child)
 	
 	child.parent = self
 	local id = #self.children + 1
@@ -545,7 +555,9 @@ function Box:addChild(child)
 	child.childIndex = id
 	if child.name then self.namedChildren[child.name] = child end
 	self.canvas.display:addChild(self.visualID, child.visualID)
-
+	
+	self.CHILD_ADDED:invoke(child)
+	self.CHILDREN_ORDER_CHANGED:invoke(child)
 	self:recalculateMinimumSize()
 	self:update("dim")
 	return child
@@ -558,19 +570,19 @@ end
 ---@return self
 function Box:removeChild(box)
 	---@cast self GNUI.Box
-	local boxID = box.childIndex
-	if self.children[boxID] == box then
-		local box = self.children[boxID]
+	local childIndex = box.childIndex
+	if self.children[childIndex] == box then
+		print(self.children[childIndex],box)
+		
+		table.remove(self.children, childIndex)
 		self.CHILD_REMOVED:invoke(box)
-		self.CHILDREN_ORDER_CHANGED:invoke()
-		table.remove(self.children, boxID)
-
+		
 		if box.name then box.namedChildren[box.name] = nil end
-
 		self.canvas.display:removeChild(self.visualID, box.visualID)
-
+		
 		recalculateChildrenIndexes(self)
 		box.parent = nil
+		self.CHILDREN_ORDER_CHANGED:invoke()
 	end
 	self:recalculateMinimumSize()
 	self:update("dim")
@@ -798,10 +810,13 @@ end
 
 ---Deletes this box and its children
 function Box:free()
-	for _, child in ipairs(self.children) do child:free() end
-
 	self:removeParent()
-	for index, sprite in pairs(self.sprites) do sprite:free() end
+	if self.canvas then
+		self.canvas.queueUpdate[self.flaggedUpdate] = nil
+		self.flaggedUpdate = nil
+		self.canvas = nil
+		for index, sprite in pairs(self.sprites) do sprite:free() end
+	end
 end
 
 ---@param self GNUI.Box
@@ -873,8 +888,9 @@ local function queueBox(box, dim, pos, visual)
 
 	if not box.flaggedUpdate and box.canvas then
 		local q = box.canvas.queueUpdate
-		q[#q + 1] = box
-		box.flaggedUpdate = true
+		local id = #q + 1
+		q[id] = box
+		box.flaggedUpdate = id
 	end
 end
 
