@@ -82,8 +82,10 @@ end
 ---@param visible boolean
 function Display:setSpriteVisible(visualID,taskID,visible)
 	local task = self:getTask(visualID,taskID)
-	task.quad:setVisible(visible)
-	self:flash(visualID)
+	if task then
+		task.quad:setVisible(visible)
+		self:flash(visualID)
+	end
 end
 
 
@@ -98,6 +100,7 @@ end
 ---@param b number
 function Display:setSpriteColor(visualID,taskID,r,g,b)
 	local task = self:getTask(visualID,taskID)
+	if not task then return end
 	task.quad:color(r,g,b)
 	self:flash(visualID)
 end
@@ -149,6 +152,7 @@ end
 ---@param v2 number
 function Display:setSpriteUV(visualID,taskID,u1,v1,u2,v2)
 	local task = self:getTask(visualID,taskID)
+	if not task then return end
 	local uv = vec(u1,v1,u2,v2)
 	task.uv = uv
 	task.quad

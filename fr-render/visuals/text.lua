@@ -126,6 +126,7 @@ end
 ---@param wrapText boolean
 function Display:setLabelWrapText(visualID,taskID,wrapText)
 	local task = self:getTask(visualID,taskID)
+	if not task then return end
 	task.wrapText = wrapText
 	updateLabelPos(task)
 end
@@ -140,6 +141,7 @@ end
 ---@param bottom number
 function Display:setLabelPadding(visualID,taskID,left,top,right,bottom)
 	local task = self:getTask(visualID,taskID)
+	if not task then return end
 	task.padding = vec(left,top,right,bottom)
 	updateLabelPos(task)
 end
@@ -148,6 +150,7 @@ end
 ---Sets the visibility of the given label
 function Display:setLabelVisible(visualID,taskID,visible)
 	local task = self:getTask(visualID,taskID)
+	if not task then return end
 	task.label:setVisible(visible)
 end
 
@@ -160,6 +163,7 @@ end
 ---@param b number
 function Display:setLabelColor(visualID,taskID,r,g,b)
 	local task = self:getTask(visualID,taskID)
+	if not task then return end
 	task.textColor = vectors.rgbToHex(r,g,b)
 	task.jsonText = parseText(task.text,task.textColor)
 	updateLabelText(task)
@@ -173,6 +177,7 @@ end
 ---@param text string|GNUI.Text[]
 function Display:setLabelText(visualID,taskID,text)
 	local task = self:getTask(visualID,taskID)
+	if not task then return end
 	task.text = text
 	
 	updateLabelText(task)
@@ -187,6 +192,7 @@ end
 ---@param v -1|0|1
 function Display:setLabelAlignment(visualID,taskID,h,v)
 	local task = self:getTask(visualID,taskID)
+	if not task then return end
 	task.textAlignment = vec(h,v)
 	updateLabelPos(task)
 end
@@ -199,6 +205,7 @@ end
 ---@param v -1|0|1
 function Display:setLabelOffset(visualID,taskID,h,v)
 	local task = self:getTask(visualID,taskID)
+	if not task then return end
 	task.textOffset = vec(h,v)
 	updateLabelPos(task)
 end
