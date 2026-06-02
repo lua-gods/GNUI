@@ -572,7 +572,6 @@ function Box:removeChild(box)
 	---@cast self GNUI.Box
 	local childIndex = box.childIndex
 	if self.children[childIndex] == box then
-		print(self.children[childIndex],box)
 		
 		table.remove(self.children, childIndex)
 		self.CHILD_REMOVED:invoke(box)
