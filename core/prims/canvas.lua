@@ -249,7 +249,9 @@ function Canvas:inputMouse(button, state)
 			processInput(self.hoveredBox, "MOUSE_INPUT", button, state)
 		elseif state == 0 then
 			if self.pressedButtons[button] then
-				processInput(self.pressedButtons[button], "MOUSE_INPUT", button, state)
+				if self.pressedButtons[button].canvas == self then
+					processInput(self.pressedButtons[button], "MOUSE_INPUT", button, state)
+				end
 				self.pressedButtons[button] = nil
 			end
 		end
