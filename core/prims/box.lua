@@ -419,7 +419,7 @@ function Box:recalculateMinimumSize()
 			minSize.x = math.max(minSize.x, style.padding.x + style.padding.z,
 				style.minSize.x)
 			minSize.y = math.max(minSize.y, style.padding.y + style.padding.w,
-				style.minSize.x)
+				style.minSize.y)
 		end
 	end
 	self.finalMinSize = minSize
@@ -846,7 +846,7 @@ end
 ---@return GNUI.Box
 function Box:parse(data)
 	local box = Layout.parse(self.canvas,data)
-	box:forceUpdate() -- TODO: figure out why this is required
+	--self:forceUpdate() -- TODO: figure out why this is required
 	self:addChild(box)
 	return box
 end
@@ -946,7 +946,7 @@ function Box:forceUpdate()
 		self:_solveFill(true)
 	end
 
-	if doDim then
+	if doDim or doPos then
 		-- _solveLayout only runs for dim updates.
 		-- Flow layout positions are DERIVED FROM SIZES.
 		-- If sizes didn't change, no relative positions changed either.
@@ -955,8 +955,10 @@ function Box:forceUpdate()
 	end
 
 	if doPos then
-		self.finalPos.x = self.pos.x
-		self.finalPos.y = self.pos.y
+		if self.parent and self.parent.layout == "FIXED" then
+			self.finalPos.y = self.pos.y
+			self.finalPos.x = self.pos.x
+		end
 		local parentAbs = (self.parent and self.parent.absPos) or vec(0, 0)
 		self:_calcAbsPos(parentAbs)
 	end
@@ -1068,7 +1070,7 @@ function Box:_solveFill(isY)
 			end
 		end
 	else
-		a = a and (a + 1) or 0
+		a = a and (a + 1)
 		for _, child in ipairs(self.children) do
 			if child.sizing[x] == "FILL" then
 				local m = child:getMargin()
