@@ -131,7 +131,6 @@ function Display:setLabelWrapText(visualID,taskID,wrapText)
 	updateLabelPos(task)
 end
 
-
 ---Sets the padding of the given label
 ---@param visualID integer
 ---@param taskID integer
@@ -201,8 +200,8 @@ end
 ---Sets the alignment of the given label
 ---@param visualID integer
 ---@param taskID integer
----@param h -1|0|1
----@param v -1|0|1
+---@param h number
+---@param v number
 function Display:setLabelOffset(visualID,taskID,h,v)
 	local task = self:getTask(visualID,taskID)
 	if not task then return end

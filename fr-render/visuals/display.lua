@@ -114,10 +114,13 @@ end
 
 
 ---Updates the dimensions of the visual
----@param visual GNUI.Render.Visual
-local function updateDimensions(visual)
-	visual.model:pos(-visual.pos.x,-visual.pos.y,-visual.index)
-	visual.model:scale(1,1,1/(#visual.children+1))
+---@param visualID integer
+function Display:updateDimensions(visualID)
+	local vis = self.visuals[visualID]
+	if vis then
+		vis.model:setPos(-vis.pos.x,-vis.pos.y,-vis.index)
+		vis.model:setScale(1,1,1/(#vis.children+1))
+	end
 end
 
 
@@ -137,8 +140,8 @@ function Display:addChild(visualID,childVisualID)
 	vis.children[id] = vis
 	child.index = id
 	child.model:moveTo(vis.model)
-	updateDimensions(child)
-	updateDimensions(vis)
+	self:updateDimensions(child.id)
+	self:updateDimensions(vis.id)
 	return vis
 end
 
@@ -161,9 +164,9 @@ function Display:setVisualChildIndex(visualID,index)
 				temp.index = ogIndex
 			end
 			
-			updateDimensions(parent)
+			self:updateDimensions(parent.id)
 			if parent.children[index] then
-				updateDimensions(parent)
+				self:updateDimensions(parent.id)
 			end
 		end
 	end
@@ -177,15 +180,15 @@ function Display:removeChild(visualID,childVisualID)
 	local vis = self.visuals[visualID]
 	local child = self.visuals[childVisualID]
 	if not vis then return end
-	assert(child,"Visual Quad "..visualID.." not found")
+	if not child then return end
 	
-	if vis.children[child.id] == child then
-		table.remove(vis.children, childVisualID)
-		
+	if vis.children[child.index] == child then
+		table.remove(vis.children, child.index)
+		child.model:remove()
 		updateChildrenIndexes(vis)
 		child.parent = nil
-		updateDimensions(child)
-		updateDimensions(vis)
+		self:updateDimensions(child.id)
+		self:updateDimensions(vis.id)
 	end
 	return self
 end
@@ -226,6 +229,11 @@ function Display:setParent(visualID,parentID)
 end
 
 
+function Display:free(visualID)
+	self.visuals[visualID] = nil
+end
+
+
 ---Sets the position of this visual
 ---@param visualID integer
 ---@param x number
@@ -234,7 +242,7 @@ function Display:setPos(visualID,x,y)
 	local vis = self.visuals[visualID]
 	if vis then
 		vis.pos = vec(x,y)
-		updateDimensions(vis)
+		self:updateDimensions(vis.id)
 		self:flash(visualID)
 	end
 end
@@ -252,7 +260,7 @@ function Display:setSize(visualID,x,y)
 			task:setSize(x,y)
 		end
 		
-		updateDimensions(vis)
+		self:updateDimensions(vis.id)
 		self:flash(visualID)
 	end
 end
